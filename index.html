@@ -243,8 +243,8 @@
       <div>
         <label for="modeSelect">作答模式</label>
         <select id="modeSelect">
+          <option value="choice" selected>四選一</option>
           <option value="input">輸入答案</option>
-          <option value="choice">四選一</option>
         </select>
       </div>
       <div>
@@ -285,7 +285,7 @@
       <div class="meaning" id="meaning"></div>
     </section>
 
-    <div class="version">版本：v2.0｜題庫獨立檔案 idioms.js｜適合 GitHub Pages</div>
+    <div class="version">版本：v2.1｜預設四選一作答｜題庫獨立檔案 idioms.js｜適合 GitHub Pages</div>
   </main>
 
   <script>
@@ -373,7 +373,7 @@
       $("meaning").textContent = "";
       renderMode();
       updateStats();
-      setTimeout(() => $("answerInput").focus(), 0);
+      if ($("modeSelect").value === "input") setTimeout(() => $("answerInput").focus(), 0);
     }
 
     function renderMode() {
