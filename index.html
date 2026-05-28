@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>成語填空小遊戲</title>
+  <meta name="description" content="一個適合 GitHub Pages 的成語填空中文學習小遊戲。" />
+  <style>
+    :root {
+      --bg: #f4f7f1;
+      --card: #ffffff;
+      --text: #2f3a2f;
+      --muted: #667066;
+      --primary: #5b8c5a;
+      --primary-dark: #416b40;
+      --border: #d7e5d0;
+      --success: #2e7d32;
+      --danger: #c62828;
+      --shadow: rgba(0, 0, 0, 0.12);
+    }
+
+    body.dark {
+      --bg: #050505;
+      --card: #121212;
+      --text: #f0f0f0;
+      --muted: #bbbbbb;
+      --primary: #2f7d32;
+      --primary-dark: #1f5a22;
+      --border: #333333;
+      --shadow: rgba(255, 255, 255, 0.08);
+    }
+
+    body.epaper {
+      --bg: #ffffff;
+      --card: #ffffff;
+      --text: #000000;
+      --muted: #333333;
+      --primary: #000000;
+      --primary-dark: #333333;
+      --border: #000000;
+      --success: #000000;
+      --danger: #000000;
+      --shadow: rgba(0, 0, 0, 0);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
+      background: var(--bg);
+      margin: 0;
+      color: var(--text);
+      min-height: 100vh;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    header {
+      background: var(--primary);
+      color: white;
+      padding: 18px 16px;
+      text-align: center;
+      box-shadow: 0 4px 12px var(--shadow);
+    }
+
+    body.epaper header {
+      color: #ffffff;
+      border-bottom: 2px solid #000;
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 2px;
+    }
+
+    .top-link {
+      display: inline-block;
+      margin-top: 8px;
+      color: white;
+      text-decoration: none;
+      font-size: 15px;
+      border: 1px solid rgba(255,255,255,0.65);
+      padding: 6px 12px;
+      border-radius: 999px;
+    }
+
+    main {
+      width: min(94vw, 640px);
+      margin: 24px auto;
+    }
+
+    .toolbar, .game-box, .final-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      box-shadow: 0 8px 22px var(--shadow);
+    }
+
+    .toolbar {
+      padding: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .game-box, .final-box {
+      padding: 26px;
+      text-align: center;
+    }
+
+    .mode-btn, button {
+      padding: 11px 18px;
+      font-size: 16px;
+      border: 0;
+      border-radius: 14px;
+      background: var(--primary);
+      color: white;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    button:hover, .mode-btn:hover { background: var(--primary-dark); }
+
+    body.epaper button, body.epaper .mode-btn {
+      border: 2px solid #000;
+    }
+
+    .secondary-btn {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .secondary-btn:hover {
+      background: var(--border);
+      color: var(--text);
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+
+    .question {
+      font-size: clamp(34px, 9vw, 58px);
+      font-weight: 900;
+      letter-spacing: 0.18em;
+      margin: 28px 0;
+      line-height: 1.35;
+    }
+
+    .hint {
+      font-size: 16px;
+      color: var(--muted);
+      min-height: 26px;
+      margin-bottom: 16px;
+    }
+
+    input {
+      font-size: 28px;
+      width: 112px;
+      padding: 10px;
+      text-align: center;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      background: var(--card);
+      color: var(--text);
+      outline: none;
+    }
+
+    input:focus { border-color: var(--primary); }
+
+    .actions {
+      margin-top: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .result {
+      font-size: 22px;
+      margin-top: 20px;
+      min-height: 34px;
+      font-weight: 800;
+    }
+
+    .meaning {
+      margin-top: 12px;
+      font-size: 18px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin: 16px auto 0;
+      max-width: 430px;
+    }
+
+    .choice-btn {
+      font-size: 22px;
+      min-height: 56px;
+    }
+
+    .footer-note {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 16px;
+    }
+
+    @media (max-width: 520px) {
+      header { padding: 15px 12px; }
+      .title { font-size: 24px; }
+      main { margin-top: 16px; }
+      .game-box, .final-box { padding: 18px; border-radius: 18px; }
+      .status-row { flex-direction: column; }
+      .question { letter-spacing: 0.12em; }
+      .choice-grid { grid-template-columns: 1fr; }
+      button, .mode-btn { width: 100%; }
+      .toolbar button { width: auto; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title">成語填空小遊戲</div>
+    <a class="top-link" href="https://fox520-sketch.github.io/fox/">回狐狸之家</a>
+  </header>
+
+  <main>
+    <section class="toolbar" aria-label="顯示模式">
+      <button class="mode-btn" onclick="setTheme('normal')">自然模式</button>
+      <button class="mode-btn" onclick="setTheme('dark')">深色模式</button>
+      <button class="mode-btn" onclick="setTheme('epaper')">黑白模式</button>
+    </section>
+
+    <section class="game-box" id="gameBox">
+      <div class="status-row">
+        <div id="progress">第 1 題</div>
+        <div id="score">分數：0</div>
+      </div>
+
+      <div class="question" id="question">畫＿添足</div>
+      <div class="hint" id="hint"></div>
+
+      <div id="answerArea"></div>
+
+      <div class="actions">
+        <button onclick="checkAnswer()" id="checkBtn">檢查答案</button>
+        <button onclick="showHint()" class="secondary-btn">提示</button>
+        <button onclick="nextQuestion()" class="secondary-btn">下一題</button>
+      </div>
+
+      <div class="result" id="result"></div>
+      <div class="meaning" id="meaning"></div>
+    </section>
+
+    <div class="footer-note">版本：V1.0｜適合 GitHub Pages 單機遊玩</div>
+  </main>
+
+  <script>
+    const questions = [
+      { idiom: "畫＿添足", answer: "蛇", choices: ["龍", "蛇", "虎", "馬"], hint: "一種會爬行的動物", meaning: "比喻多此一舉，反而壞事。" },
+      { idiom: "亡羊補＿", answer: "牢", choices: ["門", "牢", "牆", "屋"], hint: "關牲畜的地方", meaning: "比喻出了問題後及時補救，還不算晚。" },
+      { idiom: "井底之＿", answer: "蛙", choices: ["蛙", "魚", "龜", "鳥"], hint: "常在水邊叫的動物", meaning: "比喻見識狹小的人。" },
+      { idiom: "守株待＿", answer: "兔", choices: ["鹿", "兔", "羊", "牛"], hint: "跑得很快、耳朵很長", meaning: "比喻不主動努力，只想靠僥倖成功。" },
+      { idiom: "杯弓蛇＿", answer: "影", choices: ["影", "形", "聲", "身"], hint: "光照後可能出現", meaning: "比喻因疑神疑鬼而自相驚擾。" },
+      { idiom: "狐假虎＿", answer: "威", choices: ["力", "威", "名", "勢"], hint: "令人害怕的氣勢", meaning: "比喻仗著別人的勢力欺壓人。" },
+      { idiom: "刻舟求＿", answer: "劍", choices: ["刀", "劍", "舟", "魚"], hint: "古代常見兵器", meaning: "比喻拘泥成法，不知變通。" },
+      { idiom: "對牛彈＿", answer: "琴", choices: ["琴", "鼓", "笛", "箏"], hint: "一種樂器", meaning: "比喻對不懂道理的人講道理，白費力氣。" },
+      { idiom: "一箭雙＿", answer: "雕", choices: ["鳥", "雕", "鷹", "雁"], hint: "一種大型猛禽", meaning: "比喻做一件事同時達成兩個目的。" },
+      { idiom: "掩耳盜＿", answer: "鈴", choices: ["鐘", "鼓", "鈴", "鑼"], hint: "會發出清脆聲音的小物", meaning: "比喻自己欺騙自己。" }
+    ];
+
+    let currentIndex = 0;
+    let score = 0;
+    let answered = false;
+    let selectedAnswer = "";
+
+    function setTheme(theme) {
+      document.body.classList.remove("dark", "epaper");
+      if (theme === "dark") document.body.classList.add("dark");
+      if (theme === "epaper") document.body.classList.add("epaper");
+      localStorage.setItem("idiomGameTheme", theme);
+    }
+
+    function loadTheme() {
+      const savedTheme = localStorage.getItem("idiomGameTheme") || "normal";
+      setTheme(savedTheme);
+    }
+
+    function shuffle(array) {
+      return [...array].sort(() => Math.random() - 0.5);
+    }
+
+    function showQuestion() {
+      const q = questions[currentIndex];
+      answered = false;
+      selectedAnswer = "";
+
+      document.getElementById("question").textContent = q.idiom;
+      document.getElementById("progress").textContent = `第 ${currentIndex + 1} 題 / 共 ${questions.length} 題`;
+      document.getElementById("score").textContent = `分數：${score}`;
+      document.getElementById("hint").textContent = "";
+      document.getElementById("result").textContent = "";
+      document.getElementById("meaning").textContent = "";
+      document.getElementById("checkBtn").disabled = false;
+
+      const choices = shuffle(q.choices);
+      document.getElementById("answerArea").innerHTML = `
+        <input id="answerInput" maxlength="1" placeholder="？" aria-label="請輸入答案" />
+        <div class="choice-grid">
+          ${choices.map(choice => `<button class="choice-btn" onclick="chooseAnswer('${choice}')">${choice}</button>`).join("")}
+        </div>
+      `;
+
+      setTimeout(() => {
+        const input = document.getElementById("answerInput");
+        if (input) {
+          input.focus();
+          input.addEventListener("keydown", event => {
+            if (event.key === "Enter") checkAnswer();
+          });
+        }
+      }, 0);
+    }
+
+    function chooseAnswer(answer) {
+      if (answered) return;
+      selectedAnswer = answer;
+      const input = document.getElementById("answerInput");
+      if (input) input.value = answer;
+    }
+
+    function showHint() {
+      const q = questions[currentIndex];
+      document.getElementById("hint").textContent = `提示：${q.hint}`;
+    }
+
+    function checkAnswer() {
+      if (answered) return;
+
+      const input = document.getElementById("answerInput");
+      const userAnswer = (input ? input.value : selectedAnswer).trim();
+      const q = questions[currentIndex];
+      const result = document.getElementById("result");
+
+      if (!userAnswer) {
+        result.textContent = "請先輸入或選擇答案";
+        result.style.color = "var(--danger)";
+        return;
+      }
+
+      if (userAnswer === q.answer) {
+        result.textContent = "答對了！+10 分";
+        result.style.color = "var(--success)";
+        score += 10;
+      } else {
+        result.textContent = `答錯了，正確答案是「${q.answer}」`;
+        result.style.color = "var(--danger)";
+      }
+
+      document.getElementById("meaning").textContent = q.meaning;
+      document.getElementById("score").textContent = `分數：${score}`;
+      answered = true;
+      document.getElementById("checkBtn").disabled = true;
+    }
+
+    function nextQuestion() {
+      if (!answered) {
+        const confirmSkip = confirm("這一題還沒作答，要直接跳到下一題嗎？");
+        if (!confirmSkip) return;
+      }
+
+      currentIndex += 1;
+      if (currentIndex >= questions.length) {
+        showFinal();
+        return;
+      }
+      showQuestion();
+    }
+
+    function showFinal() {
+      const gameBox = document.getElementById("gameBox");
+      const total = questions.length * 10;
+      const message = score === total ? "太厲害了，全部答對！" : score >= total * 0.7 ? "表現很好，繼續挑戰！" : "再玩一次，成語力會更強！";
+
+      gameBox.className = "final-box";
+      gameBox.innerHTML = `
+        <h2>遊戲結束</h2>
+        <p style="font-size: 26px; font-weight: 800;">你的總分：${score} / ${total}</p>
+        <p style="font-size: 20px;">${message}</p>
+        <button onclick="restartGame()">重新開始</button>
+      `;
+    }
+
+    function restartGame() {
+      currentIndex = 0;
+      score = 0;
+      const gameBox = document.getElementById("gameBox");
+      gameBox.className = "game-box";
+      gameBox.innerHTML = `
+        <div class="status-row">
+          <div id="progress">第 1 題</div>
+          <div id="score">分數：0</div>
+        </div>
+        <div class="question" id="question"></div>
+        <div class="hint" id="hint"></div>
+        <div id="answerArea"></div>
+        <div class="actions">
+          <button onclick="checkAnswer()" id="checkBtn">檢查答案</button>
+          <button onclick="showHint()" class="secondary-btn">提示</button>
+          <button onclick="nextQuestion()" class="secondary-btn">下一題</button>
+        </div>
+        <div class="result" id="result"></div>
+        <div class="meaning" id="meaning"></div>
+      `;
+      showQuestion();
+    }
+
+    loadTheme();
+    showQuestion();
+  </script>
+</body>
+</html>
