@@ -1,49 +1,30 @@
-# 成語填空小遊戲
+# 成語填空小遊戲 v2.2
 
 這是一個可直接部署到 GitHub Pages 的成語填空網頁遊戲。
 
-## 功能
+## 本版特色
 
-- 成語填空
-- 輸入答案模式
-- 四選一模式
-- 難度篩選
-- 分類篩選
-- 隨機出題
-- 不重複出題
-- 提示功能
-- 答案解釋
-- 分數統計
-- 自然模式、深色模式、黑白模式
-- 手機版適配
+- 預設固定四選一作答
+- 答案按鈕加上 A / B / C / D 標示
+- 選完後會標出正確答案與錯誤答案
+- 增加每輪題數：10 題、20 題、30 題、全部題目
+- 增加正確率
+- 增加最佳分數，會保存在瀏覽器 localStorage
+- 遊戲結束後顯示錯題複習
+- 題庫獨立在 `idioms.js`
+- 支援自然模式、深色模式、黑白模式
+- 手機版按鈕較大，方便觸控
+- 上方保留「回狐狸之家」連結
 
-## 檔案說明
+## 上傳 GitHub Pages
 
-```text
-index.html   主程式與畫面
-idioms.js    題庫資料
-README.md    說明文件
-.gitignore   Git 忽略設定
-```
-
-## 如何增加題目
-
-打開 `idioms.js`，依照下面格式新增：
-
-```javascript
-{ full: "畫蛇添足", blank: "畫＿添足", answer: "蛇", hint: "一種爬行動物", meaning: "比喻多此一舉，反而壞事。", level: "簡單", category: "動物成語" }
-```
-
-## GitHub Pages
-
-Repository 建議名稱：
+解壓縮後，請把以下檔案放到 GitHub repository 第一層：
 
 ```text
-idiom-game
+index.html
+idioms.js
+README.md
+.gitignore
 ```
 
-部署後網址通常會是：
-
-```text
-https://fox520-sketch.github.io/idiom-game/
-```
+不要只上傳整個資料夾，否則 GitHub Pages 可能找不到首頁。
