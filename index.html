@@ -3,47 +3,32 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>成語填空小遊戲</title>
+  <title>成語填空小遊戲 v2.3</title>
   <script src="idioms.js"></script>
   <style>
     :root {
       --bg: #f3f8ef;
       --card: #ffffff;
-      --text: #253125;
+      --text: #243324;
       --muted: #647064;
       --primary: #4f8a4c;
       --primary-dark: #386b35;
       --border: #d8e8d4;
       --good: #237a35;
       --bad: #b3261e;
-      --warn: #7a4d00;
+      --warn: #8a5a00;
       --soft: #edf7e9;
       --shadow: 0 12px 28px rgba(35, 70, 35, 0.14);
     }
     body.dark {
-      --bg: #050805;
-      --card: #111811;
-      --text: #f1f7f0;
-      --muted: #b9c8b7;
-      --primary: #70b66b;
-      --primary-dark: #579653;
-      --border: #2b3b2b;
-      --soft: #172217;
-      --shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+      --bg: #050805; --card: #111811; --text: #f1f7f0; --muted: #b9c8b7;
+      --primary: #70b66b; --primary-dark: #579653; --border: #2b3b2b;
+      --soft: #172217; --shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
     }
     body.ink {
-      --bg: #ffffff;
-      --card: #ffffff;
-      --text: #000000;
-      --muted: #222222;
-      --primary: #000000;
-      --primary-dark: #333333;
-      --border: #000000;
-      --good: #000000;
-      --bad: #000000;
-      --warn: #000000;
-      --soft: #ffffff;
-      --shadow: none;
+      --bg: #fff; --card: #fff; --text: #000; --muted: #222; --primary: #000;
+      --primary-dark: #333; --border: #000; --good: #000; --bad: #000; --warn: #000;
+      --soft: #fff; --shadow: none;
     }
     * { box-sizing: border-box; }
     body {
@@ -55,66 +40,74 @@
     }
     body.dark, body.ink { background: var(--bg); }
     header {
-      background: var(--primary);
-      color: white;
-      padding: 16px 18px;
-      text-align: center;
+      background: var(--primary); color: white; padding: 16px 18px; text-align: center;
     }
     body.ink header { background: white; color: black; border-bottom: 2px solid black; }
-    header h1 { margin: 0; font-size: clamp(25px, 5vw, 40px); letter-spacing: 0.08em; }
-    .home-link { display: inline-block; margin-top: 8px; color: inherit; text-decoration: underline; font-weight: 800; }
+    header h1 { margin: 0; font-size: clamp(25px, 5vw, 40px); letter-spacing: .08em; }
+    .home-link { display: inline-block; margin-top: 8px; color: inherit; text-decoration: underline; font-weight: 900; }
     main { max-width: 980px; margin: 24px auto; padding: 0 16px 40px; }
-    .panel, .game-card, .review-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-      border-radius: 24px;
-      padding: 20px;
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .card, .panel, .game-card, .review-card, .wrong-card {
+      background: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow);
+      border-radius: 24px; padding: 20px;
     }
-    .panel { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
-    label { display: block; font-size: 14px; color: var(--muted); margin-bottom: 6px; font-weight: 800; }
-    select, input {
+    .hero { text-align: center; padding: 30px 20px; }
+    .hero h2 { font-size: clamp(30px, 6vw, 54px); margin: 0 0 12px; }
+    .hero p { color: var(--muted); font-size: 18px; line-height: 1.8; margin: 0 auto 16px; max-width: 760px; }
+    .menu-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
+    .menu-btn { min-height: 84px; font-size: 22px; }
+    .panel { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+    label { display: block; font-size: 14px; color: var(--muted); margin-bottom: 6px; font-weight: 900; }
+    select {
       width: 100%; border: 2px solid var(--border); border-radius: 14px;
-      padding: 11px 12px; font-size: 18px; background: var(--card); color: var(--text);
+      padding: 11px 12px; font-size: 17px; background: var(--card); color: var(--text);
     }
-    .stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
-    .stat { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 12px; text-align: center; font-weight: 900; }
+    .stats { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
+    .stat { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 12px; text-align: center; font-weight: 950; }
     .stat small { display: block; color: var(--muted); font-size: 13px; margin-bottom: 4px; }
-    .progress-track { height: 12px; background: var(--soft); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; margin: 4px 0 16px; }
-    .progress-bar { height: 100%; width: 0%; background: var(--primary); transition: width 0.2s ease; }
+    .timer-wrap { margin: 6px 0 16px; }
+    .timer-row { display: flex; justify-content: space-between; align-items: center; font-weight: 900; color: var(--muted); margin-bottom: 6px; }
+    .progress-track, .timer-track { height: 12px; background: var(--soft); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
+    .progress-bar, .timer-bar { height: 100%; width: 0%; background: var(--primary); transition: width .2s ease; }
+    .timer-bar.danger { background: var(--bad); }
     .game-card { text-align: center; }
     .tag-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
-    .tag { border: 1px solid var(--border); background: var(--soft); border-radius: 999px; padding: 6px 12px; color: var(--muted); font-weight: 800; }
-    .question { font-size: clamp(44px, 10vw, 82px); font-weight: 950; letter-spacing: 0.1em; margin: 18px 0 18px; }
-    .choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; max-width: 640px; margin: 18px auto; }
+    .tag { border: 1px solid var(--border); background: var(--soft); border-radius: 999px; padding: 6px 12px; color: var(--muted); font-weight: 900; }
+    .question { font-size: clamp(44px, 10vw, 82px); font-weight: 950; letter-spacing: .1em; margin: 18px 0; }
+    .choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; max-width: 650px; margin: 18px auto; }
     button {
       border: none; border-radius: 16px; background: var(--primary); color: white;
-      padding: 12px 16px; font-size: 17px; font-weight: 900; cursor: pointer;
-      transition: transform 0.08s ease, background 0.15s ease, opacity 0.15s ease;
+      padding: 12px 16px; font-size: 17px; font-weight: 950; cursor: pointer;
+      transition: transform .08s ease, background .15s ease, opacity .15s ease;
     }
     body.ink button { background: white; color: black; border: 2px solid black; }
     button:hover { background: var(--primary-dark); transform: translateY(-1px); }
-    button:disabled { cursor: default; opacity: 0.75; transform: none; }
+    button:disabled { cursor: default; opacity: .78; transform: none; }
     button.secondary { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
     body.ink button.secondary { color: black; border-color: black; }
-    .choice-btn { min-height: 72px; font-size: 26px; display: flex; align-items: center; justify-content: center; gap: 12px; }
-    .choice-label { display: inline-flex; width: 34px; height: 34px; border-radius: 50%; align-items: center; justify-content: center; background: rgba(255,255,255,0.22); font-size: 18px; }
+    button.danger { background: var(--bad); }
+    .choice-btn { min-height: 72px; font-size: 28px; display: flex; align-items: center; justify-content: center; gap: 12px; }
+    .choice-label { display: inline-flex; width: 34px; height: 34px; border-radius: 50%; align-items: center; justify-content: center; background: rgba(255,255,255,.22); font-size: 18px; }
     .choice-correct { outline: 4px solid var(--good); }
     .choice-wrong { outline: 4px solid var(--bad); }
     .actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
     .result { min-height: 34px; font-size: 23px; font-weight: 950; margin-top: 16px; }
-    .meaning, .hint-box { color: var(--muted); font-size: 18px; line-height: 1.7; max-width: 720px; margin: 8px auto 0; }
+    .meaning, .example, .hint-box { color: var(--muted); font-size: 18px; line-height: 1.75; max-width: 760px; margin: 8px auto 0; }
+    .example { background: var(--soft); border: 1px solid var(--border); border-radius: 16px; padding: 10px 14px; text-align: left; }
     .review-card { margin-top: 16px; display: none; }
-    .review-card h2 { margin: 0 0 10px; }
-    .review-list { display: grid; gap: 10px; }
-    .review-item { border: 1px solid var(--border); border-radius: 16px; padding: 12px; background: var(--soft); line-height: 1.65; }
+    .review-card h2, .wrong-card h2 { margin: 0 0 10px; }
+    .review-list, .wrong-list { display: grid; gap: 10px; }
+    .review-item, .wrong-item { border: 1px solid var(--border); border-radius: 16px; padding: 12px; background: var(--soft); line-height: 1.65; }
+    .empty { color: var(--muted); text-align: center; padding: 22px; }
     .version { text-align: center; color: var(--muted); margin-top: 18px; font-size: 14px; }
-    @media (max-width: 760px) {
+    @media (max-width: 860px) {
       .panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .menu-grid { grid-template-columns: 1fr; }
       .choices { grid-template-columns: 1fr; }
       main { margin-top: 14px; }
-      .choice-btn { min-height: 62px; }
+      .choice-btn { min-height: 64px; }
     }
   </style>
 </head>
@@ -125,249 +118,452 @@
   </header>
 
   <main>
-    <section class="panel">
-      <div>
-        <label for="levelSelect">難度</label>
-        <select id="levelSelect"></select>
-      </div>
-      <div>
-        <label for="categorySelect">分類</label>
-        <select id="categorySelect"></select>
-      </div>
-      <div>
-        <label for="limitSelect">每輪題數</label>
-        <select id="limitSelect">
-          <option value="10" selected>10 題</option>
-          <option value="20">20 題</option>
-          <option value="30">30 題</option>
-          <option value="all">全部題目</option>
-        </select>
-      </div>
-      <div>
-        <label for="themeSelect">顯示風格</label>
-        <select id="themeSelect">
-          <option value="nature">自然模式</option>
-          <option value="dark">深色模式</option>
-          <option value="ink">黑白模式</option>
-        </select>
+    <section id="homeScreen" class="screen active">
+      <div class="card hero">
+        <h2>v2.3 學習強化版</h2>
+        <p>固定四選一作答，加入倒數計時、錯題本、成語例句與首頁選單。答錯的題目會自動存入錯題本，下次可以專門複習。</p>
+        <div class="menu-grid">
+          <button class="menu-btn" onclick="goSetup()">開始遊戲</button>
+          <button class="menu-btn secondary" onclick="startWrongBookPractice()">錯題複習</button>
+          <button class="menu-btn secondary" onclick="showWrongBook()">查看錯題本</button>
+        </div>
       </div>
     </section>
 
-    <section class="stats">
-      <div class="stat"><small>目前題數</small><span id="progress">0 / 0</span></div>
-      <div class="stat"><small>分數</small><span id="score">0</span></div>
-      <div class="stat"><small>答對</small><span id="correctCount">0</span></div>
-      <div class="stat"><small>正確率</small><span id="accuracy">0%</span></div>
-      <div class="stat"><small>最佳分數</small><span id="bestScore">0</span></div>
-    </section>
-    <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
-
-    <section class="game-card">
-      <div class="tag-row">
-        <span class="tag" id="levelTag">難度</span>
-        <span class="tag" id="categoryTag">分類</span>
-        <span class="tag">四選一作答</span>
+    <section id="setupScreen" class="screen">
+      <div class="panel">
+        <div>
+          <label for="levelSelect">難度</label>
+          <select id="levelSelect"></select>
+        </div>
+        <div>
+          <label for="categorySelect">分類</label>
+          <select id="categorySelect"></select>
+        </div>
+        <div>
+          <label for="roundSelect">每輪題數</label>
+          <select id="roundSelect">
+            <option value="10">10 題</option>
+            <option value="20">20 題</option>
+            <option value="30">30 題</option>
+            <option value="all">全部題目</option>
+          </select>
+        </div>
+        <div>
+          <label for="timeSelect">倒數時間</label>
+          <select id="timeSelect">
+            <option value="0">不限時間</option>
+            <option value="20" selected>每題 20 秒</option>
+            <option value="15">每題 15 秒</option>
+            <option value="10">每題 10 秒</option>
+          </select>
+        </div>
+        <div>
+          <label for="themeSelect">顯示風格</label>
+          <select id="themeSelect" onchange="applyTheme()">
+            <option value="natural">自然模式</option>
+            <option value="dark">深色模式</option>
+            <option value="ink">黑白模式</option>
+          </select>
+        </div>
       </div>
-      <div class="question" id="question">載入中</div>
-      <div class="choices" id="choiceArea"></div>
       <div class="actions">
-        <button class="secondary" id="hintBtn">提示</button>
-        <button class="secondary" id="nextBtn">下一題</button>
-        <button class="secondary" id="restartBtn">重新開始</button>
+        <button onclick="startGame('normal')">開始四選一挑戰</button>
+        <button class="secondary" onclick="showHome()">回首頁</button>
       </div>
-      <div class="result" id="result"></div>
-      <div class="hint-box" id="hintBox"></div>
-      <div class="meaning" id="meaning"></div>
     </section>
 
-    <section class="review-card" id="reviewCard">
-      <h2>錯題複習</h2>
-      <div class="review-list" id="reviewList"></div>
+    <section id="gameScreen" class="screen">
+      <div class="stats">
+        <div class="stat"><small>目前題數</small><span id="progressText">0 / 0</span></div>
+        <div class="stat"><small>分數</small><span id="scoreText">0</span></div>
+        <div class="stat"><small>答對</small><span id="correctText">0</span></div>
+        <div class="stat"><small>正確率</small><span id="accuracyText">0%</span></div>
+        <div class="stat"><small>連續答對</small><span id="streakText">0</span></div>
+        <div class="stat"><small>錯題本</small><span id="wrongCountText">0</span></div>
+      </div>
+      <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+      <div class="game-card">
+        <div class="timer-wrap">
+          <div class="timer-row"><span>倒數計時</span><span id="timerText">不限時間</span></div>
+          <div class="timer-track"><div class="timer-bar" id="timerBar"></div></div>
+        </div>
+        <div class="tag-row">
+          <span class="tag" id="levelTag">難度</span>
+          <span class="tag" id="categoryTag">分類</span>
+          <span class="tag">四選一</span>
+        </div>
+        <div class="question" id="questionText">＿</div>
+        <div class="choices" id="choicesBox"></div>
+        <div class="actions">
+          <button class="secondary" onclick="showHint()">提示</button>
+          <button class="secondary" onclick="nextQuestion()">下一題</button>
+          <button class="secondary" onclick="showHome()">回首頁</button>
+        </div>
+        <div class="hint-box" id="hintBox"></div>
+        <div class="result" id="resultText"></div>
+        <div class="meaning" id="meaningText"></div>
+        <div class="example" id="exampleText" style="display:none;"></div>
+      </div>
+      <div class="review-card" id="reviewCard">
+        <h2>本輪錯題複習</h2>
+        <div class="review-list" id="reviewList"></div>
+      </div>
     </section>
 
-    <div class="version">版本：v2.2｜固定四選一｜增加錯題複習、每輪題數、正確率、最佳分數、答案按鈕提示｜適合 GitHub Pages</div>
+    <section id="wrongScreen" class="screen">
+      <div class="wrong-card">
+        <h2>錯題本</h2>
+        <p class="meaning">這裡會保存你答錯的成語。資料存在目前這台裝置的瀏覽器中。</p>
+        <div class="actions">
+          <button onclick="startWrongBookPractice()">練習錯題</button>
+          <button class="danger" onclick="clearWrongBook()">清除錯題本</button>
+          <button class="secondary" onclick="showHome()">回首頁</button>
+        </div>
+        <div class="wrong-list" id="wrongList"></div>
+      </div>
+    </section>
+
+    <div class="version">版本：v2.3｜學習強化版｜固定四選一｜倒數計時｜錯題本｜成語例句｜適合 GitHub Pages</div>
   </main>
 
   <script>
-    const state = {
-      pool: [], order: [], current: null, index: 0, score: 0, correct: 0,
-      answered: false, wrongList: [], selected: ""
-    };
-    const $ = (id) => document.getElementById(id);
-    const labels = ["A", "B", "C", "D"];
+    const STORAGE_WRONG = 'idiomGameWrongBookV23';
+    const labels = ['A', 'B', 'C', 'D'];
+    let pool = [];
+    let currentIndex = 0;
+    let score = 0;
+    let correctCount = 0;
+    let streak = 0;
+    let answered = false;
+    let current = null;
+    let wrongThisRound = [];
+    let timer = null;
+    let timeLimit = 20;
+    let timeLeft = 20;
+
+    function $(id) { return document.getElementById(id); }
+
+    function safeIdioms() {
+      return Array.isArray(window.IDIOMS || IDIOMS) ? (window.IDIOMS || IDIOMS) : [];
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
 
     function uniqueValues(key) {
-      return [...new Set(IDIOMS.map(item => item[key]))].sort();
+      return [...new Set(safeIdioms().map(q => q[key]).filter(Boolean))];
     }
 
-    function fillFilters() {
-      $("levelSelect").innerHTML = '<option value="全部">全部</option>' + uniqueValues("level").map(v => `<option value="${v}">${v}</option>`).join("");
-      $("categorySelect").innerHTML = '<option value="全部">全部</option>' + uniqueValues("category").map(v => `<option value="${v}">${v}</option>`).join("");
+    function initSelects() {
+      const levels = ['全部', ...uniqueValues('level')];
+      const categories = ['全部', ...uniqueValues('category')];
+      $('levelSelect').innerHTML = levels.map(v => `<option value="${v}">${v}</option>`).join('');
+      $('categorySelect').innerHTML = categories.map(v => `<option value="${v}">${v}</option>`).join('');
+      updateWrongCount();
     }
 
-    function shuffle(array) {
-      const copy = [...array];
-      for (let i = copy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-      }
-      return copy;
+    function setScreen(id) {
+      stopTimer();
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      $(id).classList.add('active');
     }
 
-    function buildPool() {
-      const level = $("levelSelect").value;
-      const category = $("categorySelect").value;
-      const limit = $("limitSelect").value;
-      state.pool = IDIOMS.filter(item => {
-        return (level === "全部" || item.level === level) && (category === "全部" || item.category === category);
-      });
-      const shuffled = shuffle(state.pool);
-      state.order = limit === "all" ? shuffled : shuffled.slice(0, Math.min(Number(limit), shuffled.length));
-      state.index = 0; state.score = 0; state.correct = 0; state.answered = false; state.wrongList = []; state.selected = "";
-      $("reviewCard").style.display = "none";
-      nextQuestion(true);
+    function showHome() { setScreen('homeScreen'); updateWrongCount(); }
+    function goSetup() { setScreen('setupScreen'); }
+
+    function applyTheme() {
+      const theme = $('themeSelect').value;
+      document.body.classList.remove('dark', 'ink');
+      if (theme === 'dark') document.body.classList.add('dark');
+      if (theme === 'ink') document.body.classList.add('ink');
     }
 
-    function nextQuestion(isReset = false) {
-      if (!isReset && !state.answered) {
-        $("result").style.color = "var(--bad)";
-        $("result").textContent = "請先選一個答案，再按下一題。";
-        return;
-      }
-      if (state.order.length === 0) {
-        $("question").textContent = "沒有題目";
-        $("choiceArea").innerHTML = "";
-        $("result").textContent = "請更換難度或分類。";
-        updateStats();
-        return;
-      }
-      if (state.index >= state.order.length) {
-        finishGame();
-        return;
-      }
-      state.current = state.order[state.index];
-      state.index += 1;
-      state.answered = false;
-      state.selected = "";
-      $("question").textContent = state.current.blank;
-      $("levelTag").textContent = `難度：${state.current.level}`;
-      $("categoryTag").textContent = `分類：${state.current.category}`;
-      $("result").textContent = "";
-      $("hintBox").textContent = "";
-      $("meaning").textContent = "";
-      renderChoices();
-      updateStats();
-    }
-
-    function renderChoices() {
-      const wrongAnswers = shuffle([...new Set(IDIOMS.map(i => i.answer).filter(a => a !== state.current.answer))]).slice(0, 3);
-      const choices = shuffle([state.current.answer, ...wrongAnswers]);
-      $("choiceArea").innerHTML = choices.map((choice, index) =>
-        `<button class="choice-btn" type="button" data-choice="${choice}" onclick="chooseAnswer('${choice}')"><span class="choice-label">${labels[index]}</span><span>${choice}</span></button>`
-      ).join("");
-    }
-
-    function chooseAnswer(choice) {
-      if (state.answered) return;
-      state.selected = choice;
-      state.answered = true;
-      const isCorrect = choice === state.current.answer;
-      if (isCorrect) {
-        state.score += 10;
-        state.correct += 1;
-        $("result").style.color = "var(--good)";
-        $("result").textContent = `答對了！完整成語：${state.current.full}`;
+    function startGame(mode) {
+      applyTheme();
+      wrongThisRound = [];
+      const all = safeIdioms();
+      let selected = [];
+      if (mode === 'wrong') {
+        const wrongFulls = loadWrongBook();
+        selected = all.filter(q => wrongFulls.includes(q.full));
       } else {
-        state.wrongList.push({ ...state.current, selected: choice });
-        $("result").style.color = "var(--bad)";
-        $("result").textContent = `答錯了，你選「${choice}」，正確答案是「${state.current.answer}」。`;
+        const level = $('levelSelect').value;
+        const category = $('categorySelect').value;
+        selected = all.filter(q => (level === '全部' || q.level === level) && (category === '全部' || q.category === category));
       }
-      $("meaning").textContent = `解釋：${state.current.meaning}`;
-      markChoices();
-      updateStats();
+      if (!selected.length) {
+        alert(mode === 'wrong' ? '目前沒有錯題可以練習。' : '這個條件沒有題目，請換一個難度或分類。');
+        return;
+      }
+      const roundValue = $('roundSelect').value;
+      const roundSize = mode === 'wrong' ? selected.length : (roundValue === 'all' ? selected.length : Number(roundValue));
+      pool = shuffle(selected).slice(0, Math.min(roundSize, selected.length));
+      timeLimit = Number($('timeSelect').value || 0);
+      currentIndex = 0; score = 0; correctCount = 0; streak = 0; answered = false;
+      $('reviewCard').style.display = 'none';
+      setScreen('gameScreen');
+      showQuestion();
     }
 
-    function markChoices() {
-      document.querySelectorAll(".choice-btn").forEach(btn => {
-        const choice = btn.dataset.choice;
-        btn.disabled = true;
-        if (choice === state.current.answer) btn.classList.add("choice-correct");
-        if (choice === state.selected && choice !== state.current.answer) btn.classList.add("choice-wrong");
+    function startWrongBookPractice() {
+      if (!loadWrongBook().length) {
+        showWrongBook();
+        return;
+      }
+      startGame('wrong');
+    }
+
+    function showQuestion() {
+      stopTimer();
+      if (currentIndex >= pool.length) return endGame();
+      current = pool[currentIndex];
+      answered = false;
+      $('questionText').textContent = current.blank;
+      $('levelTag').textContent = current.level || '未分類難度';
+      $('categoryTag').textContent = current.category || '未分類';
+      $('hintBox').textContent = '';
+      $('resultText').textContent = '';
+      $('meaningText').textContent = '';
+      $('exampleText').style.display = 'none';
+      $('exampleText').textContent = '';
+      renderChoices(current);
+      updateStats();
+      startTimer();
+    }
+
+    function renderChoices(q) {
+      const answers = [...new Set(safeIdioms().map(item => item.answer).filter(a => a && a !== q.answer))];
+      const wrongs = shuffle(answers).slice(0, 3);
+      const choices = shuffle([q.answer, ...wrongs]);
+      $('choicesBox').innerHTML = choices.map((choice, i) => `
+        <button class="choice-btn" onclick="chooseAnswer('${escapeJs(choice)}', this)">
+          <span class="choice-label">${labels[i]}</span><span>${choice}</span>
+        </button>
+      `).join('');
+    }
+
+    function escapeJs(text) {
+      return String(text).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    }
+
+    function chooseAnswer(choice, btn) {
+      if (answered) return;
+      stopTimer();
+      answered = true;
+      const isCorrect = choice === current.answer;
+      document.querySelectorAll('.choice-btn').forEach(b => {
+        b.disabled = true;
+        if (b.textContent.includes(current.answer)) b.classList.add('choice-correct');
       });
+      if (isCorrect) {
+        const timeBonus = timeLimit ? Math.max(0, timeLeft) : 0;
+        score += 10 + timeBonus;
+        correctCount += 1;
+        streak += 1;
+        if (streak >= 3) score += 5;
+        $('resultText').style.color = 'var(--good)';
+        $('resultText').textContent = `答對了！${timeBonus ? `時間加分 +${timeBonus}` : ''}${streak >= 3 ? '，連續答對加分 +5' : ''}`;
+      } else {
+        btn.classList.add('choice-wrong');
+        streak = 0;
+        addWrong(current);
+        addWrongThisRound(current);
+        $('resultText').style.color = 'var(--bad)';
+        $('resultText').textContent = `答錯了，正確答案是「${current.answer}」`;
+      }
+      showExplanation();
+      updateStats();
     }
 
     function showHint() {
-      if (!state.current) return;
-      $("hintBox").textContent = `提示：${state.current.hint}`;
+      if (!current) return;
+      $('hintBox').textContent = `提示：${current.hint || '請從完整成語的意思判斷缺字。'}`;
     }
 
-    function finishGame() {
-      const best = Math.max(Number(localStorage.getItem("idiomBestScoreV22") || 0), state.score);
-      localStorage.setItem("idiomBestScoreV22", String(best));
-      $("question").textContent = "完成！";
-      $("choiceArea").innerHTML = "";
-      $("result").style.color = "var(--good)";
-      $("result").textContent = `本輪結束：總分 ${state.score}，答對 ${state.correct} / ${state.order.length} 題。`;
-      $("hintBox").textContent = "按「重新開始」可以再玩一輪。";
-      $("meaning").textContent = "";
-      renderReview();
+    function showExplanation() {
+      $('meaningText').innerHTML = `<strong>${current.full}</strong>：${current.meaning || '尚未提供解釋。'}`;
+      $('exampleText').style.display = 'block';
+      $('exampleText').innerHTML = `<strong>例句：</strong>${getExample(current)}`;
+    }
+
+    function getExample(q) {
+      if (q.example) return q.example;
+      const templates = [
+        `做事情要理解「${q.full}」的意思，才不會用錯成語。`,
+        `老師用「${q.full}」提醒大家：${q.meaning || '要注意這個成語的用法。'}`,
+        `這件事情正好可以用「${q.full}」來形容。`
+      ];
+      return templates[Math.floor(Math.random() * templates.length)];
+    }
+
+    function nextQuestion() {
+      if (!answered && current) {
+        stopTimer();
+        answered = true;
+        streak = 0;
+        addWrong(current);
+        addWrongThisRound(current);
+        document.querySelectorAll('.choice-btn').forEach(b => {
+          b.disabled = true;
+          if (b.textContent.includes(current.answer)) b.classList.add('choice-correct');
+        });
+        $('resultText').style.color = 'var(--bad)';
+        $('resultText').textContent = `已跳過，正確答案是「${current.answer}」`;
+        showExplanation();
+        updateStats();
+        return;
+      }
+      currentIndex += 1;
+      showQuestion();
+    }
+
+    function endGame() {
+      stopTimer();
+      $('questionText').textContent = '遊戲結束';
+      $('choicesBox').innerHTML = '';
+      $('hintBox').textContent = '';
+      $('resultText').style.color = 'var(--text)';
+      $('resultText').textContent = `總分：${score}，答對 ${correctCount} / ${pool.length} 題`;
+      $('meaningText').textContent = '可以回首頁重新開始，或進入錯題本專門複習答錯的題目。';
+      $('exampleText').style.display = 'none';
+      answered = true;
+      updateStats(true);
+      renderRoundReview();
+    }
+
+    function startTimer() {
+      timeLeft = timeLimit;
+      $('timerBar').classList.remove('danger');
+      if (!timeLimit) {
+        $('timerText').textContent = '不限時間';
+        $('timerBar').style.width = '100%';
+        return;
+      }
+      updateTimerUi();
+      timer = setInterval(() => {
+        timeLeft -= 1;
+        updateTimerUi();
+        if (timeLeft <= 0) timeUp();
+      }, 1000);
+    }
+
+    function stopTimer() {
+      if (timer) clearInterval(timer);
+      timer = null;
+    }
+
+    function updateTimerUi() {
+      $('timerText').textContent = `${timeLeft} 秒`;
+      const pct = Math.max(0, Math.min(100, (timeLeft / timeLimit) * 100));
+      $('timerBar').style.width = `${pct}%`;
+      $('timerBar').classList.toggle('danger', timeLeft <= 5 && timeLimit > 0);
+    }
+
+    function timeUp() {
+      if (answered) return;
+      stopTimer();
+      answered = true;
+      streak = 0;
+      addWrong(current);
+      addWrongThisRound(current);
+      document.querySelectorAll('.choice-btn').forEach(b => {
+        b.disabled = true;
+        if (b.textContent.includes(current.answer)) b.classList.add('choice-correct');
+      });
+      $('resultText').style.color = 'var(--bad)';
+      $('resultText').textContent = `時間到！正確答案是「${current.answer}」`;
+      showExplanation();
       updateStats();
     }
 
-    function renderReview() {
-      if (state.wrongList.length === 0) {
-        $("reviewCard").style.display = "block";
-        $("reviewList").innerHTML = '<div class="review-item">太棒了，本輪沒有錯題！</div>';
+    function updateStats(done = false) {
+      const total = pool.length || 0;
+      const shownIndex = done ? total : Math.min(currentIndex + 1, total);
+      const attempted = done ? total : currentIndex + (answered ? 1 : 0);
+      const accuracy = attempted ? Math.round((correctCount / attempted) * 100) : 0;
+      $('progressText').textContent = `${shownIndex} / ${total}`;
+      $('scoreText').textContent = score;
+      $('correctText').textContent = correctCount;
+      $('accuracyText').textContent = `${accuracy}%`;
+      $('streakText').textContent = streak;
+      $('wrongCountText').textContent = loadWrongBook().length;
+      $('progressBar').style.width = total ? `${(shownIndex / total) * 100}%` : '0%';
+    }
+
+    function loadWrongBook() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_WRONG) || '[]'); }
+      catch { return []; }
+    }
+
+    function saveWrongBook(list) {
+      localStorage.setItem(STORAGE_WRONG, JSON.stringify([...new Set(list)]));
+      updateWrongCount();
+    }
+
+    function addWrong(q) {
+      const list = loadWrongBook();
+      if (!list.includes(q.full)) list.push(q.full);
+      saveWrongBook(list);
+    }
+
+    function addWrongThisRound(q) {
+      if (!wrongThisRound.some(item => item.full === q.full)) wrongThisRound.push(q);
+    }
+
+    function updateWrongCount() {
+      const el = $('wrongCountText');
+      if (el) el.textContent = loadWrongBook().length;
+    }
+
+    function showWrongBook() {
+      setScreen('wrongScreen');
+      const wrongFulls = loadWrongBook();
+      const list = safeIdioms().filter(q => wrongFulls.includes(q.full));
+      if (!list.length) {
+        $('wrongList').innerHTML = '<div class="empty">目前沒有錯題。答錯的題目會自動出現在這裡。</div>';
         return;
       }
-      $("reviewCard").style.display = "block";
-      $("reviewList").innerHTML = state.wrongList.map(item => `
-        <div class="review-item">
-          <strong>${item.blank}</strong><br>
-          你選：${item.selected}　正解：${item.answer}<br>
-          完整成語：${item.full}<br>
-          解釋：${item.meaning}
+      $('wrongList').innerHTML = list.map(q => `
+        <div class="wrong-item">
+          <strong>${q.full}</strong>（缺字：${q.answer}）<br>
+          題目：${q.blank}<br>
+          解釋：${q.meaning || '尚未提供解釋。'}<br>
+          例句：${getExample(q)}
         </div>
-      `).join("");
+      `).join('');
     }
 
-    function updateStats() {
-      const total = state.order.length;
-      const answeredCount = Math.max(0, Math.min(state.index - (state.answered ? 0 : 1), total));
-      const accuracy = answeredCount ? Math.round((state.correct / answeredCount) * 100) : 0;
-      $("progress").textContent = `${Math.min(state.index, total)} / ${total}`;
-      $("score").textContent = state.score;
-      $("correctCount").textContent = state.correct;
-      $("accuracy").textContent = `${accuracy}%`;
-      $("bestScore").textContent = localStorage.getItem("idiomBestScoreV22") || "0";
-      $("progressBar").style.width = total ? `${Math.round((Math.min(state.index, total) / total) * 100)}%` : "0%";
+    function clearWrongBook() {
+      if (!confirm('確定要清除錯題本嗎？')) return;
+      saveWrongBook([]);
+      showWrongBook();
     }
 
-    function applyTheme() {
-      document.body.className = "";
-      const theme = $("themeSelect").value;
-      if (theme === "dark") document.body.classList.add("dark");
-      if (theme === "ink") document.body.classList.add("ink");
-      localStorage.setItem("idiomTheme", theme);
+    function renderRoundReview() {
+      if (!wrongThisRound.length) {
+        $('reviewCard').style.display = 'block';
+        $('reviewList').innerHTML = '<div class="review-item">太棒了！這一輪沒有錯題。</div>';
+        return;
+      }
+      $('reviewCard').style.display = 'block';
+      $('reviewList').innerHTML = wrongThisRound.map(q => `
+        <div class="review-item">
+          <strong>${q.full}</strong>（答案：${q.answer}）<br>
+          題目：${q.blank}<br>
+          解釋：${q.meaning || '尚未提供解釋。'}<br>
+          例句：${getExample(q)}
+        </div>
+      `).join('');
     }
 
-    function loadTheme() {
-      const saved = localStorage.getItem("idiomTheme") || "nature";
-      $("themeSelect").value = saved;
-      applyTheme();
-    }
-
-    $("hintBtn").addEventListener("click", showHint);
-    $("nextBtn").addEventListener("click", () => nextQuestion(false));
-    $("restartBtn").addEventListener("click", buildPool);
-    $("levelSelect").addEventListener("change", buildPool);
-    $("categorySelect").addEventListener("change", buildPool);
-    $("limitSelect").addEventListener("change", buildPool);
-    $("themeSelect").addEventListener("change", applyTheme);
-
-    fillFilters();
-    loadTheme();
-    buildPool();
+    initSelects();
   </script>
 </body>
 </html>
