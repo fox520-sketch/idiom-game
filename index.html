@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>成語填空小遊戲 v2.3</title>
+  <title>成語填空小遊戲 v2.4</title>
   <script src="idioms.js"></script>
   <style>
     :root {
@@ -101,10 +101,21 @@
     .review-item, .wrong-item { border: 1px solid var(--border); border-radius: 16px; padding: 12px; background: var(--soft); line-height: 1.65; }
     .empty { color: var(--muted); text-align: center; padding: 22px; }
     .version { text-align: center; color: var(--muted); margin-top: 18px; font-size: 14px; }
+
+    .record-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 14px 0; }
+    .record-box { background: var(--soft); border: 1px solid var(--border); border-radius: 18px; padding: 14px; text-align: center; font-weight: 950; }
+    .record-box small { display:block; color: var(--muted); margin-bottom:6px; }
+    .card-toolbar { display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:12px; margin: 12px 0 16px; }
+    .learn-card { background: var(--soft); border: 1px solid var(--border); border-radius: 20px; padding: 18px; line-height: 1.8; }
+    .learn-title { font-size: clamp(32px, 7vw, 56px); font-weight: 950; text-align:center; margin: 8px 0; letter-spacing:.08em; }
+    .zhuyin { color: var(--muted); text-align:center; font-size: 20px; font-weight: 900; margin-bottom: 12px; }
+    .share-box { background: var(--soft); border:1px solid var(--border); border-radius:16px; padding:12px; margin-top:12px; white-space:pre-wrap; text-align:left; }
     @media (max-width: 860px) {
       .panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .menu-grid { grid-template-columns: 1fr; }
+      .record-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .card-toolbar { grid-template-columns: 1fr; }
       .choices { grid-template-columns: 1fr; }
       main { margin-top: 14px; }
       .choice-btn { min-height: 64px; }
@@ -120,12 +131,14 @@
   <main>
     <section id="homeScreen" class="screen active">
       <div class="card hero">
-        <h2>v2.3 學習強化版</h2>
-        <p>固定四選一作答，加入倒數計時、錯題本、成語例句與首頁選單。答錯的題目會自動存入錯題本，下次可以專門複習。</p>
+        <h2>v2.4 題庫與學習紀錄強化版</h2>
+        <p>固定四選一作答，加入學習紀錄、加強版錯題本、成語學習卡、注音欄位與分享成績。</p>
         <div class="menu-grid">
           <button class="menu-btn" onclick="goSetup()">開始遊戲</button>
           <button class="menu-btn secondary" onclick="startWrongBookPractice()">錯題複習</button>
           <button class="menu-btn secondary" onclick="showWrongBook()">查看錯題本</button>
+          <button class="menu-btn secondary" onclick="showRecords()">學習紀錄</button>
+          <button class="menu-btn secondary" onclick="showCards()">成語學習卡</button>
         </div>
       </div>
     </section>
@@ -194,6 +207,7 @@
           <span class="tag">四選一</span>
         </div>
         <div class="question" id="questionText">＿</div>
+        <div class="zhuyin" id="zhuyinText"></div>
         <div class="choices" id="choicesBox"></div>
         <div class="actions">
           <button class="secondary" onclick="showHint()">提示</button>
@@ -224,344 +238,208 @@
       </div>
     </section>
 
-    <div class="version">版本：v2.3｜學習強化版｜固定四選一｜倒數計時｜錯題本｜成語例句｜適合 GitHub Pages</div>
+
+    <section id="recordsScreen" class="screen">
+      <div class="card">
+        <h2>學習紀錄</h2>
+        <p class="meaning">這些紀錄會保存在目前這台裝置的瀏覽器中。</p>
+        <div class="record-grid" id="recordGrid"></div>
+        <div class="actions">
+          <button class="danger" onclick="clearRecords()">清除學習紀錄</button>
+          <button class="secondary" onclick="showHome()">回首頁</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="cardsScreen" class="screen">
+      <div class="card">
+        <h2>成語學習卡</h2>
+        <p class="meaning">先看完整成語、注音、意思與例句，再進入四選一挑戰。</p>
+        <div class="card-toolbar">
+          <div>
+            <label for="cardLevelSelect">難度</label>
+            <select id="cardLevelSelect" onchange="renderCards()"></select>
+          </div>
+          <div>
+            <label for="cardCategorySelect">分類</label>
+            <select id="cardCategorySelect" onchange="renderCards()"></select>
+          </div>
+          <div>
+            <label for="cardLimitSelect">顯示數量</label>
+            <select id="cardLimitSelect" onchange="renderCards()">
+              <option value="12">12 張</option>
+              <option value="24">24 張</option>
+              <option value="all">全部</option>
+            </select>
+          </div>
+        </div>
+        <div class="actions">
+          <button onclick="renderRandomCard()">隨機學一張</button>
+          <button class="secondary" onclick="showHome()">回首頁</button>
+        </div>
+        <div class="wrong-list" id="cardsList"></div>
+      </div>
+    </section>
+
+    <div class="version">版本：v2.4｜題庫與學習紀錄強化版｜固定四選一｜學習紀錄｜錯題本｜學習卡｜注音｜分享成績｜適合 GitHub Pages</div>
   </main>
 
   <script>
-    const STORAGE_WRONG = 'idiomGameWrongBookV23';
+    const STORAGE_WRONG = 'idiomGameWrongBookV24';
+    const STORAGE_RECORDS = 'idiomGameRecordsV24';
     const labels = ['A', 'B', 'C', 'D'];
     let pool = [];
     let currentIndex = 0;
     let score = 0;
     let correctCount = 0;
     let streak = 0;
+    let maxStreakThisRound = 0;
     let answered = false;
     let current = null;
     let wrongThisRound = [];
     let timer = null;
     let timeLimit = 20;
     let timeLeft = 20;
+    let currentMode = 'normal';
 
     function $(id) { return document.getElementById(id); }
-
-    function safeIdioms() {
-      return Array.isArray(window.IDIOMS || IDIOMS) ? (window.IDIOMS || IDIOMS) : [];
-    }
-
-    function shuffle(arr) {
-      const a = [...arr];
-      for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-      }
-      return a;
-    }
-
-    function uniqueValues(key) {
-      return [...new Set(safeIdioms().map(q => q[key]).filter(Boolean))];
-    }
+    function safeIdioms() { return Array.isArray(window.IDIOMS || IDIOMS) ? (window.IDIOMS || IDIOMS) : []; }
+    function shuffle(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+    function uniqueValues(key) { return [...new Set(safeIdioms().map(q => q[key]).filter(Boolean))]; }
+    function todayString() { return new Date().toLocaleDateString('zh-TW'); }
 
     function initSelects() {
       const levels = ['全部', ...uniqueValues('level')];
       const categories = ['全部', ...uniqueValues('category')];
       $('levelSelect').innerHTML = levels.map(v => `<option value="${v}">${v}</option>`).join('');
       $('categorySelect').innerHTML = categories.map(v => `<option value="${v}">${v}</option>`).join('');
+      $('cardLevelSelect').innerHTML = levels.map(v => `<option value="${v}">${v}</option>`).join('');
+      $('cardCategorySelect').innerHTML = categories.map(v => `<option value="${v}">${v}</option>`).join('');
       updateWrongCount();
     }
 
-    function setScreen(id) {
-      stopTimer();
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      $(id).classList.add('active');
-    }
-
+    function setScreen(id) { stopTimer(); document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); $(id).classList.add('active'); }
     function showHome() { setScreen('homeScreen'); updateWrongCount(); }
     function goSetup() { setScreen('setupScreen'); }
-
-    function applyTheme() {
-      const theme = $('themeSelect').value;
-      document.body.classList.remove('dark', 'ink');
-      if (theme === 'dark') document.body.classList.add('dark');
-      if (theme === 'ink') document.body.classList.add('ink');
-    }
+    function applyTheme() { const theme = $('themeSelect').value; document.body.classList.remove('dark', 'ink'); if (theme === 'dark') document.body.classList.add('dark'); if (theme === 'ink') document.body.classList.add('ink'); }
 
     function startGame(mode) {
-      applyTheme();
-      wrongThisRound = [];
-      const all = safeIdioms();
-      let selected = [];
-      if (mode === 'wrong') {
-        const wrongFulls = loadWrongBook();
-        selected = all.filter(q => wrongFulls.includes(q.full));
-      } else {
-        const level = $('levelSelect').value;
-        const category = $('categorySelect').value;
+      applyTheme(); currentMode = mode || 'normal'; wrongThisRound = [];
+      const all = safeIdioms(); let selected = [];
+      if (currentMode === 'wrong') selected = getWrongItems();
+      else {
+        const level = $('levelSelect').value; const category = $('categorySelect').value;
         selected = all.filter(q => (level === '全部' || q.level === level) && (category === '全部' || q.category === category));
       }
-      if (!selected.length) {
-        alert(mode === 'wrong' ? '目前沒有錯題可以練習。' : '這個條件沒有題目，請換一個難度或分類。');
-        return;
-      }
+      if (!selected.length) { alert(currentMode === 'wrong' ? '目前沒有錯題可以練習。' : '這個條件沒有題目，請換一個難度或分類。'); return; }
       const roundValue = $('roundSelect').value;
-      const roundSize = mode === 'wrong' ? selected.length : (roundValue === 'all' ? selected.length : Number(roundValue));
+      const roundSize = currentMode === 'wrong' ? selected.length : (roundValue === 'all' ? selected.length : Number(roundValue));
       pool = shuffle(selected).slice(0, Math.min(roundSize, selected.length));
       timeLimit = Number($('timeSelect').value || 0);
-      currentIndex = 0; score = 0; correctCount = 0; streak = 0; answered = false;
-      $('reviewCard').style.display = 'none';
-      setScreen('gameScreen');
-      showQuestion();
+      currentIndex = 0; score = 0; correctCount = 0; streak = 0; maxStreakThisRound = 0; answered = false;
+      $('reviewCard').style.display = 'none'; setScreen('gameScreen'); showQuestion();
     }
 
-    function startWrongBookPractice() {
-      if (!loadWrongBook().length) {
-        showWrongBook();
-        return;
-      }
-      startGame('wrong');
-    }
+    function startWrongBookPractice() { if (!Object.keys(loadWrongBook()).length) { showWrongBook(); return; } startGame('wrong'); }
 
     function showQuestion() {
-      stopTimer();
-      if (currentIndex >= pool.length) return endGame();
-      current = pool[currentIndex];
-      answered = false;
+      stopTimer(); if (currentIndex >= pool.length) return endGame();
+      current = pool[currentIndex]; answered = false;
       $('questionText').textContent = current.blank;
-      $('levelTag').textContent = current.level || '未分類難度';
-      $('categoryTag').textContent = current.category || '未分類';
-      $('hintBox').textContent = '';
-      $('resultText').textContent = '';
-      $('meaningText').textContent = '';
-      $('exampleText').style.display = 'none';
-      $('exampleText').textContent = '';
-      renderChoices(current);
-      updateStats();
-      startTimer();
+      $('zhuyinText').textContent = current.zhuyin ? `注音：${current.zhuyin}` : '注音：尚未提供';
+      $('levelTag').textContent = current.level || '未分類難度'; $('categoryTag').textContent = current.category || '未分類';
+      $('hintBox').textContent = ''; $('resultText').textContent = ''; $('meaningText').textContent = ''; $('exampleText').style.display = 'none'; $('exampleText').textContent = '';
+      renderChoices(current); updateStats(); startTimer();
     }
 
     function renderChoices(q) {
       const answers = [...new Set(safeIdioms().map(item => item.answer).filter(a => a && a !== q.answer))];
-      const wrongs = shuffle(answers).slice(0, 3);
-      const choices = shuffle([q.answer, ...wrongs]);
-      $('choicesBox').innerHTML = choices.map((choice, i) => `
-        <button class="choice-btn" onclick="chooseAnswer('${escapeJs(choice)}', this)">
-          <span class="choice-label">${labels[i]}</span><span>${choice}</span>
-        </button>
-      `).join('');
+      const choices = shuffle([q.answer, ...shuffle(answers).slice(0, 3)]);
+      $('choicesBox').innerHTML = choices.map((choice, i) => `<button class="choice-btn" onclick="chooseAnswer('${escapeJs(choice)}', this)"><span class="choice-label">${labels[i]}</span><span>${choice}</span></button>`).join('');
     }
-
-    function escapeJs(text) {
-      return String(text).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-    }
+    function escapeJs(text) { return String(text).replace(/\/g, '\\').replace(/'/g, "\\'"); }
 
     function chooseAnswer(choice, btn) {
-      if (answered) return;
-      stopTimer();
-      answered = true;
+      if (answered) return; stopTimer(); answered = true;
       const isCorrect = choice === current.answer;
-      document.querySelectorAll('.choice-btn').forEach(b => {
-        b.disabled = true;
-        if (b.textContent.includes(current.answer)) b.classList.add('choice-correct');
-      });
+      document.querySelectorAll('.choice-btn').forEach(b => { b.disabled = true; if (b.textContent.includes(current.answer)) b.classList.add('choice-correct'); });
       if (isCorrect) {
-        const timeBonus = timeLimit ? Math.max(0, timeLeft) : 0;
-        score += 10 + timeBonus;
-        correctCount += 1;
-        streak += 1;
-        if (streak >= 3) score += 5;
-        $('resultText').style.color = 'var(--good)';
-        $('resultText').textContent = `答對了！${timeBonus ? `時間加分 +${timeBonus}` : ''}${streak >= 3 ? '，連續答對加分 +5' : ''}`;
+        const timeBonus = timeLimit ? Math.max(0, timeLeft) : 0; score += 10 + timeBonus; correctCount += 1; streak += 1; maxStreakThisRound = Math.max(maxStreakThisRound, streak); if (streak >= 3) score += 5;
+        if (currentMode === 'wrong') markWrongPracticeCorrect(current);
+        updateRecords(true);
+        $('resultText').style.color = 'var(--good)'; $('resultText').textContent = `答對了！${timeBonus ? `時間加分 +${timeBonus}` : ''}${streak >= 3 ? '，連續答對加分 +5' : ''}`;
       } else {
-        btn.classList.add('choice-wrong');
-        streak = 0;
-        addWrong(current);
-        addWrongThisRound(current);
-        $('resultText').style.color = 'var(--bad)';
-        $('resultText').textContent = `答錯了，正確答案是「${current.answer}」`;
+        btn.classList.add('choice-wrong'); streak = 0; addWrong(current); addWrongThisRound(current); updateRecords(false);
+        $('resultText').style.color = 'var(--bad)'; $('resultText').textContent = `答錯了，正確答案是「${current.answer}」`;
       }
-      showExplanation();
-      updateStats();
+      showExplanation(); updateStats();
     }
 
-    function showHint() {
-      if (!current) return;
-      $('hintBox').textContent = `提示：${current.hint || '請從完整成語的意思判斷缺字。'}`;
-    }
-
-    function showExplanation() {
-      $('meaningText').innerHTML = `<strong>${current.full}</strong>：${current.meaning || '尚未提供解釋。'}`;
-      $('exampleText').style.display = 'block';
-      $('exampleText').innerHTML = `<strong>例句：</strong>${getExample(current)}`;
-    }
-
-    function getExample(q) {
-      if (q.example) return q.example;
-      const templates = [
-        `做事情要理解「${q.full}」的意思，才不會用錯成語。`,
-        `老師用「${q.full}」提醒大家：${q.meaning || '要注意這個成語的用法。'}`,
-        `這件事情正好可以用「${q.full}」來形容。`
-      ];
-      return templates[Math.floor(Math.random() * templates.length)];
-    }
+    function showHint() { if (!current) return; $('hintBox').textContent = `提示：${current.hint || '請從完整成語的意思判斷缺字。'}`; }
+    function showExplanation() { $('meaningText').innerHTML = `<strong>${current.full}</strong>${current.zhuyin ? `（${current.zhuyin}）` : ''}：${current.meaning || '尚未提供解釋。'}`; $('exampleText').style.display = 'block'; $('exampleText').innerHTML = `<strong>例句：</strong>${getExample(current)}`; }
+    function getExample(q) { return q.example || `這件事情正好可以用「${q.full}」來形容。`; }
 
     function nextQuestion() {
       if (!answered && current) {
-        stopTimer();
-        answered = true;
-        streak = 0;
-        addWrong(current);
-        addWrongThisRound(current);
-        document.querySelectorAll('.choice-btn').forEach(b => {
-          b.disabled = true;
-          if (b.textContent.includes(current.answer)) b.classList.add('choice-correct');
-        });
-        $('resultText').style.color = 'var(--bad)';
-        $('resultText').textContent = `已跳過，正確答案是「${current.answer}」`;
-        showExplanation();
-        updateStats();
-        return;
+        stopTimer(); answered = true; streak = 0; addWrong(current); addWrongThisRound(current); updateRecords(false);
+        document.querySelectorAll('.choice-btn').forEach(b => { b.disabled = true; if (b.textContent.includes(current.answer)) b.classList.add('choice-correct'); });
+        $('resultText').style.color = 'var(--bad)'; $('resultText').textContent = `已跳過，正確答案是「${current.answer}」`; showExplanation(); updateStats(); return;
       }
-      currentIndex += 1;
-      showQuestion();
+      currentIndex += 1; showQuestion();
     }
 
     function endGame() {
-      stopTimer();
-      $('questionText').textContent = '遊戲結束';
-      $('choicesBox').innerHTML = '';
-      $('hintBox').textContent = '';
-      $('resultText').style.color = 'var(--text)';
-      $('resultText').textContent = `總分：${score}，答對 ${correctCount} / ${pool.length} 題`;
-      $('meaningText').textContent = '可以回首頁重新開始，或進入錯題本專門複習答錯的題目。';
-      $('exampleText').style.display = 'none';
-      answered = true;
-      updateStats(true);
-      renderRoundReview();
+      stopTimer(); saveBestScore();
+      $('questionText').textContent = '遊戲結束'; $('zhuyinText').textContent = ''; $('choicesBox').innerHTML = ''; $('hintBox').textContent = '';
+      const accuracy = pool.length ? Math.round((correctCount / pool.length) * 100) : 0;
+      $('resultText').style.color = 'var(--text)'; $('resultText').textContent = `總分：${score}，答對 ${correctCount} / ${pool.length} 題，正確率 ${accuracy}%`;
+      $('meaningText').textContent = '可以複製成績分享給朋友，或進入錯題本專門複習答錯的題目。';
+      $('exampleText').style.display = 'block'; $('exampleText').innerHTML = `<strong>分享文字：</strong><div class="share-box" id="shareText">${makeShareText()}</div><div class="actions"><button onclick="copyShareText()">複製成績</button></div>`;
+      answered = true; updateStats(true); renderRoundReview();
     }
 
-    function startTimer() {
-      timeLeft = timeLimit;
-      $('timerBar').classList.remove('danger');
-      if (!timeLimit) {
-        $('timerText').textContent = '不限時間';
-        $('timerBar').style.width = '100%';
-        return;
-      }
-      updateTimerUi();
-      timer = setInterval(() => {
-        timeLeft -= 1;
-        updateTimerUi();
-        if (timeLeft <= 0) timeUp();
-      }, 1000);
-    }
+    function makeShareText() { const accuracy = pool.length ? Math.round((correctCount / pool.length) * 100) : 0; return `我在成語填空小遊戲拿到 ${score} 分！\n答對 ${correctCount} / ${pool.length} 題，正確率 ${accuracy}%\n最高連續答對 ${maxStreakThisRound} 題\n快來挑戰：https://fox520-sketch.github.io/idiom-game/`; }
+    async function copyShareText() { const text = makeShareText(); try { await navigator.clipboard.writeText(text); alert('已複製成績！'); } catch(e) { alert('無法自動複製，請手動選取分享文字。'); } }
 
-    function stopTimer() {
-      if (timer) clearInterval(timer);
-      timer = null;
-    }
+    function startTimer() { timeLeft = timeLimit; $('timerBar').classList.remove('danger'); if (!timeLimit) { $('timerText').textContent = '不限時間'; $('timerBar').style.width = '100%'; return; } updateTimerUi(); timer = setInterval(() => { timeLeft -= 1; updateTimerUi(); if (timeLeft <= 0) timeUp(); }, 1000); }
+    function stopTimer() { if (timer) clearInterval(timer); timer = null; }
+    function updateTimerUi() { $('timerText').textContent = `${timeLeft} 秒`; const pct = Math.max(0, Math.min(100, (timeLeft / timeLimit) * 100)); $('timerBar').style.width = `${pct}%`; $('timerBar').classList.toggle('danger', timeLeft <= 5 && timeLimit > 0); }
+    function timeUp() { if (answered) return; stopTimer(); answered = true; streak = 0; addWrong(current); addWrongThisRound(current); updateRecords(false); document.querySelectorAll('.choice-btn').forEach(b => { b.disabled = true; if (b.textContent.includes(current.answer)) b.classList.add('choice-correct'); }); $('resultText').style.color = 'var(--bad)'; $('resultText').textContent = `時間到！正確答案是「${current.answer}」`; showExplanation(); updateStats(); }
 
-    function updateTimerUi() {
-      $('timerText').textContent = `${timeLeft} 秒`;
-      const pct = Math.max(0, Math.min(100, (timeLeft / timeLimit) * 100));
-      $('timerBar').style.width = `${pct}%`;
-      $('timerBar').classList.toggle('danger', timeLeft <= 5 && timeLimit > 0);
-    }
+    function updateStats(done = false) { const total = pool.length || 0; const shownIndex = done ? total : Math.min(currentIndex + 1, total); const attempted = done ? total : currentIndex + (answered ? 1 : 0); const accuracy = attempted ? Math.round((correctCount / attempted) * 100) : 0; $('progressText').textContent = `${shownIndex} / ${total}`; $('scoreText').textContent = score; $('correctText').textContent = correctCount; $('accuracyText').textContent = `${accuracy}%`; $('streakText').textContent = streak; $('wrongCountText').textContent = Object.keys(loadWrongBook()).length; $('progressBar').style.width = total ? `${(shownIndex / total) * 100}%` : '0%'; }
 
-    function timeUp() {
-      if (answered) return;
-      stopTimer();
-      answered = true;
-      streak = 0;
-      addWrong(current);
-      addWrongThisRound(current);
-      document.querySelectorAll('.choice-btn').forEach(b => {
-        b.disabled = true;
-        if (b.textContent.includes(current.answer)) b.classList.add('choice-correct');
-      });
-      $('resultText').style.color = 'var(--bad)';
-      $('resultText').textContent = `時間到！正確答案是「${current.answer}」`;
-      showExplanation();
-      updateStats();
-    }
-
-    function updateStats(done = false) {
-      const total = pool.length || 0;
-      const shownIndex = done ? total : Math.min(currentIndex + 1, total);
-      const attempted = done ? total : currentIndex + (answered ? 1 : 0);
-      const accuracy = attempted ? Math.round((correctCount / attempted) * 100) : 0;
-      $('progressText').textContent = `${shownIndex} / ${total}`;
-      $('scoreText').textContent = score;
-      $('correctText').textContent = correctCount;
-      $('accuracyText').textContent = `${accuracy}%`;
-      $('streakText').textContent = streak;
-      $('wrongCountText').textContent = loadWrongBook().length;
-      $('progressBar').style.width = total ? `${(shownIndex / total) * 100}%` : '0%';
-    }
+    function defaultRecords() { return { totalAnswered:0, correct:0, wrong:0, gamesPlayed:0, bestScore:0, bestStreak:0, lastPlayed:'尚未開始' }; }
+    function loadRecords() { try { return Object.assign(defaultRecords(), JSON.parse(localStorage.getItem(STORAGE_RECORDS) || '{}')); } catch { return defaultRecords(); } }
+    function saveRecords(r) { localStorage.setItem(STORAGE_RECORDS, JSON.stringify(r)); }
+    function updateRecords(isCorrect) { const r = loadRecords(); r.totalAnswered += 1; if (isCorrect) r.correct += 1; else r.wrong += 1; r.lastPlayed = todayString(); r.bestStreak = Math.max(r.bestStreak || 0, maxStreakThisRound); saveRecords(r); }
+    function saveBestScore() { const r = loadRecords(); r.gamesPlayed += 1; r.bestScore = Math.max(r.bestScore || 0, score); r.bestStreak = Math.max(r.bestStreak || 0, maxStreakThisRound); r.lastPlayed = todayString(); saveRecords(r); }
+    function showRecords() { setScreen('recordsScreen'); const r = loadRecords(); const acc = r.totalAnswered ? Math.round((r.correct / r.totalAnswered) * 100) : 0; const data = [['總作答題數', r.totalAnswered], ['答對題數', r.correct], ['答錯題數', r.wrong], ['總正確率', `${acc}%`], ['遊玩次數', r.gamesPlayed], ['最高分', r.bestScore], ['最高連續答對', r.bestStreak], ['最近遊玩日期', r.lastPlayed]]; $('recordGrid').innerHTML = data.map(([k,v]) => `<div class="record-box"><small>${k}</small>${v}</div>`).join(''); }
+    function clearRecords() { if (!confirm('確定要清除學習紀錄嗎？')) return; localStorage.removeItem(STORAGE_RECORDS); showRecords(); }
 
     function loadWrongBook() {
-      try { return JSON.parse(localStorage.getItem(STORAGE_WRONG) || '[]'); }
-      catch { return []; }
+      try {
+        const raw = JSON.parse(localStorage.getItem(STORAGE_WRONG) || 'null');
+        if (Array.isArray(raw)) { const obj = {}; raw.forEach(full => obj[full] = { wrongCount:1, correctReview:0, lastWrong:'' }); return obj; }
+        return raw && typeof raw === 'object' ? raw : {};
+      } catch { return {}; }
     }
+    function saveWrongBook(obj) { localStorage.setItem(STORAGE_WRONG, JSON.stringify(obj)); updateWrongCount(); }
+    function addWrong(q) { const obj = loadWrongBook(); const item = obj[q.full] || { wrongCount:0, correctReview:0, lastWrong:'' }; item.wrongCount += 1; item.correctReview = 0; item.lastWrong = todayString(); obj[q.full] = item; saveWrongBook(obj); }
+    function markWrongPracticeCorrect(q) { const obj = loadWrongBook(); if (!obj[q.full]) return; obj[q.full].correctReview = (obj[q.full].correctReview || 0) + 1; if (obj[q.full].correctReview >= 2) delete obj[q.full]; saveWrongBook(obj); }
+    function addWrongThisRound(q) { if (!wrongThisRound.some(item => item.full === q.full)) wrongThisRound.push(q); }
+    function updateWrongCount() { const el = $('wrongCountText'); if (el) el.textContent = Object.keys(loadWrongBook()).length; }
+    function getWrongItems() { const wrong = loadWrongBook(); return safeIdioms().filter(q => wrong[q.full]); }
 
-    function saveWrongBook(list) {
-      localStorage.setItem(STORAGE_WRONG, JSON.stringify([...new Set(list)]));
-      updateWrongCount();
-    }
+    function showWrongBook() { setScreen('wrongScreen'); const wrong = loadWrongBook(); const list = safeIdioms().filter(q => wrong[q.full]); if (!list.length) { $('wrongList').innerHTML = '<div class="empty">目前沒有錯題。答錯的題目會自動出現在這裡。</div>'; return; } $('wrongList').innerHTML = list.map(q => { const w = wrong[q.full] || {}; return `<div class="wrong-item"><strong>${q.full}</strong>（${q.zhuyin || '尚未提供注音'}）<br>缺字：${q.answer}｜錯誤次數：${w.wrongCount || 1}｜複習答對：${w.correctReview || 0} / 2<br>題目：${q.blank}<br>解釋：${q.meaning || '尚未提供解釋。'}<br>例句：${getExample(q)}</div>`; }).join(''); }
+    function clearWrongBook() { if (!confirm('確定要清除錯題本嗎？')) return; saveWrongBook({}); showWrongBook(); }
 
-    function addWrong(q) {
-      const list = loadWrongBook();
-      if (!list.includes(q.full)) list.push(q.full);
-      saveWrongBook(list);
-    }
+    function renderRoundReview() { $('reviewCard').style.display = 'block'; if (!wrongThisRound.length) { $('reviewList').innerHTML = '<div class="review-item">太棒了！這一輪沒有錯題。</div>'; return; } $('reviewList').innerHTML = wrongThisRound.map(q => `<div class="review-item"><strong>${q.full}</strong>（${q.zhuyin || '尚未提供注音'}，答案：${q.answer}）<br>題目：${q.blank}<br>解釋：${q.meaning || '尚未提供解釋。'}<br>例句：${getExample(q)}</div>`).join(''); }
 
-    function addWrongThisRound(q) {
-      if (!wrongThisRound.some(item => item.full === q.full)) wrongThisRound.push(q);
-    }
-
-    function updateWrongCount() {
-      const el = $('wrongCountText');
-      if (el) el.textContent = loadWrongBook().length;
-    }
-
-    function showWrongBook() {
-      setScreen('wrongScreen');
-      const wrongFulls = loadWrongBook();
-      const list = safeIdioms().filter(q => wrongFulls.includes(q.full));
-      if (!list.length) {
-        $('wrongList').innerHTML = '<div class="empty">目前沒有錯題。答錯的題目會自動出現在這裡。</div>';
-        return;
-      }
-      $('wrongList').innerHTML = list.map(q => `
-        <div class="wrong-item">
-          <strong>${q.full}</strong>（缺字：${q.answer}）<br>
-          題目：${q.blank}<br>
-          解釋：${q.meaning || '尚未提供解釋。'}<br>
-          例句：${getExample(q)}
-        </div>
-      `).join('');
-    }
-
-    function clearWrongBook() {
-      if (!confirm('確定要清除錯題本嗎？')) return;
-      saveWrongBook([]);
-      showWrongBook();
-    }
-
-    function renderRoundReview() {
-      if (!wrongThisRound.length) {
-        $('reviewCard').style.display = 'block';
-        $('reviewList').innerHTML = '<div class="review-item">太棒了！這一輪沒有錯題。</div>';
-        return;
-      }
-      $('reviewCard').style.display = 'block';
-      $('reviewList').innerHTML = wrongThisRound.map(q => `
-        <div class="review-item">
-          <strong>${q.full}</strong>（答案：${q.answer}）<br>
-          題目：${q.blank}<br>
-          解釋：${q.meaning || '尚未提供解釋。'}<br>
-          例句：${getExample(q)}
-        </div>
-      `).join('');
-    }
+    function showCards() { setScreen('cardsScreen'); renderCards(); }
+    function filteredCardItems() { const level = $('cardLevelSelect').value; const category = $('cardCategorySelect').value; return safeIdioms().filter(q => (level === '全部' || q.level === level) && (category === '全部' || q.category === category)); }
+    function renderCards() { let list = filteredCardItems(); const limit = $('cardLimitSelect').value; list = shuffle(list); if (limit !== 'all') list = list.slice(0, Number(limit)); if (!list.length) { $('cardsList').innerHTML = '<div class="empty">這個條件沒有學習卡。</div>'; return; } $('cardsList').innerHTML = list.map(renderOneCard).join(''); }
+    function renderRandomCard() { const list = filteredCardItems(); if (!list.length) { $('cardsList').innerHTML = '<div class="empty">這個條件沒有學習卡。</div>'; return; } $('cardsList').innerHTML = renderOneCard(shuffle(list)[0]); }
+    function renderOneCard(q) { return `<div class="learn-card"><div class="learn-title">${q.full}</div><div class="zhuyin">${q.zhuyin || '尚未提供注音'}</div><strong>題目：</strong>${q.blank}　<strong>答案：</strong>${q.answer}<br><strong>難度：</strong>${q.level || '未分類'}　<strong>分類：</strong>${q.category || '未分類'}<br><strong>意思：</strong>${q.meaning || '尚未提供解釋。'}<br><strong>例句：</strong>${getExample(q)}<br><strong>提示：</strong>${q.hint || '尚未提供提示。'}</div>`; }
 
     initSelects();
   </script>
