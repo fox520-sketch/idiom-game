@@ -16,9 +16,10 @@
       --border: #d8e8d4;
       --good: #237a35;
       --bad: #b3261e;
+      --warn: #7a4d00;
+      --soft: #edf7e9;
       --shadow: 0 12px 28px rgba(35, 70, 35, 0.14);
     }
-
     body.dark {
       --bg: #050805;
       --card: #111811;
@@ -27,9 +28,9 @@
       --primary: #70b66b;
       --primary-dark: #579653;
       --border: #2b3b2b;
+      --soft: #172217;
       --shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
     }
-
     body.ink {
       --bg: #ffffff;
       --card: #ffffff;
@@ -40,11 +41,11 @@
       --border: #000000;
       --good: #000000;
       --bad: #000000;
+      --warn: #000000;
+      --soft: #ffffff;
       --shadow: none;
     }
-
     * { box-sizing: border-box; }
-
     body {
       margin: 0;
       font-family: "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
@@ -52,175 +53,68 @@
       color: var(--text);
       min-height: 100vh;
     }
-
     body.dark, body.ink { background: var(--bg); }
-
     header {
       background: var(--primary);
       color: white;
       padding: 16px 18px;
       text-align: center;
     }
-
-    body.ink header {
-      background: white;
-      color: black;
-      border-bottom: 2px solid black;
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: clamp(24px, 5vw, 38px);
-      letter-spacing: 0.08em;
-    }
-
-    .home-link {
-      display: inline-block;
-      margin-top: 8px;
-      color: inherit;
-      text-decoration: underline;
-      font-weight: 700;
-    }
-
-    main {
-      max-width: 920px;
-      margin: 24px auto;
-      padding: 0 16px 40px;
-    }
-
-    .panel, .game-card {
+    body.ink header { background: white; color: black; border-bottom: 2px solid black; }
+    header h1 { margin: 0; font-size: clamp(25px, 5vw, 40px); letter-spacing: 0.08em; }
+    .home-link { display: inline-block; margin-top: 8px; color: inherit; text-decoration: underline; font-weight: 800; }
+    main { max-width: 980px; margin: 24px auto; padding: 0 16px 40px; }
+    .panel, .game-card, .review-card {
       background: var(--card);
       border: 1px solid var(--border);
       box-shadow: var(--shadow);
       border-radius: 24px;
       padding: 20px;
     }
-
-    .panel {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    label {
-      display: block;
-      font-size: 14px;
-      color: var(--muted);
-      margin-bottom: 6px;
-      font-weight: 700;
-    }
-
+    .panel { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+    label { display: block; font-size: 14px; color: var(--muted); margin-bottom: 6px; font-weight: 800; }
     select, input {
-      width: 100%;
-      border: 2px solid var(--border);
-      border-radius: 14px;
-      padding: 11px 12px;
-      font-size: 18px;
-      background: var(--card);
-      color: var(--text);
+      width: 100%; border: 2px solid var(--border); border-radius: 14px;
+      padding: 11px 12px; font-size: 18px; background: var(--card); color: var(--text);
     }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-
-    .stat {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 12px;
-      text-align: center;
-      font-weight: 800;
-    }
-
-    .stat small {
-      display: block;
-      color: var(--muted);
-      font-size: 13px;
-      margin-bottom: 4px;
-    }
-
+    .stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
+    .stat { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 12px; text-align: center; font-weight: 900; }
+    .stat small { display: block; color: var(--muted); font-size: 13px; margin-bottom: 4px; }
+    .progress-track { height: 12px; background: var(--soft); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; margin: 4px 0 16px; }
+    .progress-bar { height: 100%; width: 0%; background: var(--primary); transition: width 0.2s ease; }
     .game-card { text-align: center; }
-
-    .question {
-      font-size: clamp(42px, 10vw, 76px);
-      font-weight: 900;
-      letter-spacing: 0.1em;
-      margin: 24px 0 18px;
-    }
-
-    .answer-row {
-      max-width: 240px;
-      margin: 0 auto 12px;
-    }
-
-    .choices {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 10px;
-      margin: 18px 0;
-    }
-
+    .tag-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+    .tag { border: 1px solid var(--border); background: var(--soft); border-radius: 999px; padding: 6px 12px; color: var(--muted); font-weight: 800; }
+    .question { font-size: clamp(44px, 10vw, 82px); font-weight: 950; letter-spacing: 0.1em; margin: 18px 0 18px; }
+    .choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; max-width: 640px; margin: 18px auto; }
     button {
-      border: none;
-      border-radius: 16px;
-      background: var(--primary);
-      color: white;
-      padding: 12px 16px;
-      font-size: 17px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: transform 0.08s ease, background 0.15s ease;
+      border: none; border-radius: 16px; background: var(--primary); color: white;
+      padding: 12px 16px; font-size: 17px; font-weight: 900; cursor: pointer;
+      transition: transform 0.08s ease, background 0.15s ease, opacity 0.15s ease;
     }
-
-    body.ink button {
-      background: white;
-      color: black;
-      border: 2px solid black;
-    }
-
+    body.ink button { background: white; color: black; border: 2px solid black; }
     button:hover { background: var(--primary-dark); transform: translateY(-1px); }
+    button:disabled { cursor: default; opacity: 0.75; transform: none; }
     button.secondary { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
     body.ink button.secondary { color: black; border-color: black; }
-
-    .actions {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 12px;
-    }
-
-    .result {
-      min-height: 32px;
-      font-size: 22px;
-      font-weight: 900;
-      margin-top: 16px;
-    }
-
-    .meaning, .hint-box {
-      color: var(--muted);
-      font-size: 18px;
-      line-height: 1.7;
-      max-width: 680px;
-      margin: 8px auto 0;
-    }
-
-    .version {
-      text-align: center;
-      color: var(--muted);
-      margin-top: 18px;
-      font-size: 14px;
-    }
-
+    .choice-btn { min-height: 72px; font-size: 26px; display: flex; align-items: center; justify-content: center; gap: 12px; }
+    .choice-label { display: inline-flex; width: 34px; height: 34px; border-radius: 50%; align-items: center; justify-content: center; background: rgba(255,255,255,0.22); font-size: 18px; }
+    .choice-correct { outline: 4px solid var(--good); }
+    .choice-wrong { outline: 4px solid var(--bad); }
+    .actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+    .result { min-height: 34px; font-size: 23px; font-weight: 950; margin-top: 16px; }
+    .meaning, .hint-box { color: var(--muted); font-size: 18px; line-height: 1.7; max-width: 720px; margin: 8px auto 0; }
+    .review-card { margin-top: 16px; display: none; }
+    .review-card h2 { margin: 0 0 10px; }
+    .review-list { display: grid; gap: 10px; }
+    .review-item { border: 1px solid var(--border); border-radius: 16px; padding: 12px; background: var(--soft); line-height: 1.65; }
+    .version { text-align: center; color: var(--muted); margin-top: 18px; font-size: 14px; }
     @media (max-width: 760px) {
-      .panel, .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .choices { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .choices { grid-template-columns: 1fr; }
       main { margin-top: 14px; }
+      .choice-btn { min-height: 62px; }
     }
   </style>
 </head>
@@ -241,10 +135,12 @@
         <select id="categorySelect"></select>
       </div>
       <div>
-        <label for="modeSelect">作答模式</label>
-        <select id="modeSelect">
-          <option value="choice" selected>四選一</option>
-          <option value="input">輸入答案</option>
+        <label for="limitSelect">每輪題數</label>
+        <select id="limitSelect">
+          <option value="10" selected>10 題</option>
+          <option value="20">20 題</option>
+          <option value="30">30 題</option>
+          <option value="all">全部題目</option>
         </select>
       </div>
       <div>
@@ -261,55 +157,52 @@
       <div class="stat"><small>目前題數</small><span id="progress">0 / 0</span></div>
       <div class="stat"><small>分數</small><span id="score">0</span></div>
       <div class="stat"><small>答對</small><span id="correctCount">0</span></div>
-      <div class="stat"><small>題庫</small><span id="poolCount">0</span></div>
+      <div class="stat"><small>正確率</small><span id="accuracy">0%</span></div>
+      <div class="stat"><small>最佳分數</small><span id="bestScore">0</span></div>
     </section>
+    <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
 
     <section class="game-card">
-      <div class="question" id="question">載入中</div>
-
-      <div class="answer-row" id="inputArea">
-        <input id="answerInput" maxlength="1" placeholder="輸入缺字" autocomplete="off" />
+      <div class="tag-row">
+        <span class="tag" id="levelTag">難度</span>
+        <span class="tag" id="categoryTag">分類</span>
+        <span class="tag">四選一作答</span>
       </div>
-
+      <div class="question" id="question">載入中</div>
       <div class="choices" id="choiceArea"></div>
-
       <div class="actions">
-        <button id="checkBtn">檢查答案</button>
         <button class="secondary" id="hintBtn">提示</button>
         <button class="secondary" id="nextBtn">下一題</button>
         <button class="secondary" id="restartBtn">重新開始</button>
       </div>
-
       <div class="result" id="result"></div>
       <div class="hint-box" id="hintBox"></div>
       <div class="meaning" id="meaning"></div>
     </section>
 
-    <div class="version">版本：v2.1｜預設四選一作答｜題庫獨立檔案 idioms.js｜適合 GitHub Pages</div>
+    <section class="review-card" id="reviewCard">
+      <h2>錯題複習</h2>
+      <div class="review-list" id="reviewList"></div>
+    </section>
+
+    <div class="version">版本：v2.2｜固定四選一｜增加錯題複習、每輪題數、正確率、最佳分數、答案按鈕提示｜適合 GitHub Pages</div>
   </main>
 
   <script>
     const state = {
-      pool: [],
-      order: [],
-      current: null,
-      index: 0,
-      score: 0,
-      correct: 0,
-      answered: false
+      pool: [], order: [], current: null, index: 0, score: 0, correct: 0,
+      answered: false, wrongList: [], selected: ""
     };
-
     const $ = (id) => document.getElementById(id);
+    const labels = ["A", "B", "C", "D"];
 
     function uniqueValues(key) {
       return [...new Set(IDIOMS.map(item => item[key]))].sort();
     }
 
     function fillFilters() {
-      const levelSelect = $("levelSelect");
-      const categorySelect = $("categorySelect");
-      levelSelect.innerHTML = '<option value="全部">全部</option>' + uniqueValues("level").map(v => `<option value="${v}">${v}</option>`).join("");
-      categorySelect.innerHTML = '<option value="全部">全部</option>' + uniqueValues("category").map(v => `<option value="${v}">${v}</option>`).join("");
+      $("levelSelect").innerHTML = '<option value="全部">全部</option>' + uniqueValues("level").map(v => `<option value="${v}">${v}</option>`).join("");
+      $("categorySelect").innerHTML = '<option value="全部">全部</option>' + uniqueValues("category").map(v => `<option value="${v}">${v}</option>`).join("");
     }
 
     function shuffle(array) {
@@ -324,99 +217,83 @@
     function buildPool() {
       const level = $("levelSelect").value;
       const category = $("categorySelect").value;
+      const limit = $("limitSelect").value;
       state.pool = IDIOMS.filter(item => {
-        const levelOK = level === "全部" || item.level === level;
-        const categoryOK = category === "全部" || item.category === category;
-        return levelOK && categoryOK;
+        return (level === "全部" || item.level === level) && (category === "全部" || item.category === category);
       });
-      state.order = shuffle(state.pool);
-      state.index = 0;
-      state.score = 0;
-      state.correct = 0;
-      state.answered = false;
+      const shuffled = shuffle(state.pool);
+      state.order = limit === "all" ? shuffled : shuffled.slice(0, Math.min(Number(limit), shuffled.length));
+      state.index = 0; state.score = 0; state.correct = 0; state.answered = false; state.wrongList = []; state.selected = "";
+      $("reviewCard").style.display = "none";
       nextQuestion(true);
     }
 
     function nextQuestion(isReset = false) {
       if (!isReset && !state.answered) {
         $("result").style.color = "var(--bad)";
-        $("result").textContent = "請先作答，或按重新開始更換題庫。";
+        $("result").textContent = "請先選一個答案，再按下一題。";
         return;
       }
-
-      if (state.pool.length === 0) {
+      if (state.order.length === 0) {
         $("question").textContent = "沒有題目";
+        $("choiceArea").innerHTML = "";
         $("result").textContent = "請更換難度或分類。";
         updateStats();
         return;
       }
-
       if (state.index >= state.order.length) {
-        $("question").textContent = "完成！";
-        $("result").style.color = "var(--good)";
-        $("result").textContent = `本輪結束，總分 ${state.score}，答對 ${state.correct} 題。`;
-        $("meaning").textContent = "按「重新開始」可再玩一次。";
-        $("hintBox").textContent = "";
-        $("choiceArea").innerHTML = "";
-        updateStats();
+        finishGame();
         return;
       }
-
       state.current = state.order[state.index];
       state.index += 1;
       state.answered = false;
-
+      state.selected = "";
       $("question").textContent = state.current.blank;
-      $("answerInput").value = "";
+      $("levelTag").textContent = `難度：${state.current.level}`;
+      $("categoryTag").textContent = `分類：${state.current.category}`;
       $("result").textContent = "";
       $("hintBox").textContent = "";
       $("meaning").textContent = "";
-      renderMode();
+      renderChoices();
       updateStats();
-      if ($("modeSelect").value === "input") setTimeout(() => $("answerInput").focus(), 0);
-    }
-
-    function renderMode() {
-      const mode = $("modeSelect").value;
-      $("inputArea").style.display = mode === "input" ? "block" : "none";
-      $("choiceArea").style.display = mode === "choice" ? "grid" : "none";
-      if (mode === "choice") renderChoices();
-      else $("choiceArea").innerHTML = "";
     }
 
     function renderChoices() {
       const wrongAnswers = shuffle([...new Set(IDIOMS.map(i => i.answer).filter(a => a !== state.current.answer))]).slice(0, 3);
       const choices = shuffle([state.current.answer, ...wrongAnswers]);
-      $("choiceArea").innerHTML = choices.map(choice => `<button type="button" onclick="chooseAnswer('${choice}')">${choice}</button>`).join("");
+      $("choiceArea").innerHTML = choices.map((choice, index) =>
+        `<button class="choice-btn" type="button" data-choice="${choice}" onclick="chooseAnswer('${choice}')"><span class="choice-label">${labels[index]}</span><span>${choice}</span></button>`
+      ).join("");
     }
 
     function chooseAnswer(choice) {
       if (state.answered) return;
-      $("answerInput").value = choice;
-      checkAnswer();
-    }
-
-    function checkAnswer() {
-      if (!state.current || state.answered) return;
-      const value = $("answerInput").value.trim();
-      if (!value) {
-        $("result").style.color = "var(--bad)";
-        $("result").textContent = "請先輸入或選擇答案。";
-        return;
-      }
-
+      state.selected = choice;
       state.answered = true;
-      if (value === state.current.answer) {
+      const isCorrect = choice === state.current.answer;
+      if (isCorrect) {
         state.score += 10;
         state.correct += 1;
         $("result").style.color = "var(--good)";
         $("result").textContent = `答對了！完整成語：${state.current.full}`;
       } else {
+        state.wrongList.push({ ...state.current, selected: choice });
         $("result").style.color = "var(--bad)";
-        $("result").textContent = `答錯了，正確答案是「${state.current.answer}」。完整成語：${state.current.full}`;
+        $("result").textContent = `答錯了，你選「${choice}」，正確答案是「${state.current.answer}」。`;
       }
       $("meaning").textContent = `解釋：${state.current.meaning}`;
+      markChoices();
       updateStats();
+    }
+
+    function markChoices() {
+      document.querySelectorAll(".choice-btn").forEach(btn => {
+        const choice = btn.dataset.choice;
+        btn.disabled = true;
+        if (choice === state.current.answer) btn.classList.add("choice-correct");
+        if (choice === state.selected && choice !== state.current.answer) btn.classList.add("choice-wrong");
+      });
     }
 
     function showHint() {
@@ -424,11 +301,46 @@
       $("hintBox").textContent = `提示：${state.current.hint}`;
     }
 
+    function finishGame() {
+      const best = Math.max(Number(localStorage.getItem("idiomBestScoreV22") || 0), state.score);
+      localStorage.setItem("idiomBestScoreV22", String(best));
+      $("question").textContent = "完成！";
+      $("choiceArea").innerHTML = "";
+      $("result").style.color = "var(--good)";
+      $("result").textContent = `本輪結束：總分 ${state.score}，答對 ${state.correct} / ${state.order.length} 題。`;
+      $("hintBox").textContent = "按「重新開始」可以再玩一輪。";
+      $("meaning").textContent = "";
+      renderReview();
+      updateStats();
+    }
+
+    function renderReview() {
+      if (state.wrongList.length === 0) {
+        $("reviewCard").style.display = "block";
+        $("reviewList").innerHTML = '<div class="review-item">太棒了，本輪沒有錯題！</div>';
+        return;
+      }
+      $("reviewCard").style.display = "block";
+      $("reviewList").innerHTML = state.wrongList.map(item => `
+        <div class="review-item">
+          <strong>${item.blank}</strong><br>
+          你選：${item.selected}　正解：${item.answer}<br>
+          完整成語：${item.full}<br>
+          解釋：${item.meaning}
+        </div>
+      `).join("");
+    }
+
     function updateStats() {
-      $("progress").textContent = `${Math.min(state.index, state.order.length)} / ${state.order.length}`;
+      const total = state.order.length;
+      const answeredCount = Math.max(0, Math.min(state.index - (state.answered ? 0 : 1), total));
+      const accuracy = answeredCount ? Math.round((state.correct / answeredCount) * 100) : 0;
+      $("progress").textContent = `${Math.min(state.index, total)} / ${total}`;
       $("score").textContent = state.score;
       $("correctCount").textContent = state.correct;
-      $("poolCount").textContent = state.pool.length;
+      $("accuracy").textContent = `${accuracy}%`;
+      $("bestScore").textContent = localStorage.getItem("idiomBestScoreV22") || "0";
+      $("progressBar").style.width = total ? `${Math.round((Math.min(state.index, total) / total) * 100)}%` : "0%";
     }
 
     function applyTheme() {
@@ -445,15 +357,13 @@
       applyTheme();
     }
 
-    $("checkBtn").addEventListener("click", checkAnswer);
     $("hintBtn").addEventListener("click", showHint);
     $("nextBtn").addEventListener("click", () => nextQuestion(false));
     $("restartBtn").addEventListener("click", buildPool);
     $("levelSelect").addEventListener("change", buildPool);
     $("categorySelect").addEventListener("change", buildPool);
-    $("modeSelect").addEventListener("change", renderMode);
+    $("limitSelect").addEventListener("change", buildPool);
     $("themeSelect").addEventListener("change", applyTheme);
-    $("answerInput").addEventListener("keydown", (e) => { if (e.key === "Enter") checkAnswer(); });
 
     fillFilters();
     loadTheme();
