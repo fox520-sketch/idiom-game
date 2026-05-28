@@ -1,34 +1,49 @@
 # 成語填空小遊戲
 
-這是一個可以直接上傳到 GitHub Pages 的單機版成語填空網頁遊戲。
+這是一個可直接部署到 GitHub Pages 的成語填空網頁遊戲。
 
 ## 功能
 
-- 成語填空題
-- 可輸入答案，也可點選選項
-- 計分功能
+- 成語填空
+- 輸入答案模式
+- 四選一模式
+- 難度篩選
+- 分類篩選
+- 隨機出題
+- 不重複出題
 - 提示功能
-- 成語解釋
+- 答案解釋
+- 分數統計
+- 自然模式、深色模式、黑白模式
 - 手機版適配
-- 自然模式、深色模式、黑白電子紙模式
-- 上方連結回狐狸之家
 
-## 上傳 GitHub Pages 方法
+## 檔案說明
 
-1. 建立新的 GitHub repository，例如 `idiom-game`
-2. 上傳本專案所有檔案
-3. 到 `Settings` → `Pages`
-4. Source 選擇 `Deploy from a branch`
-5. Branch 選擇 `main`，資料夾選擇 `/root`
-6. 儲存後等待部署完成
+```text
+index.html   主程式與畫面
+idioms.js    題庫資料
+README.md    說明文件
+.gitignore   Git 忽略設定
+```
 
-完成後網址通常會是：
+## 如何增加題目
+
+打開 `idioms.js`，依照下面格式新增：
+
+```javascript
+{ full: "畫蛇添足", blank: "畫＿添足", answer: "蛇", hint: "一種爬行動物", meaning: "比喻多此一舉，反而壞事。", level: "簡單", category: "動物成語" }
+```
+
+## GitHub Pages
+
+Repository 建議名稱：
+
+```text
+idiom-game
+```
+
+部署後網址通常會是：
 
 ```text
 https://fox520-sketch.github.io/idiom-game/
 ```
-
-## 檔案說明
-
-- `index.html`：主程式，包含 HTML、CSS、JavaScript
-- `README.md`：說明文件
