@@ -75,7 +75,7 @@
     .tag-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
     .tag { border: 1px solid var(--border); background: var(--soft); border-radius: 999px; padding: 6px 12px; color: var(--muted); font-weight: 900; }
     .question { font-size: clamp(44px, 10vw, 82px); font-weight: 950; letter-spacing: .1em; margin: 18px 0; }
-    .choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; max-width: 650px; margin: 18px auto; }
+    .choices { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; max-width: 760px; margin: 18px auto; }
     button {
       border: none; border-radius: 16px; background: var(--primary); color: white;
       padding: 12px 16px; font-size: 17px; font-weight: 950; cursor: pointer;
@@ -116,9 +116,12 @@
       .menu-grid { grid-template-columns: 1fr; }
       .record-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .card-toolbar { grid-template-columns: 1fr; }
-      .choices { grid-template-columns: 1fr; }
+      .choices { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       main { margin-top: 14px; }
-      .choice-btn { min-height: 64px; }
+      .choice-btn { min-height: 64px; font-size: 24px; }
+    }
+    @media (max-width: 390px) {
+      .choices { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -132,7 +135,7 @@
     <section id="homeScreen" class="screen active">
       <div class="card hero">
         <h2>v2.8 題庫與注音擴充版</h2>
-        <p>固定四選一作答。「開始遊戲」答完後可看解釋再按下一題；「快速遊戲」可先選難度、分類、題數、倒數時間與顯示風格，選擇答案後會自動進入下一題。</p>
+        <p>固定八選一作答。「開始遊戲」答完後可看解釋再按下一題；「快速遊戲」可先選難度、分類、題數、倒數時間與顯示風格，選擇答案後會自動進入下一題。</p>
         <div class="menu-grid">
           <button class="menu-btn" onclick="goSetup()">開始遊戲</button>
           <button class="menu-btn" onclick="startQuickGame()">快速遊戲</button>
@@ -182,7 +185,7 @@
         </div>
       </div>
       <div class="actions">
-        <button id="setupStartBtn" onclick="startGame(setupMode)">開始四選一挑戰</button>
+        <button id="setupStartBtn" onclick="startGame(setupMode)">開始八選一挑戰</button>
         <button class="secondary" onclick="showHome()">回首頁</button>
       </div>
     </section>
@@ -205,7 +208,7 @@
         <div class="tag-row">
           <span class="tag" id="levelTag">難度</span>
           <span class="tag" id="categoryTag">分類</span>
-          <span class="tag">四選一</span>
+          <span class="tag">八選一</span>
         </div>
         <div class="question" id="questionText">＿</div>
         <div class="zhuyin" id="zhuyinText"></div>
@@ -255,7 +258,7 @@
     <section id="cardsScreen" class="screen">
       <div class="card">
         <h2>成語學習卡</h2>
-        <p class="meaning">先看完整成語、注音、意思與例句，再進入四選一挑戰。</p>
+        <p class="meaning">先看完整成語、注音、意思與例句，再進入八選一挑戰。</p>
         <div class="card-toolbar">
           <div>
             <label for="cardLevelSelect">難度</label>
@@ -282,13 +285,13 @@
       </div>
     </section>
 
-    <div class="version">版本：v2.8｜題庫與注音擴充版｜補齊題庫注音｜新增題庫｜快速遊戲可設定｜固定四選一｜學習紀錄｜錯題本｜學習卡｜分享成績｜適合 GitHub Pages</div>
+    <div class="version">版本：v2.9｜八選一答案版｜答案選項增加為 8 個｜題庫注音擴充｜快速遊戲可設定｜固定八選一｜學習紀錄｜錯題本｜學習卡｜分享成績｜適合 GitHub Pages</div>
   </main>
 
   <script>
     const STORAGE_WRONG = 'idiomGameWrongBookV24';
     const STORAGE_RECORDS = 'idiomGameRecordsV24';
-    const labels = ['A', 'B', 'C', 'D'];
+    const labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
     let pool = [];
     let currentIndex = 0;
     let score = 0;
@@ -324,7 +327,7 @@
     function showHome() { setScreen('homeScreen'); updateWrongCount(); }
     function goSetup() {
       setupMode = 'normal';
-      $('setupStartBtn').textContent = '開始四選一挑戰';
+      $('setupStartBtn').textContent = '開始八選一挑戰';
       setScreen('setupScreen');
     }
     function startQuickGame() {
@@ -367,15 +370,16 @@
 
     function renderChoices(q) {
       const answers = [...new Set(safeIdioms().map(item => item.answer).filter(a => a && a !== q.answer))];
-      const choices = shuffle([q.answer, ...shuffle(answers).slice(0, 3)]);
-      $('choicesBox').innerHTML = choices.map((choice, i) => `<button class="choice-btn" onclick="chooseAnswer('${escapeJs(choice)}', this)"><span class="choice-label">${labels[i]}</span><span>${choice}</span></button>`).join('');
+      const choices = shuffle([q.answer, ...shuffle(answers).slice(0, 7)]);
+      $('choicesBox').innerHTML = choices.map((choice, i) => `<button class="choice-btn" data-choice="${escapeHtml(choice)}" onclick="chooseAnswer('${escapeJs(choice)}', this)"><span class="choice-label">${labels[i]}</span><span>${choice}</span></button>`).join('');
     }
     function escapeJs(text) { return String(text).replace(/\\/g, '\\\\').replace(/'/g, "\'"); }
+    function escapeHtml(text) { return String(text).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
 
     function chooseAnswer(choice, btn) {
       if (answered) return; stopTimer(); answered = true;
       const isCorrect = choice === current.answer;
-      document.querySelectorAll('.choice-btn').forEach(b => { b.disabled = true; if (b.textContent.includes(current.answer)) b.classList.add('choice-correct'); });
+      document.querySelectorAll('.choice-btn').forEach(b => { b.disabled = true; if (b.dataset.choice === current.answer) b.classList.add('choice-correct'); });
       if (isCorrect) {
         const timeBonus = timeLimit ? Math.max(0, timeLeft) : 0; score += 10 + timeBonus; correctCount += 1; streak += 1; maxStreakThisRound = Math.max(maxStreakThisRound, streak); if (streak >= 3) score += 5;
         if (currentMode === 'wrong') markWrongPracticeCorrect(current);
@@ -401,7 +405,7 @@
     function nextQuestion() {
       if (!answered && current) {
         stopTimer(); answered = true; streak = 0; addWrong(current); addWrongThisRound(current); updateRecords(false);
-        document.querySelectorAll('.choice-btn').forEach(b => { b.disabled = true; if (b.textContent.includes(current.answer)) b.classList.add('choice-correct'); });
+        document.querySelectorAll('.choice-btn').forEach(b => { b.disabled = true; if (b.dataset.choice === current.answer) b.classList.add('choice-correct'); });
         $('resultText').style.color = 'var(--bad)'; $('resultText').textContent = `已跳過，正確答案是「${current.answer}」`; showExplanation(); updateStats(); return;
       }
       currentIndex += 1; showQuestion();
@@ -423,7 +427,7 @@
     function startTimer() { timeLeft = timeLimit; $('timerBar').classList.remove('danger'); if (!timeLimit) { $('timerText').textContent = '不限時間'; $('timerBar').style.width = '100%'; return; } updateTimerUi(); timer = setInterval(() => { timeLeft -= 1; updateTimerUi(); if (timeLeft <= 0) timeUp(); }, 1000); }
     function stopTimer() { if (timer) clearInterval(timer); timer = null; }
     function updateTimerUi() { $('timerText').textContent = `${timeLeft} 秒`; const pct = Math.max(0, Math.min(100, (timeLeft / timeLimit) * 100)); $('timerBar').style.width = `${pct}%`; $('timerBar').classList.toggle('danger', timeLeft <= 5 && timeLimit > 0); }
-    function timeUp() { if (answered) return; stopTimer(); answered = true; streak = 0; addWrong(current); addWrongThisRound(current); updateRecords(false); document.querySelectorAll('.choice-btn').forEach(b => { b.disabled = true; if (b.textContent.includes(current.answer)) b.classList.add('choice-correct'); }); $('resultText').style.color = 'var(--bad)'; $('resultText').textContent = `時間到！正確答案是「${current.answer}」`; showExplanation(); updateStats(); if (currentMode === 'quick') { setTimeout(() => { currentIndex += 1; showQuestion(); }, 650); } }
+    function timeUp() { if (answered) return; stopTimer(); answered = true; streak = 0; addWrong(current); addWrongThisRound(current); updateRecords(false); document.querySelectorAll('.choice-btn').forEach(b => { b.disabled = true; if (b.dataset.choice === current.answer) b.classList.add('choice-correct'); }); $('resultText').style.color = 'var(--bad)'; $('resultText').textContent = `時間到！正確答案是「${current.answer}」`; showExplanation(); updateStats(); if (currentMode === 'quick') { setTimeout(() => { currentIndex += 1; showQuestion(); }, 650); } }
 
     function updateStats(done = false) { const total = pool.length || 0; const shownIndex = done ? total : Math.min(currentIndex + 1, total); const attempted = done ? total : currentIndex + (answered ? 1 : 0); const accuracy = attempted ? Math.round((correctCount / attempted) * 100) : 0; $('progressText').textContent = `${shownIndex} / ${total}`; $('scoreText').textContent = score; $('correctText').textContent = correctCount; $('accuracyText').textContent = `${accuracy}%`; $('streakText').textContent = streak; $('wrongCountText').textContent = Object.keys(loadWrongBook()).length; $('progressBar').style.width = total ? `${(shownIndex / total) * 100}%` : '0%'; }
 
