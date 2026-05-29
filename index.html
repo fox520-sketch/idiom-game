@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>成語填空小遊戲 v2.5</title>
+  <title>成語填空小遊戲 v2.6</title>
   <script src="idioms.js"></script>
   <style>
     :root {
@@ -131,10 +131,11 @@
   <main>
     <section id="homeScreen" class="screen active">
       <div class="card hero">
-        <h2>v2.5 題庫擴充與學習紀錄強化版</h2>
-        <p>固定四選一作答，加入學習紀錄、加強版錯題本、成語學習卡、注音欄位與分享成績。</p>
+        <h2>v2.6 快速遊戲強化版</h2>
+        <p>固定四選一作答，新增「快速遊戲」：選擇答案後會自動進入下一題，也保留一般開始遊戲、錯題本、學習紀錄與成語學習卡。</p>
         <div class="menu-grid">
           <button class="menu-btn" onclick="goSetup()">開始遊戲</button>
+          <button class="menu-btn" onclick="startQuickGame()">快速遊戲</button>
           <button class="menu-btn secondary" onclick="startWrongBookPractice()">錯題複習</button>
           <button class="menu-btn secondary" onclick="showWrongBook()">查看錯題本</button>
           <button class="menu-btn secondary" onclick="showRecords()">學習紀錄</button>
@@ -281,7 +282,7 @@
       </div>
     </section>
 
-    <div class="version">版本：v2.5｜題庫擴充與學習紀錄強化版｜固定四選一｜題庫擴充｜學習紀錄｜錯題本｜學習卡｜注音｜分享成績｜適合 GitHub Pages</div>
+    <div class="version">版本：v2.6｜快速遊戲強化版｜快速遊戲｜固定四選一｜題庫擴充｜學習紀錄｜錯題本｜學習卡｜注音｜分享成績｜適合 GitHub Pages</div>
   </main>
 
   <script>
@@ -321,6 +322,13 @@
     function setScreen(id) { stopTimer(); document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); $(id).classList.add('active'); }
     function showHome() { setScreen('homeScreen'); updateWrongCount(); }
     function goSetup() { setScreen('setupScreen'); }
+    function startQuickGame() {
+      $('levelSelect').value = '全部';
+      $('categorySelect').value = '全部';
+      $('roundSelect').value = '10';
+      $('timeSelect').value = '15';
+      startGame('quick');
+    }
     function applyTheme() { const theme = $('themeSelect').value; document.body.classList.remove('dark', 'ink'); if (theme === 'dark') document.body.classList.add('dark'); if (theme === 'ink') document.body.classList.add('ink'); }
 
     function startGame(mode) {
@@ -373,6 +381,12 @@
         $('resultText').style.color = 'var(--bad)'; $('resultText').textContent = `答錯了，正確答案是「${current.answer}」`;
       }
       showExplanation(); updateStats();
+      if (currentMode === 'quick') {
+        setTimeout(() => {
+          currentIndex += 1;
+          showQuestion();
+        }, 650);
+      }
     }
 
     function showHint() { if (!current) return; $('hintBox').textContent = `提示：${current.hint || '請從完整成語的意思判斷缺字。'}`; }
@@ -404,7 +418,7 @@
     function startTimer() { timeLeft = timeLimit; $('timerBar').classList.remove('danger'); if (!timeLimit) { $('timerText').textContent = '不限時間'; $('timerBar').style.width = '100%'; return; } updateTimerUi(); timer = setInterval(() => { timeLeft -= 1; updateTimerUi(); if (timeLeft <= 0) timeUp(); }, 1000); }
     function stopTimer() { if (timer) clearInterval(timer); timer = null; }
     function updateTimerUi() { $('timerText').textContent = `${timeLeft} 秒`; const pct = Math.max(0, Math.min(100, (timeLeft / timeLimit) * 100)); $('timerBar').style.width = `${pct}%`; $('timerBar').classList.toggle('danger', timeLeft <= 5 && timeLimit > 0); }
-    function timeUp() { if (answered) return; stopTimer(); answered = true; streak = 0; addWrong(current); addWrongThisRound(current); updateRecords(false); document.querySelectorAll('.choice-btn').forEach(b => { b.disabled = true; if (b.textContent.includes(current.answer)) b.classList.add('choice-correct'); }); $('resultText').style.color = 'var(--bad)'; $('resultText').textContent = `時間到！正確答案是「${current.answer}」`; showExplanation(); updateStats(); }
+    function timeUp() { if (answered) return; stopTimer(); answered = true; streak = 0; addWrong(current); addWrongThisRound(current); updateRecords(false); document.querySelectorAll('.choice-btn').forEach(b => { b.disabled = true; if (b.textContent.includes(current.answer)) b.classList.add('choice-correct'); }); $('resultText').style.color = 'var(--bad)'; $('resultText').textContent = `時間到！正確答案是「${current.answer}」`; showExplanation(); updateStats(); if (currentMode === 'quick') { setTimeout(() => { currentIndex += 1; showQuestion(); }, 650); } }
 
     function updateStats(done = false) { const total = pool.length || 0; const shownIndex = done ? total : Math.min(currentIndex + 1, total); const attempted = done ? total : currentIndex + (answered ? 1 : 0); const accuracy = attempted ? Math.round((correctCount / attempted) * 100) : 0; $('progressText').textContent = `${shownIndex} / ${total}`; $('scoreText').textContent = score; $('correctText').textContent = correctCount; $('accuracyText').textContent = `${accuracy}%`; $('streakText').textContent = streak; $('wrongCountText').textContent = Object.keys(loadWrongBook()).length; $('progressBar').style.width = total ? `${(shownIndex / total) * 100}%` : '0%'; }
 
