@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>成語大挑戰正式版 v3.0</title>
+  <title>成語大挑戰進階版 v3.1</title>
   <script src="idioms.js"></script>
   <style>
     :root {
@@ -57,7 +57,7 @@
     .hero p { color: var(--muted); font-size: 18px; line-height: 1.8; margin: 0 auto 16px; max-width: 760px; }
     .menu-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
     .menu-btn { min-height: 84px; font-size: 22px; }
-    .panel { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .panel { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
     label { display: block; font-size: 14px; color: var(--muted); margin-bottom: 6px; font-weight: 900; }
     select {
       width: 100%; border: 2px solid var(--border); border-radius: 14px;
@@ -89,8 +89,14 @@
     button.danger { background: var(--bad); }
     .choice-btn { min-height: 72px; font-size: 28px; display: flex; align-items: center; justify-content: center; gap: 12px; }
     .choice-label { display: inline-flex; width: 34px; height: 34px; border-radius: 50%; align-items: center; justify-content: center; background: rgba(255,255,255,.22); font-size: 18px; }
-    .choice-correct { outline: 4px solid var(--good); }
-    .choice-wrong { outline: 4px solid var(--bad); }
+    .choice-correct { outline: 4px solid var(--good); animation: popCorrect .35s ease; }
+    .choice-wrong { outline: 4px solid var(--bad); animation: shakeWrong .28s ease; }
+    .flash-good { animation: flashGood .45s ease; }
+    .flash-bad { animation: flashBad .45s ease; }
+    @keyframes popCorrect { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
+    @keyframes shakeWrong { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+    @keyframes flashGood { 0% { box-shadow: 0 0 0 rgba(35,122,53,0); } 50% { box-shadow: 0 0 0 8px rgba(35,122,53,.22); } 100% { box-shadow: 0 0 0 rgba(35,122,53,0); } }
+    @keyframes flashBad { 0% { box-shadow: 0 0 0 rgba(179,38,30,0); } 50% { box-shadow: 0 0 0 8px rgba(179,38,30,.22); } 100% { box-shadow: 0 0 0 rgba(179,38,30,0); } }
     .actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
     .result { min-height: 34px; font-size: 23px; font-weight: 950; margin-top: 16px; }
     .meaning, .example, .hint-box { color: var(--muted); font-size: 18px; line-height: 1.75; max-width: 760px; margin: 8px auto 0; }
@@ -115,6 +121,12 @@
     .badge { border:1px solid var(--border); border-radius:18px; padding:16px; background:var(--soft); line-height:1.65; }
     .badge.locked { opacity:.48; filter: grayscale(1); }
     .badge strong { font-size:20px; }
+    .table-wrap { overflow:auto; margin-top:14px; }
+    table { width:100%; border-collapse: collapse; background: var(--card); }
+    th, td { border:1px solid var(--border); padding:10px; text-align:left; vertical-align:top; }
+    th { background: var(--soft); }
+    .issue-ok { color: var(--good); font-weight:950; }
+    .issue-bad { color: var(--bad); font-weight:950; }
     @media (max-width: 860px) {
       .panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -140,8 +152,8 @@
   <main>
     <section id="homeScreen" class="screen active">
       <div class="card hero">
-        <h2>v3.0 成語大挑戰正式版</h2>
-        <p>固定八選一作答，新增每日挑戰、考試模式、成就徽章、題庫搜尋與題目回報。</p>
+        <h2>v3.1 成語大挑戰進階版</h2>
+        <p>新增答題動畫、音效與靜音、連續答對加分、注音開關、題庫分類統計與題庫品質檢查。</p>
         <div class="menu-grid">
           <button class="menu-btn" onclick="goSetup()">開始遊戲</button>
           <button class="menu-btn" onclick="startQuickGame()">快速遊戲</button>
@@ -153,7 +165,10 @@
           <button class="menu-btn secondary" onclick="goExamSetup()">考試模式</button>
           <button class="menu-btn secondary" onclick="showAchievements()">成就徽章</button>
           <button class="menu-btn secondary" onclick="showReports()">題目回報</button>
+          <button class="menu-btn secondary" onclick="showCategoryStats()">題庫分類統計</button>
+          <button class="menu-btn secondary" onclick="showQualityCheck()">題庫品質檢查</button>
         </div>
+        <div class="actions"><button class="secondary" id="muteHomeBtn" onclick="toggleMute()">音效：開</button></div>
       </div>
     </section>
 
@@ -193,9 +208,17 @@
             <option value="ink">黑白模式</option>
           </select>
         </div>
+        <div>
+          <label for="zhuyinSelect">顯示注音</label>
+          <select id="zhuyinSelect">
+            <option value="on" selected>開</option>
+            <option value="off">關</option>
+          </select>
+        </div>
       </div>
       <div class="actions">
         <button id="setupStartBtn" onclick="startGame(setupMode)">開始八選一挑戰</button>
+        <button class="secondary" onclick="toggleMute()" id="muteSetupBtn">音效：開</button>
         <button class="secondary" onclick="showHome()">回首頁</button>
       </div>
     </section>
@@ -227,6 +250,7 @@
           <button class="secondary" id="hintBtn" onclick="showHint()">提示</button>
           <button class="secondary" onclick="nextQuestion()">下一題</button>
           <button class="secondary" onclick="makeReportText(current)">回報此題</button>
+          <button class="secondary" onclick="toggleMute()" id="muteGameBtn">音效：開</button>
           <button class="secondary" onclick="showHome()">回首頁</button>
         </div>
         <div class="hint-box" id="hintBox"></div>
@@ -311,6 +335,24 @@
       </div>
     </section>
 
+    <section id="categoryStatsScreen" class="screen">
+      <div class="card">
+        <h2>題庫分類統計</h2>
+        <p class="meaning">這裡會統計目前題庫的總題數、難度與分類分布，方便你之後補強題庫。</p>
+        <div id="categoryStatsBox"></div>
+        <div class="actions"><button class="secondary" onclick="showHome()">回首頁</button></div>
+      </div>
+    </section>
+
+    <section id="qualityScreen" class="screen">
+      <div class="card">
+        <h2>題庫品質檢查</h2>
+        <p class="meaning">自動檢查缺少注音、例句、解釋、提示、重複成語、答案不在完整成語內、題目沒有空格等問題。</p>
+        <div id="qualityBox"></div>
+        <div class="actions"><button onclick="copyQualityReport()">複製檢查報告</button><button class="secondary" onclick="showHome()">回首頁</button></div>
+      </div>
+    </section>
+
     <section id="reportsScreen" class="screen">
       <div class="card">
         <h2>題目回報</h2>
@@ -323,7 +365,7 @@
       </div>
     </section>
 
-    <div class="version">版本：v3.0｜成語大挑戰正式版｜每日挑戰｜考試模式｜成就徽章｜題庫搜尋｜題目回報｜八選一｜適合 GitHub Pages</div>
+    <div class="version">版本：v3.1｜成語大挑戰進階版｜答題動畫｜音效靜音｜連續答對加分｜注音開關｜分類統計｜題庫品質檢查｜八選一｜適合 GitHub Pages</div>
   </main>
 
   <script>
@@ -331,6 +373,8 @@
     const STORAGE_RECORDS = 'idiomGameRecordsV24';
     const STORAGE_DAILY = 'idiomGameDailyV30';
     const STORAGE_REPORT = 'idiomGameReportV30';
+    const STORAGE_MUTE = 'idiomGameMutedV31';
+    const STORAGE_ZHUYIN = 'idiomGameZhuyinV31';
     const labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
     let pool = [];
     let currentIndex = 0;
@@ -346,6 +390,11 @@
     let timeLeft = 20;
     let currentMode = 'normal';
     let setupMode = 'normal';
+    let streakBonusTotal = 0;
+    let isMuted = localStorage.getItem(STORAGE_MUTE) === '1';
+    let showZhuyinSetting = localStorage.getItem(STORAGE_ZHUYIN) || 'on';
+    let audioCtx = null;
+    let lastQualityReport = '';
 
     function $(id) { return document.getElementById(id); }
     function safeIdioms() { return Array.isArray(window.IDIOMS || IDIOMS) ? (window.IDIOMS || IDIOMS) : []; }
@@ -363,6 +412,8 @@
       $('categorySelect').innerHTML = categories.map(v => `<option value="${v}">${v}</option>`).join('');
       $('cardLevelSelect').innerHTML = levels.map(v => `<option value="${v}">${v}</option>`).join('');
       $('cardCategorySelect').innerHTML = categories.map(v => `<option value="${v}">${v}</option>`).join('');
+      if ($('zhuyinSelect')) $('zhuyinSelect').value = showZhuyinSetting;
+      updateMuteButtons();
       updateWrongCount();
     }
 
@@ -386,9 +437,16 @@
       setScreen('setupScreen');
     }
     function applyTheme() { const theme = $('themeSelect').value; document.body.classList.remove('dark', 'ink'); if (theme === 'dark') document.body.classList.add('dark'); if (theme === 'ink') document.body.classList.add('ink'); }
+    function updateZhuyinSetting() { showZhuyinSetting = $('zhuyinSelect') ? $('zhuyinSelect').value : 'on'; localStorage.setItem(STORAGE_ZHUYIN, showZhuyinSetting); }
+    function shouldShowZhuyin() { return showZhuyinSetting !== 'off' && currentMode !== 'exam'; }
+    function updateMuteButtons() { ['muteHomeBtn','muteSetupBtn','muteGameBtn'].forEach(id => { const el=$(id); if (el) el.textContent = `音效：${isMuted ? '關' : '開'}`; }); }
+    function toggleMute() { isMuted = !isMuted; localStorage.setItem(STORAGE_MUTE, isMuted ? '1' : '0'); updateMuteButtons(); if (!isMuted) playTone('click'); }
+    function playTone(type) { if (isMuted) return; try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); const now = audioCtx.currentTime; const freq = type === 'correct' ? 660 : type === 'wrong' ? 180 : type === 'finish' ? 880 : type === 'tick' ? 420 : 520; o.frequency.setValueAtTime(freq, now); o.type = 'sine'; g.gain.setValueAtTime(0.0001, now); g.gain.exponentialRampToValueAtTime(0.16, now + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, now + (type === 'finish' ? 0.32 : 0.16)); o.connect(g); g.connect(audioCtx.destination); o.start(now); o.stop(now + (type === 'finish' ? 0.34 : 0.18)); } catch(e) {} }
+    function flashGame(ok) { const card = document.querySelector('.game-card'); if (!card) return; card.classList.remove('flash-good','flash-bad'); void card.offsetWidth; card.classList.add(ok ? 'flash-good' : 'flash-bad'); }
+    function streakBonusValue(nextStreak) { if (nextStreak === 3) return 5; if (nextStreak === 5) return 10; if (nextStreak === 10) return 20; if (nextStreak > 10 && nextStreak % 5 === 0) return 10; return 0; }
 
     function startGame(mode) {
-      applyTheme(); currentMode = mode || 'normal'; wrongThisRound = [];
+      applyTheme(); updateZhuyinSetting(); currentMode = mode || 'normal'; wrongThisRound = [];
       const all = safeIdioms(); let selected = [];
       if (currentMode === 'wrong') {
         selected = getWrongItems();
@@ -405,7 +463,7 @@
       timeLimit = Number($('timeSelect').value || 0);
       if (currentMode === 'daily') timeLimit = 15;
       if ($('hintBtn')) $('hintBtn').style.display = currentMode === 'exam' ? 'none' : '';
-      currentIndex = 0; score = 0; correctCount = 0; streak = 0; maxStreakThisRound = 0; answered = false;
+      currentIndex = 0; score = 0; correctCount = 0; streak = 0; maxStreakThisRound = 0; streakBonusTotal = 0; answered = false;
       $('reviewCard').style.display = 'none'; setScreen('gameScreen'); showQuestion();
     }
 
@@ -423,7 +481,7 @@
       stopTimer(); if (currentIndex >= pool.length) return endGame();
       current = pool[currentIndex]; answered = false;
       $('questionText').textContent = current.blank;
-      $('zhuyinText').textContent = current.zhuyin ? `注音：${current.zhuyin}` : '注音：尚未提供';
+      $('zhuyinText').textContent = shouldShowZhuyin() ? (current.zhuyin ? `注音：${current.zhuyin}` : '注音：尚未提供') : '注音：已隱藏';
       $('levelTag').textContent = current.level || '未分類難度'; $('categoryTag').textContent = current.category || '未分類';
       if (currentMode === 'exam') $('categoryTag').textContent = '考試模式';
       if (currentMode === 'daily') $('categoryTag').textContent = '每日挑戰';
@@ -451,15 +509,20 @@
       });
       if (isCorrect) {
         const timeBonus = timeLimit ? Math.max(0, timeLeft) : 0;
-        score += 10 + timeBonus;
+        const nextStreak = streak + 1;
+        const streakBonus = streakBonusValue(nextStreak);
+        score += 10 + timeBonus + streakBonus;
+        streakBonusTotal += streakBonus;
         correctCount += 1;
-        streak += 1;
+        streak = nextStreak;
         maxStreakThisRound = Math.max(maxStreakThisRound, streak);
-        if (streak >= 3) score += 5;
+        
         updateRecords(true);
         if (currentMode === 'wrong') markWrongPracticeCorrect(current);
         $('resultText').style.color = 'var(--good)';
-        $('resultText').textContent = currentMode === 'exam' ? '已作答' : `答對了！${timeBonus ? `時間加分 +${timeBonus}` : ''}`;
+        $('resultText').textContent = currentMode === 'exam' ? '已作答' : `答對了！${timeBonus ? `時間加分 +${timeBonus}` : ''}${streakBonus ? `｜連續答對加分 +${streakBonus}` : ''}`;
+        playTone('correct');
+        flashGame(true);
       } else {
         if (currentMode !== 'exam') btn.classList.add('choice-wrong');
         streak = 0;
@@ -468,6 +531,8 @@
         updateRecords(false);
         $('resultText').style.color = currentMode === 'exam' ? 'var(--text)' : 'var(--bad)';
         $('resultText').textContent = currentMode === 'exam' ? '已作答' : `答錯了，正確答案是「${current.answer}」`;
+        playTone('wrong');
+        flashGame(false);
       }
       if (currentMode !== 'exam') showExplanation();
       updateStats();
@@ -484,13 +549,13 @@
       if (!answered && current) {
         stopTimer(); answered = true; streak = 0; addWrong(current); addWrongThisRound(current); updateRecords(false);
         document.querySelectorAll('.choice-btn').forEach(b => { b.disabled = true; if (b.dataset.choice === current.answer) b.classList.add('choice-correct'); });
-        $('resultText').style.color = currentMode === 'exam' ? 'var(--text)' : 'var(--bad)'; $('resultText').textContent = currentMode === 'exam' ? '已跳過' : `已跳過，正確答案是「${current.answer}」`; if (currentMode !== 'exam') showExplanation(); updateStats(); if (currentMode === 'exam') { currentIndex += 1; showQuestion(); } return;
+        $('resultText').style.color = currentMode === 'exam' ? 'var(--text)' : 'var(--bad)'; $('resultText').textContent = currentMode === 'exam' ? '已跳過' : `已跳過，正確答案是「${current.answer}」`; playTone('wrong'); flashGame(false); if (currentMode !== 'exam') showExplanation(); updateStats(); if (currentMode === 'exam') { currentIndex += 1; showQuestion(); } return;
       }
       currentIndex += 1; showQuestion();
     }
 
     function endGame() {
-      stopTimer(); saveBestScore(); if (currentMode === 'daily') saveDailyResult(); unlockAchievements();
+      stopTimer(); saveBestScore(); if (currentMode === 'daily') saveDailyResult(); unlockAchievements(); playTone('finish');
       $('questionText').textContent = '遊戲結束'; $('zhuyinText').textContent = ''; $('choicesBox').innerHTML = ''; $('hintBox').textContent = '';
       const accuracy = pool.length ? Math.round((correctCount / pool.length) * 100) : 0;
       $('resultText').style.color = 'var(--text)'; $('resultText').textContent = `總分：${score}，答對 ${correctCount} / ${pool.length} 題，正確率 ${accuracy}%`;
@@ -499,7 +564,7 @@
       answered = true; updateStats(true); renderRoundReview();
     }
 
-    function makeShareText() { const accuracy = pool.length ? Math.round((correctCount / pool.length) * 100) : 0; return `我在成語填空小遊戲拿到 ${score} 分！\n答對 ${correctCount} / ${pool.length} 題，正確率 ${accuracy}%\n最高連續答對 ${maxStreakThisRound} 題\n快來挑戰：https://fox520-sketch.github.io/idiom-game/`; }
+    function makeShareText() { const accuracy = pool.length ? Math.round((correctCount / pool.length) * 100) : 0; return `我在成語填空小遊戲拿到 ${score} 分！\n答對 ${correctCount} / ${pool.length} 題，正確率 ${accuracy}%\n最高連續答對 ${maxStreakThisRound} 題\n連續答對加分 ${streakBonusTotal} 分\n快來挑戰：https://fox520-sketch.github.io/idiom-game/`; }
     async function copyShareText() { const text = makeShareText(); try { await navigator.clipboard.writeText(text); alert('已複製成績！'); } catch(e) { alert('無法自動複製，請手動選取分享文字。'); } }
 
     function saveDailyResult() {
@@ -532,8 +597,8 @@
 
     function startTimer() { timeLeft = timeLimit; $('timerBar').classList.remove('danger'); if (!timeLimit) { $('timerText').textContent = '不限時間'; $('timerBar').style.width = '100%'; return; } updateTimerUi(); timer = setInterval(() => { timeLeft -= 1; updateTimerUi(); if (timeLeft <= 0) timeUp(); }, 1000); }
     function stopTimer() { if (timer) clearInterval(timer); timer = null; }
-    function updateTimerUi() { $('timerText').textContent = `${timeLeft} 秒`; const pct = Math.max(0, Math.min(100, (timeLeft / timeLimit) * 100)); $('timerBar').style.width = `${pct}%`; $('timerBar').classList.toggle('danger', timeLeft <= 5 && timeLimit > 0); }
-    function timeUp() { if (answered) return; stopTimer(); answered = true; streak = 0; addWrong(current); addWrongThisRound(current); updateRecords(false); document.querySelectorAll('.choice-btn').forEach(b => { b.disabled = true; if (currentMode !== 'exam' && b.dataset.choice === current.answer) b.classList.add('choice-correct'); }); $('resultText').style.color = currentMode === 'exam' ? 'var(--text)' : 'var(--bad)'; $('resultText').textContent = currentMode === 'exam' ? '時間到，已記錄。' : `時間到！正確答案是「${current.answer}」`; if (currentMode !== 'exam') showExplanation(); updateStats(); if (currentMode === 'quick' || currentMode === 'exam' || currentMode === 'daily') { setTimeout(() => { currentIndex += 1; showQuestion(); }, currentMode === 'exam' ? 300 : 650); } }
+    function updateTimerUi() { $('timerText').textContent = `${timeLeft} 秒`; if (timeLimit > 0 && timeLeft > 0 && timeLeft <= 5) playTone('tick'); const pct = Math.max(0, Math.min(100, (timeLeft / timeLimit) * 100)); $('timerBar').style.width = `${pct}%`; $('timerBar').classList.toggle('danger', timeLeft <= 5 && timeLimit > 0); }
+    function timeUp() { if (answered) return; stopTimer(); answered = true; streak = 0; addWrong(current); addWrongThisRound(current); updateRecords(false); document.querySelectorAll('.choice-btn').forEach(b => { b.disabled = true; if (currentMode !== 'exam' && b.dataset.choice === current.answer) b.classList.add('choice-correct'); }); $('resultText').style.color = currentMode === 'exam' ? 'var(--text)' : 'var(--bad)'; $('resultText').textContent = currentMode === 'exam' ? '時間到，已記錄。' : `時間到！正確答案是「${current.answer}」`; playTone('wrong'); flashGame(false); if (currentMode !== 'exam') showExplanation(); updateStats(); if (currentMode === 'quick' || currentMode === 'exam' || currentMode === 'daily') { setTimeout(() => { currentIndex += 1; showQuestion(); }, currentMode === 'exam' ? 300 : 650); } }
 
     function updateStats(done = false) { const total = pool.length || 0; const shownIndex = done ? total : Math.min(currentIndex + 1, total); const attempted = done ? total : currentIndex + (answered ? 1 : 0); const accuracy = attempted ? Math.round((correctCount / attempted) * 100) : 0; $('progressText').textContent = `${shownIndex} / ${total}`; $('scoreText').textContent = score; $('correctText').textContent = correctCount; $('accuracyText').textContent = `${accuracy}%`; $('streakText').textContent = streak; $('wrongCountText').textContent = Object.keys(loadWrongBook()).length; $('progressBar').style.width = total ? `${(shownIndex / total) * 100}%` : '0%'; }
 
@@ -569,6 +634,50 @@
     function renderCards() { let list = filteredCardItems(); const limit = $('cardLimitSelect').value; list = shuffle(list); if (limit !== 'all') list = list.slice(0, Number(limit)); if (!list.length) { $('cardsList').innerHTML = '<div class="empty">這個條件沒有學習卡。</div>'; return; } $('cardsList').innerHTML = list.map(renderOneCard).join(''); }
     function renderRandomCard() { const list = filteredCardItems(); if (!list.length) { $('cardsList').innerHTML = '<div class="empty">這個條件沒有學習卡。</div>'; return; } $('cardsList').innerHTML = renderOneCard(shuffle(list)[0]); }
     function renderOneCard(q) { return `<div class="learn-card"><div class="learn-title">${q.full}</div><div class="zhuyin">${q.zhuyin || '尚未提供注音'}</div><strong>題目：</strong>${q.blank}　<strong>答案：</strong>${q.answer}<br><strong>難度：</strong>${q.level || '未分類'}　<strong>分類：</strong>${q.category || '未分類'}<br><strong>意思：</strong>${q.meaning || '尚未提供解釋。'}<br><strong>例句：</strong>${getExample(q)}<br><strong>提示：</strong>${q.hint || '尚未提供提示。'}<div class="actions"><button class="secondary" onclick="makeReportTextByFull('${escapeJs(q.full)}')">回報此題</button></div></div>`; }
+
+
+    function showCategoryStats() {
+      setScreen('categoryStatsScreen');
+      const items = safeIdioms();
+      const byCat = countBy(items, 'category');
+      const byLevel = countBy(items, 'level');
+      const rowsCat = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([k,v]) => `<tr><td>${k || '未分類'}</td><td>${v}</td></tr>`).join('');
+      const rowsLevel = Object.entries(byLevel).sort((a,b)=>b[1]-a[1]).map(([k,v]) => `<tr><td>${k || '未分類'}</td><td>${v}</td></tr>`).join('');
+      $('categoryStatsBox').innerHTML = `<div class="record-grid"><div class="record-box"><small>總題數</small>${items.length}</div><div class="record-box"><small>分類數</small>${Object.keys(byCat).length}</div><div class="record-box"><small>難度數</small>${Object.keys(byLevel).length}</div><div class="record-box"><small>八選一所需不同答案</small>${new Set(items.map(q=>q.answer).filter(Boolean)).size}</div></div><div class="table-wrap"><h3>依分類統計</h3><table><thead><tr><th>分類</th><th>題數</th></tr></thead><tbody>${rowsCat}</tbody></table></div><div class="table-wrap"><h3>依難度統計</h3><table><thead><tr><th>難度</th><th>題數</th></tr></thead><tbody>${rowsLevel}</tbody></table></div>`;
+    }
+    function countBy(items, key) { return items.reduce((acc,q)=>{ const v=q[key] || '未分類'; acc[v]=(acc[v]||0)+1; return acc; }, {}); }
+
+    function qualityIssues() {
+      const items = safeIdioms();
+      const issues = [];
+      const seen = {};
+      items.forEach((q, idx) => {
+        const n = idx + 1;
+        if (!q.full) issues.push([n, q.full || '(空白)', '缺少完整成語 full']);
+        if (!q.blank || !String(q.blank).includes('＿')) issues.push([n, q.full || '(空白)', '題目 blank 沒有全形空格「＿」']);
+        if (!q.answer) issues.push([n, q.full || '(空白)', '缺少答案 answer']);
+        if (q.full && q.answer && !String(q.full).includes(String(q.answer))) issues.push([n, q.full, '答案不在完整成語中']);
+        if (!q.zhuyin) issues.push([n, q.full || '(空白)', '缺少注音 zhuyin']);
+        if (!q.meaning) issues.push([n, q.full || '(空白)', '缺少解釋 meaning']);
+        if (!q.example) issues.push([n, q.full || '(空白)', '缺少例句 example']);
+        if (!q.hint) issues.push([n, q.full || '(空白)', '缺少提示 hint']);
+        if (!q.level) issues.push([n, q.full || '(空白)', '缺少難度 level']);
+        if (!q.category) issues.push([n, q.full || '(空白)', '缺少分類 category']);
+        if (q.full) seen[q.full] = (seen[q.full] || 0) + 1;
+      });
+      Object.entries(seen).forEach(([full,count]) => { if (count > 1) issues.push(['重複', full, `完整成語重複 ${count} 次`]); });
+      return issues;
+    }
+    function showQualityCheck() {
+      setScreen('qualityScreen');
+      const issues = qualityIssues();
+      const items = safeIdioms();
+      const summary = issues.length ? `<span class="issue-bad">發現 ${issues.length} 個可改善項目</span>` : `<span class="issue-ok">題庫品質檢查通過</span>`;
+      const rows = issues.slice(0, 300).map(([i,full,msg]) => `<tr><td>${i}</td><td>${escapeHtml(full)}</td><td>${escapeHtml(msg)}</td></tr>`).join('');
+      lastQualityReport = `成語大挑戰 v3.1 題庫品質檢查\n總題數：${items.length}\n問題數：${issues.length}\n` + issues.map(([i,full,msg]) => `#${i} ${full}：${msg}`).join('\n');
+      $('qualityBox').innerHTML = `<div class="record-grid"><div class="record-box"><small>總題數</small>${items.length}</div><div class="record-box"><small>問題數</small>${issues.length}</div><div class="record-box"><small>有注音</small>${items.filter(q=>q.zhuyin).length}</div><div class="record-box"><small>有例句</small>${items.filter(q=>q.example).length}</div></div><p class="meaning">${summary}</p>${issues.length ? `<div class="table-wrap"><table><thead><tr><th>序號</th><th>成語</th><th>問題</th></tr></thead><tbody>${rows}</tbody></table></div>${issues.length > 300 ? '<p class="meaning">只顯示前 300 筆，完整內容可用「複製檢查報告」。</p>' : ''}` : '<div class="empty">目前沒有發現明顯問題。</div>'}`;
+    }
+    async function copyQualityReport() { if (!lastQualityReport) showQualityCheck(); try { await navigator.clipboard.writeText(lastQualityReport); alert('已複製題庫品質檢查報告！'); } catch(e) { alert('無法自動複製，請手動選取檢查結果。'); } }
 
     function makeReportText(q) {
       if (!q) { showReports(); return; }
