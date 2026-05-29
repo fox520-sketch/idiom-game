@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>成語填空小遊戲 v2.6</title>
+  <title>成語填空小遊戲 v2.7</title>
   <script src="idioms.js"></script>
   <style>
     :root {
@@ -131,8 +131,8 @@
   <main>
     <section id="homeScreen" class="screen active">
       <div class="card hero">
-        <h2>v2.6 快速遊戲強化版</h2>
-        <p>固定四選一作答，新增「快速遊戲」：選擇答案後會自動進入下一題，也保留一般開始遊戲、錯題本、學習紀錄與成語學習卡。</p>
+        <h2>v2.7 快速遊戲可設定版</h2>
+        <p>固定四選一作答。「開始遊戲」答完後可看解釋再按下一題；「快速遊戲」可先選難度、分類、題數、倒數時間與顯示風格，選擇答案後會自動進入下一題。</p>
         <div class="menu-grid">
           <button class="menu-btn" onclick="goSetup()">開始遊戲</button>
           <button class="menu-btn" onclick="startQuickGame()">快速遊戲</button>
@@ -182,7 +182,7 @@
         </div>
       </div>
       <div class="actions">
-        <button onclick="startGame('normal')">開始四選一挑戰</button>
+        <button id="setupStartBtn" onclick="startGame(setupMode)">開始四選一挑戰</button>
         <button class="secondary" onclick="showHome()">回首頁</button>
       </div>
     </section>
@@ -282,7 +282,7 @@
       </div>
     </section>
 
-    <div class="version">版本：v2.6｜快速遊戲強化版｜快速遊戲｜固定四選一｜題庫擴充｜學習紀錄｜錯題本｜學習卡｜注音｜分享成績｜適合 GitHub Pages</div>
+    <div class="version">版本：v2.7｜快速遊戲可設定版｜快速遊戲可選難度分類題數倒數｜固定四選一｜題庫擴充｜學習紀錄｜錯題本｜學習卡｜注音｜分享成績｜適合 GitHub Pages</div>
   </main>
 
   <script>
@@ -302,6 +302,7 @@
     let timeLimit = 20;
     let timeLeft = 20;
     let currentMode = 'normal';
+    let setupMode = 'normal';
 
     function $(id) { return document.getElementById(id); }
     function safeIdioms() { return Array.isArray(window.IDIOMS || IDIOMS) ? (window.IDIOMS || IDIOMS) : []; }
@@ -321,13 +322,17 @@
 
     function setScreen(id) { stopTimer(); document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); $(id).classList.add('active'); }
     function showHome() { setScreen('homeScreen'); updateWrongCount(); }
-    function goSetup() { setScreen('setupScreen'); }
+    function goSetup() {
+      setupMode = 'normal';
+      $('setupStartBtn').textContent = '開始四選一挑戰';
+      setScreen('setupScreen');
+    }
     function startQuickGame() {
-      $('levelSelect').value = '全部';
-      $('categorySelect').value = '全部';
+      setupMode = 'quick';
+      $('setupStartBtn').textContent = '開始快速遊戲';
       $('roundSelect').value = '10';
       $('timeSelect').value = '15';
-      startGame('quick');
+      setScreen('setupScreen');
     }
     function applyTheme() { const theme = $('themeSelect').value; document.body.classList.remove('dark', 'ink'); if (theme === 'dark') document.body.classList.add('dark'); if (theme === 'ink') document.body.classList.add('ink'); }
 
