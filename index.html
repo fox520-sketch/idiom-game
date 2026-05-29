@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>成語填空小遊戲 v2.8</title>
+  <title>成語大挑戰正式版 v3.0</title>
   <script src="idioms.js"></script>
   <style>
     :root {
@@ -110,12 +110,18 @@
     .learn-title { font-size: clamp(32px, 7vw, 56px); font-weight: 950; text-align:center; margin: 8px 0; letter-spacing:.08em; }
     .zhuyin { color: var(--muted); text-align:center; font-size: 20px; font-weight: 900; margin-bottom: 12px; }
     .share-box { background: var(--soft); border:1px solid var(--border); border-radius:16px; padding:12px; margin-top:12px; white-space:pre-wrap; text-align:left; }
+    input { width: 100%; border: 2px solid var(--border); border-radius: 14px; padding: 11px 12px; font-size: 17px; background: var(--card); color: var(--text); }
+    .badge-grid { display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:12px; margin-top:14px; }
+    .badge { border:1px solid var(--border); border-radius:18px; padding:16px; background:var(--soft); line-height:1.65; }
+    .badge.locked { opacity:.48; filter: grayscale(1); }
+    .badge strong { font-size:20px; }
     @media (max-width: 860px) {
       .panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .menu-grid { grid-template-columns: 1fr; }
       .record-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .card-toolbar { grid-template-columns: 1fr; }
+      .badge-grid { grid-template-columns: 1fr; }
       .choices { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       main { margin-top: 14px; }
       .choice-btn { min-height: 64px; font-size: 24px; }
@@ -134,8 +140,8 @@
   <main>
     <section id="homeScreen" class="screen active">
       <div class="card hero">
-        <h2>v2.8 題庫與注音擴充版</h2>
-        <p>固定八選一作答。「開始遊戲」答完後可看解釋再按下一題；「快速遊戲」可先選難度、分類、題數、倒數時間與顯示風格，選擇答案後會自動進入下一題。</p>
+        <h2>v3.0 成語大挑戰正式版</h2>
+        <p>固定八選一作答，新增每日挑戰、考試模式、成就徽章、題庫搜尋與題目回報。</p>
         <div class="menu-grid">
           <button class="menu-btn" onclick="goSetup()">開始遊戲</button>
           <button class="menu-btn" onclick="startQuickGame()">快速遊戲</button>
@@ -143,6 +149,10 @@
           <button class="menu-btn secondary" onclick="showWrongBook()">查看錯題本</button>
           <button class="menu-btn secondary" onclick="showRecords()">學習紀錄</button>
           <button class="menu-btn secondary" onclick="showCards()">成語學習卡</button>
+          <button class="menu-btn secondary" onclick="startDailyChallenge()">每日挑戰</button>
+          <button class="menu-btn secondary" onclick="goExamSetup()">考試模式</button>
+          <button class="menu-btn secondary" onclick="showAchievements()">成就徽章</button>
+          <button class="menu-btn secondary" onclick="showReports()">題目回報</button>
         </div>
       </div>
     </section>
@@ -214,8 +224,9 @@
         <div class="zhuyin" id="zhuyinText"></div>
         <div class="choices" id="choicesBox"></div>
         <div class="actions">
-          <button class="secondary" onclick="showHint()">提示</button>
+          <button class="secondary" id="hintBtn" onclick="showHint()">提示</button>
           <button class="secondary" onclick="nextQuestion()">下一題</button>
+          <button class="secondary" onclick="makeReportText(current)">回報此題</button>
           <button class="secondary" onclick="showHome()">回首頁</button>
         </div>
         <div class="hint-box" id="hintBox"></div>
@@ -269,6 +280,10 @@
             <select id="cardCategorySelect" onchange="renderCards()"></select>
           </div>
           <div>
+            <label for="cardSearchInput">題庫搜尋</label>
+            <input id="cardSearchInput" oninput="renderCards()" placeholder="搜尋成語、注音、意思、分類" />
+          </div>
+          <div>
             <label for="cardLimitSelect">顯示數量</label>
             <select id="cardLimitSelect" onchange="renderCards()">
               <option value="12">12 張</option>
@@ -285,12 +300,37 @@
       </div>
     </section>
 
-    <div class="version">版本：v2.9｜八選一答案版｜答案選項增加為 8 個｜題庫注音擴充｜快速遊戲可設定｜固定八選一｜學習紀錄｜錯題本｜學習卡｜分享成績｜適合 GitHub Pages</div>
+
+
+    <section id="achievementsScreen" class="screen">
+      <div class="card">
+        <h2>成就徽章</h2>
+        <p class="meaning">完成題目、連續答對、滿分與每日挑戰，都可以解鎖徽章。資料存在目前這台裝置的瀏覽器中。</p>
+        <div class="badge-grid" id="badgeGrid"></div>
+        <div class="actions"><button class="secondary" onclick="showHome()">回首頁</button></div>
+      </div>
+    </section>
+
+    <section id="reportsScreen" class="screen">
+      <div class="card">
+        <h2>題目回報</h2>
+        <p class="meaning">在遊戲題目或學習卡中按「回報此題」，會自動產生可複製的回報文字，方便你之後修正題庫。</p>
+        <div class="share-box" id="reportBox">尚未產生回報文字。</div>
+        <div class="actions">
+          <button onclick="copyReportText()">複製回報文字</button>
+          <button class="secondary" onclick="showHome()">回首頁</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="version">版本：v3.0｜成語大挑戰正式版｜每日挑戰｜考試模式｜成就徽章｜題庫搜尋｜題目回報｜八選一｜適合 GitHub Pages</div>
   </main>
 
   <script>
     const STORAGE_WRONG = 'idiomGameWrongBookV24';
     const STORAGE_RECORDS = 'idiomGameRecordsV24';
+    const STORAGE_DAILY = 'idiomGameDailyV30';
+    const STORAGE_REPORT = 'idiomGameReportV30';
     const labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
     let pool = [];
     let currentIndex = 0;
@@ -312,6 +352,9 @@
     function shuffle(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
     function uniqueValues(key) { return [...new Set(safeIdioms().map(q => q[key]).filter(Boolean))]; }
     function todayString() { return new Date().toLocaleDateString('zh-TW'); }
+    function todayKey() { return new Date().toISOString().slice(0,10); }
+    function hashString(str) { let h = 2166136261; for (let i=0; i<str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+    function seededShuffle(arr, seedText) { let seed = hashString(seedText) || 1; const a = [...arr]; const rand = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }; for (let i=a.length-1; i>0; i--) { const j=Math.floor(rand()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 
     function initSelects() {
       const levels = ['全部', ...uniqueValues('level')];
@@ -330,6 +373,11 @@
       $('setupStartBtn').textContent = '開始八選一挑戰';
       setScreen('setupScreen');
     }
+    function goExamSetup() {
+      setupMode = 'exam';
+      $('setupStartBtn').textContent = '開始考試模式';
+      setScreen('setupScreen');
+    }
     function startQuickGame() {
       setupMode = 'quick';
       $('setupStartBtn').textContent = '開始快速遊戲';
@@ -342,8 +390,11 @@
     function startGame(mode) {
       applyTheme(); currentMode = mode || 'normal'; wrongThisRound = [];
       const all = safeIdioms(); let selected = [];
-      if (currentMode === 'wrong') selected = getWrongItems();
-      else {
+      if (currentMode === 'wrong') {
+        selected = getWrongItems();
+      } else if (currentMode === 'daily') {
+        selected = seededShuffle(all, 'daily-' + todayKey()).slice(0, Math.min(10, all.length));
+      } else {
         const level = $('levelSelect').value; const category = $('categorySelect').value;
         selected = all.filter(q => (level === '全部' || q.level === level) && (category === '全部' || q.category === category));
       }
@@ -352,10 +403,20 @@
       const roundSize = currentMode === 'wrong' ? selected.length : (roundValue === 'all' ? selected.length : Number(roundValue));
       pool = shuffle(selected).slice(0, Math.min(roundSize, selected.length));
       timeLimit = Number($('timeSelect').value || 0);
+      if (currentMode === 'daily') timeLimit = 15;
+      if ($('hintBtn')) $('hintBtn').style.display = currentMode === 'exam' ? 'none' : '';
       currentIndex = 0; score = 0; correctCount = 0; streak = 0; maxStreakThisRound = 0; answered = false;
       $('reviewCard').style.display = 'none'; setScreen('gameScreen'); showQuestion();
     }
 
+    function startDailyChallenge() {
+      setupMode = 'daily';
+      $('levelSelect').value = '全部';
+      $('categorySelect').value = '全部';
+      $('roundSelect').value = '10';
+      $('timeSelect').value = '15';
+      startGame('daily');
+    }
     function startWrongBookPractice() { if (!Object.keys(loadWrongBook()).length) { showWrongBook(); return; } startGame('wrong'); }
 
     function showQuestion() {
@@ -364,6 +425,8 @@
       $('questionText').textContent = current.blank;
       $('zhuyinText').textContent = current.zhuyin ? `注音：${current.zhuyin}` : '注音：尚未提供';
       $('levelTag').textContent = current.level || '未分類難度'; $('categoryTag').textContent = current.category || '未分類';
+      if (currentMode === 'exam') $('categoryTag').textContent = '考試模式';
+      if (currentMode === 'daily') $('categoryTag').textContent = '每日挑戰';
       $('hintBox').textContent = ''; $('resultText').textContent = ''; $('meaningText').textContent = ''; $('exampleText').style.display = 'none'; $('exampleText').textContent = '';
       renderChoices(current); updateStats(); startTimer();
     }
@@ -377,28 +440,43 @@
     function escapeHtml(text) { return String(text).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
 
     function chooseAnswer(choice, btn) {
-      if (answered) return; stopTimer(); answered = true;
+      if (answered || !current) return;
+      stopTimer(); answered = true;
       const isCorrect = choice === current.answer;
-      document.querySelectorAll('.choice-btn').forEach(b => { b.disabled = true; if (b.dataset.choice === current.answer) b.classList.add('choice-correct'); });
+      document.querySelectorAll('.choice-btn').forEach(b => {
+        b.disabled = true;
+        if (currentMode !== 'exam') {
+          if (b.dataset.choice === current.answer) b.classList.add('choice-correct');
+        }
+      });
       if (isCorrect) {
-        const timeBonus = timeLimit ? Math.max(0, timeLeft) : 0; score += 10 + timeBonus; correctCount += 1; streak += 1; maxStreakThisRound = Math.max(maxStreakThisRound, streak); if (streak >= 3) score += 5;
-        if (currentMode === 'wrong') markWrongPracticeCorrect(current);
+        const timeBonus = timeLimit ? Math.max(0, timeLeft) : 0;
+        score += 10 + timeBonus;
+        correctCount += 1;
+        streak += 1;
+        maxStreakThisRound = Math.max(maxStreakThisRound, streak);
+        if (streak >= 3) score += 5;
         updateRecords(true);
-        $('resultText').style.color = 'var(--good)'; $('resultText').textContent = `答對了！${timeBonus ? `時間加分 +${timeBonus}` : ''}${streak >= 3 ? '，連續答對加分 +5' : ''}`;
+        if (currentMode === 'wrong') markWrongPracticeCorrect(current);
+        $('resultText').style.color = 'var(--good)';
+        $('resultText').textContent = currentMode === 'exam' ? '已作答' : `答對了！${timeBonus ? `時間加分 +${timeBonus}` : ''}`;
       } else {
-        btn.classList.add('choice-wrong'); streak = 0; addWrong(current); addWrongThisRound(current); updateRecords(false);
-        $('resultText').style.color = 'var(--bad)'; $('resultText').textContent = `答錯了，正確答案是「${current.answer}」`;
+        if (currentMode !== 'exam') btn.classList.add('choice-wrong');
+        streak = 0;
+        addWrong(current);
+        addWrongThisRound(current);
+        updateRecords(false);
+        $('resultText').style.color = currentMode === 'exam' ? 'var(--text)' : 'var(--bad)';
+        $('resultText').textContent = currentMode === 'exam' ? '已作答' : `答錯了，正確答案是「${current.answer}」`;
       }
-      showExplanation(); updateStats();
-      if (currentMode === 'quick') {
-        setTimeout(() => {
-          currentIndex += 1;
-          showQuestion();
-        }, 650);
+      if (currentMode !== 'exam') showExplanation();
+      updateStats();
+      if (currentMode === 'quick' || currentMode === 'exam' || currentMode === 'daily') {
+        setTimeout(() => { currentIndex += 1; showQuestion(); }, currentMode === 'exam' ? 300 : 650);
       }
     }
 
-    function showHint() { if (!current) return; $('hintBox').textContent = `提示：${current.hint || '請從完整成語的意思判斷缺字。'}`; }
+    function showHint() { if (!current) return; if (currentMode === 'exam') { $('hintBox').textContent = '考試模式不提供提示。'; return; } $('hintBox').textContent = `提示：${current.hint || '請從完整成語的意思判斷缺字。'}`; }
     function showExplanation() { $('meaningText').innerHTML = `<strong>${current.full}</strong>${current.zhuyin ? `（${current.zhuyin}）` : ''}：${current.meaning || '尚未提供解釋。'}`; $('exampleText').style.display = 'block'; $('exampleText').innerHTML = `<strong>例句：</strong>${getExample(current)}`; }
     function getExample(q) { return q.example || `這件事情正好可以用「${q.full}」來形容。`; }
 
@@ -406,17 +484,17 @@
       if (!answered && current) {
         stopTimer(); answered = true; streak = 0; addWrong(current); addWrongThisRound(current); updateRecords(false);
         document.querySelectorAll('.choice-btn').forEach(b => { b.disabled = true; if (b.dataset.choice === current.answer) b.classList.add('choice-correct'); });
-        $('resultText').style.color = 'var(--bad)'; $('resultText').textContent = `已跳過，正確答案是「${current.answer}」`; showExplanation(); updateStats(); return;
+        $('resultText').style.color = currentMode === 'exam' ? 'var(--text)' : 'var(--bad)'; $('resultText').textContent = currentMode === 'exam' ? '已跳過' : `已跳過，正確答案是「${current.answer}」`; if (currentMode !== 'exam') showExplanation(); updateStats(); if (currentMode === 'exam') { currentIndex += 1; showQuestion(); } return;
       }
       currentIndex += 1; showQuestion();
     }
 
     function endGame() {
-      stopTimer(); saveBestScore();
+      stopTimer(); saveBestScore(); if (currentMode === 'daily') saveDailyResult(); unlockAchievements();
       $('questionText').textContent = '遊戲結束'; $('zhuyinText').textContent = ''; $('choicesBox').innerHTML = ''; $('hintBox').textContent = '';
       const accuracy = pool.length ? Math.round((correctCount / pool.length) * 100) : 0;
       $('resultText').style.color = 'var(--text)'; $('resultText').textContent = `總分：${score}，答對 ${correctCount} / ${pool.length} 題，正確率 ${accuracy}%`;
-      $('meaningText').textContent = '可以複製成績分享給朋友，或進入錯題本專門複習答錯的題目。';
+      $('meaningText').textContent = currentMode === 'exam' ? '考試模式已結束，現在可以查看本輪錯題與成績。' : '可以複製成績分享給朋友，或進入錯題本專門複習答錯的題目。';
       $('exampleText').style.display = 'block'; $('exampleText').innerHTML = `<strong>分享文字：</strong><div class="share-box" id="shareText">${makeShareText()}</div><div class="actions"><button onclick="copyShareText()">複製成績</button></div>`;
       answered = true; updateStats(true); renderRoundReview();
     }
@@ -424,10 +502,38 @@
     function makeShareText() { const accuracy = pool.length ? Math.round((correctCount / pool.length) * 100) : 0; return `我在成語填空小遊戲拿到 ${score} 分！\n答對 ${correctCount} / ${pool.length} 題，正確率 ${accuracy}%\n最高連續答對 ${maxStreakThisRound} 題\n快來挑戰：https://fox520-sketch.github.io/idiom-game/`; }
     async function copyShareText() { const text = makeShareText(); try { await navigator.clipboard.writeText(text); alert('已複製成績！'); } catch(e) { alert('無法自動複製，請手動選取分享文字。'); } }
 
+    function saveDailyResult() {
+      const data = JSON.parse(localStorage.getItem(STORAGE_DAILY) || '{}');
+      const accuracy = pool.length ? Math.round((correctCount / pool.length) * 100) : 0;
+      data[todayKey()] = { score, correct: correctCount, total: pool.length, accuracy, date: todayString() };
+      localStorage.setItem(STORAGE_DAILY, JSON.stringify(data));
+    }
+
+    function achievementDefs() {
+      const r = loadRecords();
+      const daily = JSON.parse(localStorage.getItem(STORAGE_DAILY) || '{}');
+      return [
+        ['first', '初次挑戰', '完成第一輪遊戲', (r.gamesPlayed || 0) >= 1],
+        ['ten', '成語入門', '累積作答 10 題', (r.totalAnswered || 0) >= 10],
+        ['fifty', '成語小達人', '累積作答 50 題', (r.totalAnswered || 0) >= 50],
+        ['hundred', '成語高手', '累積作答 100 題', (r.totalAnswered || 0) >= 100],
+        ['streak10', '連勝高手', '最高連續答對 10 題', (r.bestStreak || 0) >= 10],
+        ['perfect', '滿分王', '任一輪正確率 100%', pool.length > 0 && correctCount === pool.length],
+        ['daily', '今日挑戰者', '完成每日挑戰', Boolean(daily[todayKey()])],
+        ['wrongclean', '錯題清除者', '錯題本清空', Object.keys(loadWrongBook()).length === 0 && (r.totalAnswered || 0) > 0]
+      ];
+    }
+    function unlockAchievements() { return achievementDefs().filter(a => a[3]); }
+    function showAchievements() {
+      setScreen('achievementsScreen');
+      const defs = achievementDefs();
+      $('badgeGrid').innerHTML = defs.map(([id,name,desc,ok]) => `<div class="badge ${ok ? '' : 'locked'}"><strong>${ok ? '🏅' : '🔒'} ${name}</strong><br>${desc}<br><small>${ok ? '已解鎖' : '尚未解鎖'}</small></div>`).join('');
+    }
+
     function startTimer() { timeLeft = timeLimit; $('timerBar').classList.remove('danger'); if (!timeLimit) { $('timerText').textContent = '不限時間'; $('timerBar').style.width = '100%'; return; } updateTimerUi(); timer = setInterval(() => { timeLeft -= 1; updateTimerUi(); if (timeLeft <= 0) timeUp(); }, 1000); }
     function stopTimer() { if (timer) clearInterval(timer); timer = null; }
     function updateTimerUi() { $('timerText').textContent = `${timeLeft} 秒`; const pct = Math.max(0, Math.min(100, (timeLeft / timeLimit) * 100)); $('timerBar').style.width = `${pct}%`; $('timerBar').classList.toggle('danger', timeLeft <= 5 && timeLimit > 0); }
-    function timeUp() { if (answered) return; stopTimer(); answered = true; streak = 0; addWrong(current); addWrongThisRound(current); updateRecords(false); document.querySelectorAll('.choice-btn').forEach(b => { b.disabled = true; if (b.dataset.choice === current.answer) b.classList.add('choice-correct'); }); $('resultText').style.color = 'var(--bad)'; $('resultText').textContent = `時間到！正確答案是「${current.answer}」`; showExplanation(); updateStats(); if (currentMode === 'quick') { setTimeout(() => { currentIndex += 1; showQuestion(); }, 650); } }
+    function timeUp() { if (answered) return; stopTimer(); answered = true; streak = 0; addWrong(current); addWrongThisRound(current); updateRecords(false); document.querySelectorAll('.choice-btn').forEach(b => { b.disabled = true; if (currentMode !== 'exam' && b.dataset.choice === current.answer) b.classList.add('choice-correct'); }); $('resultText').style.color = currentMode === 'exam' ? 'var(--text)' : 'var(--bad)'; $('resultText').textContent = currentMode === 'exam' ? '時間到，已記錄。' : `時間到！正確答案是「${current.answer}」`; if (currentMode !== 'exam') showExplanation(); updateStats(); if (currentMode === 'quick' || currentMode === 'exam' || currentMode === 'daily') { setTimeout(() => { currentIndex += 1; showQuestion(); }, currentMode === 'exam' ? 300 : 650); } }
 
     function updateStats(done = false) { const total = pool.length || 0; const shownIndex = done ? total : Math.min(currentIndex + 1, total); const attempted = done ? total : currentIndex + (answered ? 1 : 0); const accuracy = attempted ? Math.round((correctCount / attempted) * 100) : 0; $('progressText').textContent = `${shownIndex} / ${total}`; $('scoreText').textContent = score; $('correctText').textContent = correctCount; $('accuracyText').textContent = `${accuracy}%`; $('streakText').textContent = streak; $('wrongCountText').textContent = Object.keys(loadWrongBook()).length; $('progressBar').style.width = total ? `${(shownIndex / total) * 100}%` : '0%'; }
 
@@ -459,10 +565,20 @@
     function renderRoundReview() { $('reviewCard').style.display = 'block'; if (!wrongThisRound.length) { $('reviewList').innerHTML = '<div class="review-item">太棒了！這一輪沒有錯題。</div>'; return; } $('reviewList').innerHTML = wrongThisRound.map(q => `<div class="review-item"><strong>${q.full}</strong>（${q.zhuyin || '尚未提供注音'}，答案：${q.answer}）<br>題目：${q.blank}<br>解釋：${q.meaning || '尚未提供解釋。'}<br>例句：${getExample(q)}</div>`).join(''); }
 
     function showCards() { setScreen('cardsScreen'); renderCards(); }
-    function filteredCardItems() { const level = $('cardLevelSelect').value; const category = $('cardCategorySelect').value; return safeIdioms().filter(q => (level === '全部' || q.level === level) && (category === '全部' || q.category === category)); }
+    function filteredCardItems() { const level = $('cardLevelSelect').value; const category = $('cardCategorySelect').value; const key = ($('cardSearchInput')?.value || '').trim(); return safeIdioms().filter(q => { const okFilter = (level === '全部' || q.level === level) && (category === '全部' || q.category === category); if (!okFilter) return false; if (!key) return true; const text = [q.full,q.blank,q.answer,q.zhuyin,q.meaning,q.example,q.hint,q.level,q.category].join(' '); return text.includes(key); }); }
     function renderCards() { let list = filteredCardItems(); const limit = $('cardLimitSelect').value; list = shuffle(list); if (limit !== 'all') list = list.slice(0, Number(limit)); if (!list.length) { $('cardsList').innerHTML = '<div class="empty">這個條件沒有學習卡。</div>'; return; } $('cardsList').innerHTML = list.map(renderOneCard).join(''); }
     function renderRandomCard() { const list = filteredCardItems(); if (!list.length) { $('cardsList').innerHTML = '<div class="empty">這個條件沒有學習卡。</div>'; return; } $('cardsList').innerHTML = renderOneCard(shuffle(list)[0]); }
-    function renderOneCard(q) { return `<div class="learn-card"><div class="learn-title">${q.full}</div><div class="zhuyin">${q.zhuyin || '尚未提供注音'}</div><strong>題目：</strong>${q.blank}　<strong>答案：</strong>${q.answer}<br><strong>難度：</strong>${q.level || '未分類'}　<strong>分類：</strong>${q.category || '未分類'}<br><strong>意思：</strong>${q.meaning || '尚未提供解釋。'}<br><strong>例句：</strong>${getExample(q)}<br><strong>提示：</strong>${q.hint || '尚未提供提示。'}</div>`; }
+    function renderOneCard(q) { return `<div class="learn-card"><div class="learn-title">${q.full}</div><div class="zhuyin">${q.zhuyin || '尚未提供注音'}</div><strong>題目：</strong>${q.blank}　<strong>答案：</strong>${q.answer}<br><strong>難度：</strong>${q.level || '未分類'}　<strong>分類：</strong>${q.category || '未分類'}<br><strong>意思：</strong>${q.meaning || '尚未提供解釋。'}<br><strong>例句：</strong>${getExample(q)}<br><strong>提示：</strong>${q.hint || '尚未提供提示。'}<div class="actions"><button class="secondary" onclick="makeReportTextByFull('${escapeJs(q.full)}')">回報此題</button></div></div>`; }
+
+    function makeReportText(q) {
+      if (!q) { showReports(); return; }
+      const text = `我要回報成語題目：\n成語：${q.full}\n題目：${q.blank}\n答案：${q.answer}\n注音：${q.zhuyin || '尚未提供'}\n解釋：${q.meaning || '尚未提供'}\n問題：`;
+      localStorage.setItem(STORAGE_REPORT, text);
+      showReports();
+    }
+    function makeReportTextByFull(full) { const q = safeIdioms().find(x => x.full === full); makeReportText(q); }
+    function showReports() { setScreen('reportsScreen'); $('reportBox').textContent = localStorage.getItem(STORAGE_REPORT) || '尚未產生回報文字。'; }
+    async function copyReportText() { const text = $('reportBox').textContent; try { await navigator.clipboard.writeText(text); alert('已複製回報文字！'); } catch(e) { alert('無法自動複製，請手動選取回報文字。'); } }
 
     initSelects();
   </script>
