@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>成語大挑戰題庫擴充版 v3.6</title>
+  <title>成語大挑戰題庫擴充版 v3.6.1</title>
   <script src="idioms.js"></script>
   <style>
     :root {
@@ -42,6 +42,66 @@
     header {
       background: var(--primary); color: white; padding: 16px 18px; text-align: center;
     }
+
+    .portal-bar {
+      background: var(--card);
+      color: var(--text);
+      border-bottom: 2px solid var(--border);
+      padding: 18px 20px;
+      box-shadow: 0 4px 14px rgba(35, 70, 35, 0.06);
+    }
+    .portal-inner {
+      max-width: 980px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    .portal-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: clamp(20px, 3vw, 28px);
+      font-weight: 950;
+    }
+    .portal-logo {
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      color: #fff;
+      font-size: 30px;
+      flex: 0 0 auto;
+    }
+    .portal-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      font-weight: 950;
+    }
+    .portal-nav a {
+      color: var(--text);
+      text-decoration: none;
+      padding: 8px 10px;
+      border-radius: 12px;
+    }
+    .portal-nav a:hover {
+      background: var(--soft);
+      color: var(--primary);
+    }
+    body.dark .portal-bar { background: #0f160f; border-bottom-color: var(--border); }
+    body.ink .portal-bar { background: white; color: black; border-bottom: 2px solid black; box-shadow: none; }
+    body.ink .portal-brand, body.ink .portal-nav a { color: black; }
+
     body.ink header { background: white; color: black; border-bottom: 2px solid black; }
     header h1 { margin: 0; font-size: clamp(25px, 5vw, 40px); letter-spacing: .08em; }
     .home-link { display: inline-block; margin-top: 8px; color: inherit; text-decoration: underline; font-weight: 900; }
@@ -176,6 +236,19 @@
   </style>
 </head>
 <body>
+  <nav class="portal-bar" aria-label="狐狸網路遊戲之家導覽">
+    <div class="portal-inner">
+      <a class="portal-brand" href="https://fox520-sketch.github.io/fox/" title="回狐狸網路遊戲之家">
+        <span class="portal-logo" aria-hidden="true">🦊</span>
+        <span>狐狸網路遊戲之家</span>
+      </a>
+      <div class="portal-nav">
+        <a href="https://fox520-sketch.github.io/fox/">回首頁</a>
+        <a href="https://fox520-sketch.github.io/idiom-game/">成語大挑戰</a>
+      </div>
+    </div>
+  </nav>
+
   <header>
     <h1>成語填空小遊戲</h1>
     <a class="home-link" href="https://fox520-sketch.github.io/fox/">回狐狸之家</a>
@@ -185,7 +258,7 @@
     <div class="update-banner" id="updateBanner">發現新版，可立即更新。<button onclick="applyPwaUpdate()">立即更新</button><button class="secondary" onclick="hideUpdateBanner()">稍後</button></div>
     <section id="homeScreen" class="screen active">
       <div class="card hero">
-        <h2>v3.6 成語大挑戰題庫擴充版</h2>
+        <h2>v3.6.1 成語大挑戰題庫擴充版</h2>
         <p>新增兒童模式、搜尋結果直接練習、版本除錯資訊、備份檢查、熟練度視覺化與手機安裝提示。</p>
         <div class="menu-grid">
           <button class="menu-btn" onclick="goSetup()">開始遊戲</button>
@@ -594,7 +667,7 @@
       </div>
     </section>
 
-    <div class="version">版本：v3.6｜成語大挑戰題庫擴充版｜題庫 800 題｜保留兒童模式、除錯資訊、備份檢查、熟練度視覺化</div>
+    <div class="version">版本：v3.6.1｜成語大挑戰題庫擴充版｜題庫 800 題｜保留兒童模式、除錯資訊、備份檢查、熟練度視覺化</div>
   </main>
 
   <script>
@@ -1229,7 +1302,7 @@
       const customCount = loadCustomIdioms().length;
       const sw = navigator.serviceWorker && navigator.serviceWorker.controller ? '已啟用' : '未啟用 / 尚未控制';
       return `成語大挑戰除錯資訊
-程式版本：v3.6
+程式版本：v3.6.1.1
 題庫版本：2026.05.30
 題庫數量：${safeIdioms().length}
 內建題庫：${baseIdioms().length}
