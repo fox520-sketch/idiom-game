@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>成語大挑戰使用體驗與穩定版 v3.5</title>
+  <title>成語大挑戰題庫擴充版 v3.6</title>
   <script src="idioms.js"></script>
   <style>
     :root {
@@ -185,7 +185,7 @@
     <div class="update-banner" id="updateBanner">發現新版，可立即更新。<button onclick="applyPwaUpdate()">立即更新</button><button class="secondary" onclick="hideUpdateBanner()">稍後</button></div>
     <section id="homeScreen" class="screen active">
       <div class="card hero">
-        <h2>v3.5 成語大挑戰使用體驗與穩定版</h2>
+        <h2>v3.6 成語大挑戰題庫擴充版</h2>
         <p>新增兒童模式、搜尋結果直接練習、版本除錯資訊、備份檢查、熟練度視覺化與手機安裝提示。</p>
         <div class="menu-grid">
           <button class="menu-btn" onclick="goSetup()">開始遊戲</button>
@@ -594,7 +594,7 @@
       </div>
     </section>
 
-    <div class="version">版本：v3.5｜成語大挑戰使用體驗與穩定版｜兒童模式｜搜尋結果練習｜除錯資訊｜備份檢查｜熟練度視覺化｜手機安裝提示</div>
+    <div class="version">版本：v3.6｜成語大挑戰題庫擴充版｜題庫 800 題｜保留兒童模式、除錯資訊、備份檢查、熟練度視覺化</div>
   </main>
 
   <script>
@@ -993,7 +993,7 @@
     function showTransfer() { setScreen('transferScreen'); }
     function exportLearningData() {
       const data = {
-        version: 'v3.5',
+        version: 'v3.6',
         exportedAt: new Date().toISOString(),
         records: loadRecords(),
         wrongBook: loadWrongBook(),
@@ -1229,7 +1229,7 @@
       const customCount = loadCustomIdioms().length;
       const sw = navigator.serviceWorker && navigator.serviceWorker.controller ? '已啟用' : '未啟用 / 尚未控制';
       return `成語大挑戰除錯資訊
-程式版本：v3.5
+程式版本：v3.6
 題庫版本：2026.05.30
 題庫數量：${safeIdioms().length}
 內建題庫：${baseIdioms().length}
