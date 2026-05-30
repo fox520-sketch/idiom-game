@@ -2,10 +2,10 @@
 // 使用多人連線功能前，請到 Firebase Console 建立 Web App，
 // 把 firebaseConfig 內容貼到下面。Firebase config 可放在前端，真正的安全性請靠 Firestore Rules 控制。
 window.firebaseConfig = {
-  apiKey: "請填入你的 apiKey",
-  authDomain: "請填入你的 authDomain",
-  projectId: "請填入你的 projectId",
-  storageBucket: "請填入你的 storageBucket",
-  messagingSenderId: "請填入你的 messagingSenderId",
-  appId: "請填入你的 appId"
+  apiKey: "AIzaSyCh2Z7HLDfk5rAbjoxCZTUhhIko0MgDQd0",
+  authDomain: "idiom-game-79bfe.firebaseapp.com",
+  projectId: "idiom-game-79bfe",
+  storageBucket: "idiom-game-79bfe.firebasestorage.app",
+  messagingSenderId: "574984411311",
+  appId: "1:574984411311:web:1ac9e4b86cf8686c675c5a"
 };
