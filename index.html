@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>成語大挑戰題庫擴充版 v3.6.1</title>
+  <title>成語大挑戰注音校正版 v3.6.2</title>
   <script src="idioms.js"></script>
   <style>
     :root {
@@ -258,7 +258,7 @@
     <div class="update-banner" id="updateBanner">發現新版，可立即更新。<button onclick="applyPwaUpdate()">立即更新</button><button class="secondary" onclick="hideUpdateBanner()">稍後</button></div>
     <section id="homeScreen" class="screen active">
       <div class="card hero">
-        <h2>v3.6.1 成語大挑戰題庫擴充版</h2>
+        <h2>v3.6.2 成語大挑戰注音校正版</h2>
         <p>新增兒童模式、搜尋結果直接練習、版本除錯資訊、備份檢查、熟練度視覺化與手機安裝提示。</p>
         <div class="menu-grid">
           <button class="menu-btn" onclick="goSetup()">開始遊戲</button>
@@ -667,7 +667,7 @@
       </div>
     </section>
 
-    <div class="version">版本：v3.6.1｜成語大挑戰題庫擴充版｜題庫 800 題｜保留兒童模式、除錯資訊、備份檢查、熟練度視覺化</div>
+    <div class="version">版本：v3.6.2｜成語大挑戰注音校正版｜題庫 800 題｜保留兒童模式、除錯資訊、備份檢查、熟練度視覺化</div>
   </main>
 
   <script>
@@ -1302,7 +1302,7 @@
       const customCount = loadCustomIdioms().length;
       const sw = navigator.serviceWorker && navigator.serviceWorker.controller ? '已啟用' : '未啟用 / 尚未控制';
       return `成語大挑戰除錯資訊
-程式版本：v3.6.1.1
+程式版本：v3.6.2.1
 題庫版本：2026.05.30
 題庫數量：${safeIdioms().length}
 內建題庫：${baseIdioms().length}
