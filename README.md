@@ -1,19 +1,21 @@
-# 成語大挑戰 v3.9 Firebase 匿名登入安全版
+# 成語大挑戰 v4.0 多人遊戲正式版
 
-這是可上傳 GitHub Pages 的版本。
+這是可上傳到 GitHub Pages 的成語填空八選一學習遊戲，包含單人練習、快速遊戲、每日挑戰、考試模式、題庫學習、PWA 離線功能，以及 Firebase 多人搶答。
 
-## 本版更新
+## v4.0 新增重點
 
-1. 新增 Firebase Anonymous Authentication 匿名登入
-2. 多人房間的 hostId 改用 Firebase 匿名使用者 UID
-3. Firestore Rules 改為需登入後才能讀寫多人房間資料
-4. 玩家只能更新自己的玩家資料與答案
-5. 房主可管理房間、重設分數、移除玩家、關閉房間
-6. 保留 v3.8 多人搶答進階版功能
+1. 多人等待室加入「準備 / 取消準備」狀態。
+2. 玩家清單會顯示房主、已準備、未準備。
+3. 房主開始遊戲前會提醒尚未準備的玩家。
+4. 多人遊戲中房主可手動「下一題」。
+5. 多人遊戲中房主可手動「結束本局」。
+6. 完整成績表可一鍵複製，方便貼到 LINE 或紀錄。
+7. 保留 Firebase 匿名登入安全版規則。
+8. 保留 QR Code 邀請、同房再玩一局、房主設定題數/秒數/分類/難度。
 
-## 上傳檔案
+## 上傳 GitHub
 
-請把以下檔案上傳到 GitHub repository 第一層：
+請把以下檔案放在 repository 第一層：
 
 - index.html
 - idioms.js
@@ -22,16 +24,17 @@
 - service-worker.js
 - firestore.rules
 
-請保留你原本已設定好的 firebase-config.js，不要覆蓋。
+請保留你原本已經填好的 `firebase-config.js`，不要覆蓋。
 
-## Firebase 必須新增設定
+## Firebase
 
-請到 Firebase Console：
+請確認已開啟：
 
-Authentication → Sign-in method → Anonymous → Enable
+- Authentication → Anonymous
+- Firestore Database
+- Firestore Rules 已更新為本版 `firestore.rules`
 
-然後到：
+## 版本
 
-Firestore Database → Rules
-
-貼上 `firestore.rules` 的內容並發布。
+程式版本：v4.0
+題庫：約 891 題
