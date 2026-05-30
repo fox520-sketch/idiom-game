@@ -1,8 +1,8 @@
-# 成語大挑戰 v3.7.3 多人搶答鎖題版
+# 成語大挑戰 v3.7.4 多人多人搶答字型優化版
 
 這是可部署到 GitHub Pages 的成語填空八選一學習遊戲。
 
-## v3.7.3 更新重點
+## v3.7.4 更新重點
 
 1. 新增多人連線搶答。
 2. 使用 Firebase Firestore 開房間。
@@ -64,12 +64,12 @@ Firebase config 不是資料庫密碼，可以放在前端；真正要保護資�
 本版有 PWA 離線快取。如果上傳新版後看到舊畫面，請按網頁中的「立即更新」，或到「版本 / 除錯資訊」按「清除快取並重新載入」。
 
 
-## v3.7.3 權限修正提醒
+## v3.7.4 權限修正提醒
 如果多人搶答出現「Missing or insufficient permissions」，請到 Firebase Console → Firestore Database → Rules，貼上 `firestore.rules` 的內容並 Publish。
 注意：重新上傳本壓縮檔時，請保留你已填好的 `firebase-config.js`，不要把它覆蓋成範例設定。
 
 
-## v3.7.3 更新
+## v3.7.4 更新
 
 - 優化多人搶答規則。
 - 有人答對後，Firestore 會鎖定該題。
