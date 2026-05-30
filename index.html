@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>成語大挑戰多人搶答版 v3.7.2</title>
+  <title>成語大挑戰多人搶答版 v3.7.3</title>
   <script src="idioms.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
@@ -193,7 +193,7 @@
     .issue-bad { color: var(--bad); font-weight:950; }
 
 
-    /* v3.7.2 多人搶答畫面優化 */
+    /* v3.7.3 搶答鎖題與自動下一題 */
     #multiplayerGameScreen .mp-game-card {
       max-width: 1180px;
       margin: 0 auto;
@@ -408,7 +408,7 @@
     <div class="update-banner" id="updateBanner">發現新版，可立即更新。<button onclick="applyPwaUpdate()">立即更新</button><button class="secondary" onclick="hideUpdateBanner()">稍後</button></div>
     <section id="homeScreen" class="screen active">
       <div class="card hero">
-        <h2>v3.7 成語大挑戰多人搶答版</h2>
+        <h2>v3.7.3 成語大挑戰多人搶答鎖題版</h2>
         <p>新增 Firebase 多人連線、開房間、加入房間、同步題目、搶答計分與即時排名。</p>
         <div class="menu-grid">
           <button class="menu-btn" onclick="goSetup()">開始遊戲</button>
@@ -892,7 +892,7 @@
       </div>
     </section>
 
-    <div class="version">版本：v3.7.2｜多人搶答畫面優化版｜題庫 800 題｜Firebase 開房間、搶答、即時排名</div>
+    <div class="version">版本：v3.7.3｜多人搶答鎖題版｜答對即鎖題、自動下一題、只有答對者得分</div>
   </main>
 
   <script>
@@ -949,6 +949,7 @@
     let mpAnsweredIndex = null;
     let mpCountdownTimer = null;
     let mpAdvancingQuestionIndex = null;
+    let mpRenderedQuestionIndex = null;
 
 
     function $(id) { return document.getElementById(id); }
@@ -1023,6 +1024,7 @@
         await mpRoomRef().set({
           roomId: mpRoomId, hostId: mpPlayerId, hostName: name, status: 'waiting',
           currentIndex: 0, total: questions.length, secondsPerQuestion: seconds,
+          winnerQuestionIndex: -1, winnerPlayerId: '', winnerName: '',
           questions, createdAt: firebase.firestore.FieldValue.serverTimestamp(), updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         await mpRoomRef().collection('players').doc(mpPlayerId).set({ name, score:0, correct:0, wrong:0, answered:0, joinedAt: firebase.firestore.FieldValue.serverTimestamp(), lastSeen: firebase.firestore.FieldValue.serverTimestamp() }, {merge:true});
@@ -1085,7 +1087,7 @@
     async function mpStartGame() {
       if (!mpIsHost || !mpCurrentRoom) return;
       try {
-        await mpRoomRef().update({ status:'playing', currentIndex:0, currentStartedAt: Date.now(), updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+        await mpRoomRef().update({ status:'playing', currentIndex:0, currentStartedAt: Date.now(), winnerQuestionIndex:-1, winnerPlayerId:'', winnerName:'', updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
       } catch(e) { alert('開始遊戲失敗：' + e.message); }
     }
     function mpCurrentQuestion() {
@@ -1094,15 +1096,34 @@
     }
     function mpRenderQuestion() {
       const q = mpCurrentQuestion(); if (!q) return;
-      mpAnsweredIndex = null;
-      $('mpQuestionText').textContent = q.blank;
-      $('mpZhuyinText').textContent = q.zhuyin ? `注音：${q.zhuyin}` : '';
-      $('mpProgress').textContent = `${(mpCurrentRoom.currentIndex||0)+1} / ${mpCurrentRoom.total || mpCurrentRoom.questions.length}`;
-      $('mpProgressBar').style.width = `${(((mpCurrentRoom.currentIndex||0)+1) / (mpCurrentRoom.total || mpCurrentRoom.questions.length)) * 100}%`;
-      $('mpResultText').textContent = '';
-      $('mpMeaningText').textContent = '';
-      $('mpChoicesBox').innerHTML = (q.choices||[]).map((choice,i)=>`<button class="choice-btn" onclick="mpChooseAnswer('${escapeJs(choice)}', this)"><span class="choice-label">${labels[i]||''}</span><span>${escapeHtml(choice)}</span></button>`).join('');
-      mpStartCountdown();
+      const idx = mpCurrentRoom.currentIndex || 0;
+      const isNewQuestion = mpRenderedQuestionIndex !== idx;
+      if (isNewQuestion) {
+        mpRenderedQuestionIndex = idx;
+        mpAnsweredIndex = null;
+        $('mpQuestionText').textContent = q.blank;
+        $('mpZhuyinText').textContent = q.zhuyin ? `注音：${q.zhuyin}` : '';
+        $('mpProgress').textContent = `${idx+1} / ${mpCurrentRoom.total || mpCurrentRoom.questions.length}`;
+        $('mpProgressBar').style.width = `${((idx+1) / (mpCurrentRoom.total || mpCurrentRoom.questions.length)) * 100}%`;
+        $('mpResultText').textContent = '';
+        $('mpMeaningText').textContent = '';
+        $('mpChoicesBox').innerHTML = (q.choices||[]).map((choice,i)=>`<button class="choice-btn" onclick="mpChooseAnswer('${escapeJs(choice)}', this)"><span class="choice-label">${labels[i]||''}</span><span>${escapeHtml(choice)}</span></button>`).join('');
+        mpStartCountdown();
+      }
+      mpApplyQuestionLock();
+    }
+    function mpApplyQuestionLock() {
+      if (!mpCurrentRoom) return;
+      const idx = mpCurrentRoom.currentIndex || 0;
+      if (mpCurrentRoom.winnerQuestionIndex === idx && mpCurrentRoom.winnerPlayerId) {
+        document.querySelectorAll('#mpChoicesBox .choice-btn').forEach(b => b.disabled = true);
+        const q = mpCurrentQuestion();
+        $('mpResultText').style.color = 'var(--good)';
+        $('mpResultText').textContent = `本題由「${mpCurrentRoom.winnerName || '玩家'}」搶答成功，準備下一題...`;
+        if (q) $('mpMeaningText').innerHTML = `<strong>${q.full}</strong>：${q.meaning || ''}<br><strong>例句：</strong>${q.example || ''}`;
+        if (mpCountdownTimer) { clearInterval(mpCountdownTimer); mpCountdownTimer = null; }
+        if (mpIsHost) setTimeout(mpNextQuestion, 900);
+      }
     }
     function mpStartCountdown() {
       if (mpCountdownTimer) clearInterval(mpCountdownTimer);
@@ -1123,29 +1144,53 @@
       if (!mpCurrentRoom) return;
       const idx = mpCurrentRoom.currentIndex || 0;
       if (mpAnsweredIndex === idx) return;
+      if (mpCurrentRoom.winnerQuestionIndex === idx && mpCurrentRoom.winnerPlayerId) { mpApplyQuestionLock(); return; }
       mpAnsweredIndex = idx;
-      document.querySelectorAll('#mpChoicesBox .choice-btn').forEach(b => b.disabled = true);
       const q = mpCurrentQuestion(); const ok = choice === q.answer;
       const started = Number(mpCurrentRoom.currentStartedAt || Date.now());
       const limit = Number(mpCurrentRoom.secondsPerQuestion || 15);
       const remain = Math.max(0, limit - Math.floor((Date.now() - started) / 1000));
       const delta = ok ? 10 + remain : 0;
-      if (ok) { btn.classList.add('choice-correct'); $('mpResultText').style.color = 'var(--good)'; $('mpResultText').textContent = `答對！+${delta} 分`; playTone('correct'); }
-      else { btn.classList.add('choice-wrong'); $('mpResultText').style.color = 'var(--bad)'; $('mpResultText').textContent = `答錯，正確答案是「${q.answer}」`; playTone('wrong'); }
-      $('mpMeaningText').innerHTML = `<strong>${q.full}</strong>：${q.meaning || ''}<br><strong>例句：</strong>${q.example || ''}`;
+      if (ok) {
+        document.querySelectorAll('#mpChoicesBox .choice-btn').forEach(b => b.disabled = true);
+        btn.classList.add('choice-correct'); $('mpResultText').style.color = 'var(--good)'; $('mpResultText').textContent = `答對！+${delta} 分，準備下一題...`; playTone('correct');
+      } else {
+        document.querySelectorAll('#mpChoicesBox .choice-btn').forEach(b => b.disabled = true); btn.classList.add('choice-wrong'); $('mpResultText').style.color = 'var(--bad)'; $('mpResultText').textContent = '答錯，本題不能再答，等待其他玩家搶答。'; playTone('wrong');
+      }
       try {
-        const answerId = `${idx}_${mpPlayerId}`;
-        await mpRoomRef().collection('answers').doc(answerId).set({ playerId:mpPlayerId, playerName:mpPlayerName || '玩家', questionIndex:idx, choice, correct:ok, scoreDelta:delta, answerAt: firebase.firestore.FieldValue.serverTimestamp() });
+        const roomRef = mpRoomRef();
+        const answerRef = roomRef.collection('answers').doc(`${idx}_${mpPlayerId}`);
+        const playerRef = roomRef.collection('players').doc(mpPlayerId);
         const inc = firebase.firestore.FieldValue.increment;
-        await mpRoomRef().collection('players').doc(mpPlayerId).set({ name:mpPlayerName || '玩家', score:inc(delta), correct:inc(ok?1:0), wrong:inc(ok?0:1), answered:inc(1), lastSeen:firebase.firestore.FieldValue.serverTimestamp() }, {merge:true});
-      } catch(e) { alert('送出答案失敗：' + e.message); }
+        await mpDb.runTransaction(async tx => {
+          const roomSnap = await tx.get(roomRef);
+          if (!roomSnap.exists) throw new Error('房間不存在');
+          const room = roomSnap.data() || {};
+          if (room.status !== 'playing' || (room.currentIndex || 0) !== idx) throw new Error('本題已結束');
+          if (room.winnerQuestionIndex === idx && room.winnerPlayerId) throw new Error('已有人答對，本題已鎖定');
+          tx.set(answerRef, { playerId:mpPlayerId, playerName:mpPlayerName || '玩家', questionIndex:idx, choice, correct:ok, scoreDelta:delta, answerAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge:true });
+          tx.set(playerRef, { name:mpPlayerName || '玩家', score:inc(delta), correct:inc(ok?1:0), wrong:inc(ok?0:1), answered:inc(1), lastSeen:firebase.firestore.FieldValue.serverTimestamp() }, { merge:true });
+          if (ok) tx.update(roomRef, { winnerQuestionIndex:idx, winnerPlayerId:mpPlayerId, winnerName:mpPlayerName || '玩家', updatedAt:firebase.firestore.FieldValue.serverTimestamp() });
+        });
+      } catch(e) {
+        if (String(e.message || '').includes('已有人答對')) { mpApplyQuestionLock(); return; }
+        alert('送出答案失敗：' + e.message);
+        mpAnsweredIndex = null;
+        document.querySelectorAll('#mpChoicesBox .choice-btn').forEach(b => b.disabled = false);
+      }
     }
     function mpRenderAnswers(list) {
       if (!$('mpAnswerList') || !mpCurrentRoom) return;
       const idx = mpCurrentRoom.currentIndex || 0;
       const rows = list.filter(a => a.questionIndex === idx).sort((a,b) => (a.answerAt?.seconds||0) - (b.answerAt?.seconds||0));
-      $('mpAnswerList').innerHTML = rows.length ? rows.map((a,i)=>`<div>${i+1}. ${escapeHtml(a.playerName||'玩家')}：${a.correct?'答對':'答錯'} ${a.correct?`+${a.scoreDelta}`:''}</div>`).join('') : '等待作答...';
-      if (mpIsHost && mpCurrentRoom.status === 'playing' && rows.length >= mpPlayers.length && mpPlayers.length > 0) setTimeout(mpNextQuestion, 900);
+      const winner = rows.find(a => a.correct);
+      $('mpAnswerList').innerHTML = rows.length ? rows.map((a,i)=>`<div>${i+1}. ${escapeHtml(a.playerName||'玩家')}：${a.correct?'搶答成功':'答錯'} ${a.correct?`+${a.scoreDelta}`:''}</div>`).join('') : '等待作答...';
+      if (winner) {
+        document.querySelectorAll('#mpChoicesBox .choice-btn').forEach(b => b.disabled = true);
+        if (mpIsHost && mpCurrentRoom.status === 'playing') setTimeout(mpNextQuestion, 900);
+      } else if (mpIsHost && mpCurrentRoom.status === 'playing' && rows.length >= mpPlayers.length && mpPlayers.length > 0) {
+        setTimeout(mpNextQuestion, 900);
+      }
     }
     async function mpNextQuestion() {
       if (!mpIsHost || !mpCurrentRoom || mpCurrentRoom.status !== 'playing') return;
@@ -1157,7 +1202,7 @@
         if (next >= (mpCurrentRoom.total || mpCurrentRoom.questions.length)) {
           await mpRoomRef().update({ status:'finished', updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
         } else {
-          await mpRoomRef().update({ currentIndex: next, currentStartedAt: Date.now(), updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+          await mpRoomRef().update({ currentIndex: next, currentStartedAt: Date.now(), winnerQuestionIndex:-1, winnerPlayerId:'', winnerName:'', updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
         }
       } finally {
         setTimeout(() => { mpAdvancingQuestionIndex = null; }, 500);
@@ -1529,7 +1574,7 @@
     function showTransfer() { setScreen('transferScreen'); }
     function exportLearningData() {
       const data = {
-        version: 'v3.7',
+        version: 'v3.7.3',
         exportedAt: new Date().toISOString(),
         records: loadRecords(),
         wrongBook: loadWrongBook(),
@@ -1765,7 +1810,7 @@
       const customCount = loadCustomIdioms().length;
       const sw = navigator.serviceWorker && navigator.serviceWorker.controller ? '已啟用' : '未啟用 / 尚未控制';
       return `成語大挑戰除錯資訊
-程式版本：v3.7.1.1
+程式版本：v3.7.3
 題庫版本：2026.05.30
 題庫數量：${safeIdioms().length}
 內建題庫：${baseIdioms().length}
