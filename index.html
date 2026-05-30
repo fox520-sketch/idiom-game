@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>成語大挑戰正式上線穩定版 v4.4</title>
+  <title>成語大挑戰顯示風格擴充版 v4.4.1</title>
   <script src="idioms.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
@@ -34,6 +34,66 @@
       --primary-dark: #333; --border: #000; --good: #000; --bad: #000; --warn: #000;
       --soft: #fff; --shadow: none;
     }
+    body.ocean {
+      --bg: #eaf8ff; --card: #ffffff; --text: #123244; --muted: #537386;
+      --primary: #1677a8; --primary-dark: #0d557b; --border: #bde7f7; --good: #117b55; --bad: #b3261e; --warn: #8a5a00;
+      --soft: #def4ff; --shadow: 0 12px 28px rgba(18, 80, 120, 0.14);
+    }
+    body.eye {
+      --bg: #f6f1df; --card: #fffaf0; --text: #3c3321; --muted: #756a54;
+      --primary: #7b8f3a; --primary-dark: #5f7229; --border: #e5d9b8; --good: #43752f; --bad: #9b3b2f; --warn: #8a5a00;
+      --soft: #f1e8cf; --shadow: 0 12px 28px rgba(88, 70, 35, 0.12);
+    }
+    body.softpaper {
+      --bg: #f7f7f1; --card: #fffffb; --text: #222; --muted: #5d5d55;
+      --primary: #4d4d45; --primary-dark: #2d2d28; --border: #d8d8cc; --good: #333; --bad: #333; --warn: #333;
+      --soft: #efefe7; --shadow: 0 8px 20px rgba(0,0,0,.06);
+    }
+    body.twilight {
+      --bg: #17142c; --card: #25203f; --text: #fff4e6; --muted: #c8bad9;
+      --primary: #d58a6a; --primary-dark: #aa6552; --border: #4a3f6c; --good: #8bd49b; --bad: #ff9a8a; --warn: #ffd27a;
+      --soft: #31294f; --shadow: 0 12px 28px rgba(0,0,0,.38);
+    }
+    body.sakura {
+      --bg: #fff1f6; --card: #ffffff; --text: #4a2530; --muted: #8b5a68;
+      --primary: #d95f8d; --primary-dark: #b64270; --border: #ffd0df; --good: #2f7a56; --bad: #b3261e; --warn: #966500;
+      --soft: #ffe6ef; --shadow: 0 12px 28px rgba(160, 60, 95, .13);
+    }
+    body.forest {
+      --bg: #eef7ed; --card: #ffffff; --text: #1d3422; --muted: #5f755f;
+      --primary: #2f7a45; --primary-dark: #215b32; --border: #cce8cd; --good: #237a35; --bad: #a3372c; --warn: #7a5c00;
+      --soft: #e0f1df; --shadow: 0 12px 28px rgba(30, 80, 40, .14);
+    }
+    body.meadow {
+      --bg: #f0ffe8; --card: #ffffff; --text: #284018; --muted: #66815a;
+      --primary: #69a832; --primary-dark: #4f8124; --border: #d8f1c7; --good: #2f7a35; --bad: #b3261e; --warn: #8a6a00;
+      --soft: #e6f9d7; --shadow: 0 12px 28px rgba(90, 150, 40, .12);
+    }
+    body.nightsea {
+      --bg: #061323; --card: #101f33; --text: #eaf7ff; --muted: #9ab7cc;
+      --primary: #2ca8d8; --primary-dark: #157ca5; --border: #244361; --good: #6fd49c; --bad: #ff8f86; --warn: #ffd36b;
+      --soft: #172b44; --shadow: 0 12px 28px rgba(0,0,0,.48);
+    }
+    body.sunset {
+      --bg: #fff0df; --card: #fffaf5; --text: #482b19; --muted: #8a6651;
+      --primary: #e06f3c; --primary-dark: #b94f27; --border: #ffd3ad; --good: #2f7a50; --bad: #b3261e; --warn: #a35c00;
+      --soft: #ffe2c8; --shadow: 0 12px 28px rgba(180, 85, 40, .14);
+    }
+    body.starry {
+      --bg: #080b22; --card: #151936; --text: #f5f7ff; --muted: #aeb7d9;
+      --primary: #7c8cff; --primary-dark: #5665cc; --border: #30375f; --good: #7bdca1; --bad: #ff8f9a; --warn: #f6d86e;
+      --soft: #20264a; --shadow: 0 12px 28px rgba(0,0,0,.48);
+    }
+    body.candy {
+      --bg: #fff5fb; --card: #ffffff; --text: #492544; --muted: #8c6387;
+      --primary: #ff70b8; --primary-dark: #d94b96; --border: #ffd3ec; --good: #2f8a68; --bad: #bf2d5b; --warn: #a06b00;
+      --soft: #ffe6f4; --shadow: 0 12px 28px rgba(180, 80, 140, .13);
+    }
+    body.neon {
+      --bg: #050510; --card: #111126; --text: #f2fbff; --muted: #a9b4c8;
+      --primary: #00d4ff; --primary-dark: #00a1c2; --border: #2a2d5c; --good: #00f29a; --bad: #ff4fa3; --warn: #ffe24d;
+      --soft: #191935; --shadow: 0 0 22px rgba(0, 212, 255, .22);
+    }
     * { box-sizing: border-box; }
     body {
       margin: 0;
@@ -42,7 +102,15 @@
       color: var(--text);
       min-height: 100vh;
     }
-    body.dark, body.ink { background: var(--bg); }
+    body.dark, body.ink, body.twilight, body.nightsea, body.starry, body.neon { background: var(--bg); }
+    body.ocean { background: radial-gradient(circle at top, #c9f2ff 0%, var(--bg) 45%, #eefbff 100%); }
+    body.eye { background: radial-gradient(circle at top, #fff9e5 0%, var(--bg) 48%, #f2ead2 100%); }
+    body.softpaper { background: linear-gradient(180deg, #fbfbf5 0%, var(--bg) 100%); }
+    body.sakura { background: radial-gradient(circle at top, #ffe0ed 0%, var(--bg) 48%, #fff8fb 100%); }
+    body.forest { background: radial-gradient(circle at top, #d8f2d5 0%, var(--bg) 48%, #eff8ee 100%); }
+    body.meadow { background: radial-gradient(circle at top, #dcffd0 0%, var(--bg) 48%, #f8fff3 100%); }
+    body.sunset { background: radial-gradient(circle at top, #ffd1a3 0%, var(--bg) 46%, #fff7ee 100%); }
+    body.candy { background: radial-gradient(circle at top, #ffd9f0 0%, var(--bg) 45%, #fffafe 100%); }
     header {
       background: var(--primary); color: white; padding: 16px 18px; text-align: center;
     }
@@ -103,6 +171,7 @@
       color: var(--primary);
     }
     body.dark .portal-bar { background: #0f160f; border-bottom-color: var(--border); }
+    body.twilight .portal-bar, body.nightsea .portal-bar, body.starry .portal-bar, body.neon .portal-bar { background: var(--card); border-bottom-color: var(--border); }
     body.ink .portal-bar { background: white; color: black; border-bottom: 2px solid black; box-shadow: none; }
     body.ink .portal-brand, body.ink .portal-nav a { color: black; }
 
@@ -565,7 +634,7 @@
     <div class="update-banner" id="updateBanner">發現新版，可立即更新。<button onclick="applyPwaUpdate()">立即更新</button><button class="secondary" onclick="hideUpdateBanner()">稍後</button></div>
     <section id="homeScreen" class="screen active">
       <div class="card hero">
-        <h2>v4.4 成語大挑戰正式上線穩定版</h2>
+        <h2>v4.4.1 成語大挑戰顯示風格擴充版</h2>
         <p>強化 Firebase 安全規則、過期資料清理、錯誤診斷、題庫健康檢查、手機多人流程與操作教學。</p>
         <div class="menu-grid">
           <button class="menu-btn" onclick="goSetup()">開始遊戲</button>
@@ -635,8 +704,20 @@
           <label for="themeSelect">顯示風格</label>
           <select id="themeSelect" onchange="applyTheme()">
             <option value="natural">自然模式</option>
-            <option value="dark">深色模式</option>
-            <option value="ink">黑白模式</option>
+            <option value="dark">深色模式（手機 / OLED 黑底）</option>
+            <option value="ink">黑白模式（電子紙）</option>
+            <option value="ocean">海洋風</option>
+            <option value="eye">護眼風</option>
+            <option value="softpaper">柔和電子紙</option>
+            <option value="twilight">暮光風</option>
+            <option value="sakura">櫻花風</option>
+            <option value="forest">森林風</option>
+            <option value="meadow">草原風</option>
+            <option value="nightsea">夜航風</option>
+            <option value="sunset">夕陽風</option>
+            <option value="starry">星空風</option>
+            <option value="candy">糖果風</option>
+            <option value="neon">霓虹風</option>
           </select>
         </div>
         <div>
@@ -1110,7 +1191,7 @@
       </div>
     </section>
 
-    <div class="version">版本：v4.4｜正式上線穩定版｜題庫 1000 題、Firebase 安全規則、過期資料清理、錯誤診斷、操作教學</div>
+    <div class="version">版本：v4.4.1｜顯示風格擴充版｜題庫 1000 題、多人搶答、班級版、15 種顯示風格</div>
 
 
     <section id="classroomScreen" class="screen">
@@ -1167,6 +1248,7 @@
     const STORAGE_EXAM_REPORT = 'idiomGameExamReportV34';
     const STORAGE_CHILD = 'idiomGameChildModeV35';
     const STORAGE_CLASSROOM = 'idiomGameClassroomV43';
+    const STORAGE_THEME = 'idiomGameThemeV441';
     const labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
     let pool = [];
     let currentIndex = 0;
@@ -1644,7 +1726,7 @@
     }
     async function mpCopyFinalSummary() {
       const sorted = [...mpPlayers].sort((a,b) => (b.score||0)-(a.score||0) || (b.correct||0)-(a.correct||0));
-      const lines = ['成語大挑戰多人搶答成績表', `房號：${mpRoomId}`, `版本：v4.4`, ''];
+      const lines = ['成語大挑戰多人搶答成績表', `房號：${mpRoomId}`, `版本：v4.4.1`, ''];
       sorted.forEach((p,i) => {
         const total = (p.correct||0) + (p.wrong||0);
         const rate = total ? Math.round((p.correct||0)/total*100) + '%' : '--';
@@ -1806,6 +1888,7 @@
       if ($('classAssignLevel')) $('classAssignLevel').innerHTML = levels.map(v => `<option value="${v}">${v}</option>`).join('');
       if ($('classAssignCategory')) $('classAssignCategory').innerHTML = categories.map(v => `<option value="${v}">${v}</option>`).join('');
       if ($('zhuyinSelect')) $('zhuyinSelect').value = showZhuyinSetting;
+      if ($('themeSelect')) { $('themeSelect').value = localStorage.getItem(STORAGE_THEME) || 'natural'; applyTheme(); }
       document.body.classList.toggle('child-mode', childMode);
       updateMuteButtons();
       updateWrongCount();
@@ -1852,7 +1935,13 @@
       localStorage.setItem(STORAGE_CHILD, childMode ? '1' : '0');
       document.body.classList.toggle('child-mode', childMode);
     }
-    function applyTheme() { const theme = $('themeSelect').value; document.body.classList.remove('dark', 'ink'); if (theme === 'dark') document.body.classList.add('dark'); if (theme === 'ink') document.body.classList.add('ink'); }
+    function applyTheme() {
+      const theme = $('themeSelect') ? $('themeSelect').value : 'natural';
+      const themeClasses = ['dark','ink','ocean','eye','softpaper','twilight','sakura','forest','meadow','nightsea','sunset','starry','candy','neon'];
+      document.body.classList.remove(...themeClasses);
+      if (theme !== 'natural') document.body.classList.add(theme);
+      localStorage.setItem(STORAGE_THEME, theme);
+    }
     function updateZhuyinSetting() { showZhuyinSetting = $('zhuyinSelect') ? $('zhuyinSelect').value : 'on'; localStorage.setItem(STORAGE_ZHUYIN, showZhuyinSetting); }
     function shouldShowZhuyin() { return showZhuyinSetting !== 'off' && currentMode !== 'exam'; }
     function updateMuteButtons() { ['muteHomeBtn','muteSetupBtn','muteGameBtn'].forEach(id => { const el=$(id); if (el) el.textContent = `音效：${isMuted ? '關' : '開'}`; }); }
@@ -2138,7 +2227,7 @@
     function showTransfer() { setScreen('transferScreen'); }
     function exportLearningData() {
       const data = {
-        version: 'v4.4',
+        version: 'v4.4.1',
         exportedAt: new Date().toISOString(),
         records: loadRecords(),
         wrongBook: loadWrongBook(),
@@ -2222,7 +2311,7 @@
       const items = safeIdioms();
       const summary = issues.length ? `<span class="issue-bad">發現 ${issues.length} 個可改善項目</span>` : `<span class="issue-ok">題庫品質檢查通過</span>`;
       const rows = issues.slice(0, 300).map(([i,full,msg]) => `<tr><td>${i}</td><td>${escapeHtml(full)}</td><td>${escapeHtml(msg)}</td></tr>`).join('');
-      lastQualityReport = `成語大挑戰 v4.4 題庫品質檢查\n總題數：${items.length}\n問題數：${issues.length}\n` + issues.map(([i,full,msg]) => `#${i} ${full}：${msg}`).join('\n');
+      lastQualityReport = `成語大挑戰 v4.4.1 題庫品質檢查\n總題數：${items.length}\n問題數：${issues.length}\n` + issues.map(([i,full,msg]) => `#${i} ${full}：${msg}`).join('\n');
       $('qualityBox').innerHTML = `<div class="record-grid"><div class="record-box"><small>總題數</small>${items.length}</div><div class="record-box"><small>問題數</small>${issues.length}</div><div class="record-box"><small>有注音</small>${items.filter(q=>q.zhuyin).length}</div><div class="record-box"><small>有例句</small>${items.filter(q=>q.example).length}</div></div><p class="meaning">${summary}</p>${issues.length ? `<div class="table-wrap"><table><thead><tr><th>序號</th><th>成語</th><th>問題</th></tr></thead><tbody>${rows}</tbody></table></div>${issues.length > 300 ? '<p class="meaning">只顯示前 300 筆，完整內容可用「複製檢查報告」。</p>' : ''}` : '<div class="empty">目前沒有發現明顯問題。</div>'}`;
     }
     async function copyQualityReport() { if (!lastQualityReport) showQualityCheck(); try { await navigator.clipboard.writeText(lastQualityReport); alert('已複製題庫品質檢查報告！'); } catch(e) { alert('無法自動複製，請手動選取檢查結果。'); } }
@@ -2388,7 +2477,7 @@
     function renderDataCleanupStatus() {
       const roomText = mpRoomId ? `目前多人房間：${mpRoomId}${mpIsHost ? '（你是房主）' : '（你不是房主）'}` : '目前沒有加入多人房間。';
       const parts = [
-        `程式版本：v4.4`,
+        `程式版本：v4.4.1`,
         `題庫數量：${safeIdioms().length}`,
         `本機資料約：${Math.round(localStorageBytes()/1024)} KB`,
         `錯題數：${Object.keys(loadWrongBook()).length}`,
@@ -2424,7 +2513,7 @@
     async function runFirebaseDiagnostics() {
       const lines = [];
       function mark(label, ok, extra='') { lines.push(`${ok ? '✅' : '⚠️'} ${label}${extra ? '：' + extra : ''}`); }
-      mark('程式版本', true, 'v4.4');
+      mark('程式版本', true, 'v4.4.1');
       mark('題庫數量', safeIdioms().length >= 1000, `${safeIdioms().length} 題`);
       mark('Firebase 設定檔', mpHasFirebaseConfig(), mpHasFirebaseConfig() ? 'firebase-config.js 已讀取' : '尚未設定或未上傳 firebase-config.js');
       let authOk = false;
@@ -2435,9 +2524,9 @@
       mark('Firebase 匿名登入', authOk, authOk ? mpAuth.currentUser.uid : '請確認 Authentication → Anonymous 已啟用');
       if (authOk && mpDb) {
         try {
-          await mpDb.collection('diagnostics').doc(mpPlayerId).set({ uid:mpPlayerId, version:'v4.4', checkedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge:true });
+          await mpDb.collection('diagnostics').doc(mpPlayerId).set({ uid:mpPlayerId, version:'v4.4.1', checkedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge:true });
           mark('Firestore 寫入測試', true, 'diagnostics 測試寫入成功');
-        } catch(e) { lines.push('❌ Firestore 寫入測試失敗：' + e.message + '。請確認 Firestore Rules 已更新為 v4.4。'); }
+        } catch(e) { lines.push('❌ Firestore 寫入測試失敗：' + e.message + '。請確認 Firestore Rules 已更新為 v4.4.1。'); }
       }
       const sw = navigator.serviceWorker && navigator.serviceWorker.controller;
       mark('PWA 快取', !!sw, sw ? 'Service Worker 已控制頁面' : '尚未控制，重新整理後通常會生效');
@@ -2461,7 +2550,7 @@
       const customCount = loadCustomIdioms().length;
       const sw = navigator.serviceWorker && navigator.serviceWorker.controller ? '已啟用' : '未啟用 / 尚未控制';
       return `成語大挑戰除錯資訊
-程式版本：v4.4
+程式版本：v4.4.1
 題庫版本：2026.05.30
 題庫數量：${safeIdioms().length}
 內建題庫：${baseIdioms().length}
