@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>成語大挑戰多人搶答版 v3.7.5</title>
+  <title>成語大挑戰多人搶答版 v3.7.6</title>
   <script src="idioms.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
@@ -193,7 +193,7 @@
     .issue-bad { color: var(--bad); font-weight:950; }
 
 
-    /* v3.7.5 多人搶答字型與手機版版面優化 */
+    /* v3.7.6 多人搶答字型與手機版版面優化 */
     #multiplayerGameScreen .mp-game-card {
       max-width: 1180px;
       margin: 0 auto;
@@ -324,6 +324,32 @@
       font-size: 24px;
       letter-spacing: .08em;
     }
+    .mp-invite-qr {
+      display: none;
+      max-width: 360px;
+      margin: 12px auto 0;
+      padding: 16px;
+      text-align: center;
+      background: var(--soft);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+    }
+    .mp-invite-qr img {
+      width: min(240px, 72vw);
+      height: min(240px, 72vw);
+      background: #fff;
+      padding: 10px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+    }
+    .mp-invite-qr .qr-url {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--muted);
+      word-break: break-all;
+      line-height: 1.5;
+    }
+
     @media (max-width: 860px) {
       #multiplayerGameScreen .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .mp-question { font-size: clamp(36px, 11vw, 58px); padding: 16px 10px; letter-spacing: .05em; }
@@ -409,7 +435,7 @@
     <div class="update-banner" id="updateBanner">發現新版，可立即更新。<button onclick="applyPwaUpdate()">立即更新</button><button class="secondary" onclick="hideUpdateBanner()">稍後</button></div>
     <section id="homeScreen" class="screen active">
       <div class="card hero">
-        <h2>v3.7.5 成語大挑戰多人搶答連續遊戲版</h2>
+        <h2>v3.7.6 成語大挑戰多人搶答 QR Code 邀請版</h2>
         <p>新增 Firebase 多人連線、開房間、加入房間、同步題目、搶答計分與即時排名。</p>
         <div class="menu-grid">
           <button class="menu-btn" onclick="goSetup()">開始遊戲</button>
@@ -864,7 +890,14 @@
         <div class="actions">
           <button id="mpStartBtn" onclick="mpStartGame()">房主開始遊戲</button>
           <button class="secondary" onclick="mpCopyInvite()">複製邀請連結</button>
+          <button class="secondary" onclick="mpToggleQr()">顯示 QR Code</button>
           <button class="secondary" onclick="mpLeaveRoom()">離開房間</button>
+        </div>
+        <div id="mpInviteQrBox" class="mp-invite-qr">
+          <h3>掃 QR Code 加入房間</h3>
+          <img id="mpInviteQrImg" alt="多人搶答邀請 QR Code">
+          <div id="mpInviteQrUrl" class="qr-url"></div>
+          <div class="actions"><button class="secondary" onclick="mpCopyInvite()">複製連結</button><button class="secondary" onclick="mpToggleQr(false)">收起</button></div>
         </div>
         <div class="mp-box">
           <h3>玩家即時排名</h3>
@@ -893,7 +926,7 @@
       </div>
     </section>
 
-    <div class="version">版本：v3.7.5｜多人搶答連續遊戲版｜同房再玩一局、重新計分、即時排名</div>
+    <div class="version">版本：v3.7.6｜多人搶答 QR Code 邀請版｜同房再玩一局、QR Code 邀請、即時排名</div>
   </main>
 
   <script>
@@ -1259,14 +1292,35 @@
         alert('開始下一局失敗：' + e.message);
       }
     }
+
+    function mpInviteUrl() {
+      return `${location.origin}${location.pathname}?room=${mpRoomId}`;
+    }
+    function mpToggleQr(forceShow) {
+      if (!mpRoomId) { alert('請先建立或加入房間。'); return; }
+      const box = $('mpInviteQrBox');
+      const img = $('mpInviteQrImg');
+      const urlBox = $('mpInviteQrUrl');
+      if (!box || !img || !urlBox) return;
+      const shouldShow = typeof forceShow === 'boolean' ? forceShow : box.style.display !== 'block';
+      if (shouldShow) {
+        const url = mpInviteUrl();
+        img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=12&data=' + encodeURIComponent(url);
+        urlBox.textContent = url;
+        box.style.display = 'block';
+      } else {
+        box.style.display = 'none';
+      }
+    }
     async function mpCopyInvite() {
-      const url = `${location.origin}${location.pathname}?room=${mpRoomId}`;
+      const url = mpInviteUrl();
       try { await navigator.clipboard.writeText(url); alert('已複製邀請連結！'); } catch(e) { prompt('請複製邀請連結：', url); }
     }
     function mpLeaveRoom(backHome=true) {
       if (mpRoomUnsub) mpRoomUnsub(); if (mpPlayersUnsub) mpPlayersUnsub(); if (mpAnswersUnsub) mpAnswersUnsub();
       mpRoomUnsub = mpPlayersUnsub = mpAnswersUnsub = null;
       if (mpCountdownTimer) clearInterval(mpCountdownTimer);
+      if ($('mpInviteQrBox')) $('mpInviteQrBox').style.display = 'none';
       mpRoomId = ''; mpCurrentRoom = null; mpPlayers = []; mpIsHost = false;
       if (backHome) showHome();
     }
@@ -1615,7 +1669,7 @@
     function showTransfer() { setScreen('transferScreen'); }
     function exportLearningData() {
       const data = {
-        version: 'v3.7.5',
+        version: 'v3.7.6',
         exportedAt: new Date().toISOString(),
         records: loadRecords(),
         wrongBook: loadWrongBook(),
@@ -1851,7 +1905,7 @@
       const customCount = loadCustomIdioms().length;
       const sw = navigator.serviceWorker && navigator.serviceWorker.controller ? '已啟用' : '未啟用 / 尚未控制';
       return `成語大挑戰除錯資訊
-程式版本：v3.7.5
+程式版本：v3.7.6
 題庫版本：2026.05.30
 題庫數量：${safeIdioms().length}
 內建題庫：${baseIdioms().length}
