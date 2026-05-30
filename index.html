@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>成語大挑戰第六批校對與偽題移除版 v4.6.9</title>
+  <title>成語大挑戰每輪題數擴充版 v4.6.10</title>
   <script src="idioms.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
@@ -634,7 +634,7 @@
     <div class="update-banner" id="updateBanner">發現新版，可立即更新。<button onclick="applyPwaUpdate()">立即更新</button><button class="secondary" onclick="hideUpdateBanner()">稍後</button></div>
     <section id="homeScreen" class="screen active">
       <div class="card hero">
-        <h2>v4.6.9 成語大挑戰第六批校對與偽題移除版</h2>
+        <h2>v4.6.10 成語大挑戰每輪題數擴充版</h2>
         <p>強化 Firebase 安全規則、過期資料清理、錯誤診斷、題庫健康檢查、手機多人流程與操作教學。</p>
         <div class="menu-grid">
           <button class="menu-btn" onclick="goSetup()">開始遊戲</button>
@@ -688,6 +688,7 @@
             <option value="10">10 題</option>
             <option value="20">20 題</option>
             <option value="30">30 題</option>
+            <option value="40">40 題</option><option value="50">50 題</option><option value="60">60 題</option><option value="70">70 題</option><option value="80">80 題</option><option value="90">90 題</option><option value="100">100 題</option>
             <option value="all">全部題目</option>
           </select>
         </div>
@@ -957,7 +958,7 @@
         <div class="panel">
           <div><label for="sheetLevelSelect">難度</label><select id="sheetLevelSelect"></select></div>
           <div><label for="sheetCategorySelect">分類</label><select id="sheetCategorySelect"></select></div>
-          <div><label for="sheetCountSelect">題數</label><select id="sheetCountSelect"><option value="10">10 題</option><option value="20">20 題</option><option value="30">30 題</option><option value="50">50 題</option></select></div>
+          <div><label for="sheetCountSelect">題數</label><select id="sheetCountSelect"><option value="10">10 題</option><option value="20">20 題</option><option value="30">30 題</option><option value="40">40 題</option><option value="50">50 題</option><option value="60">60 題</option><option value="70">70 題</option><option value="80">80 題</option><option value="90">90 題</option><option value="100">100 題</option></select></div>
           <div><label for="sheetTypeSelect">類型</label><select id="sheetTypeSelect"><option value="practice">練習卷</option><option value="answer">答案卷</option><option value="wrong">錯題練習卷</option><option value="favorite">收藏成語練習卷</option></select></div>
         </div>
         <div class="actions">
@@ -978,7 +979,7 @@
           <div><label for="teacherTitleInput">測驗名稱</label><input id="teacherTitleInput" value="成語測驗" /></div>
           <div><label for="teacherLevelSelect">難度</label><select id="teacherLevelSelect"></select></div>
           <div><label for="teacherCategorySelect">分類</label><select id="teacherCategorySelect"></select></div>
-          <div><label for="teacherCountSelect">題數</label><select id="teacherCountSelect"><option value="10">10 題</option><option value="20">20 題</option><option value="30">30 題</option><option value="50">50 題</option></select></div>
+          <div><label for="teacherCountSelect">題數</label><select id="teacherCountSelect"><option value="10">10 題</option><option value="20">20 題</option><option value="30">30 題</option><option value="40">40 題</option><option value="50">50 題</option><option value="60">60 題</option><option value="70">70 題</option><option value="80">80 題</option><option value="90">90 題</option><option value="100">100 題</option></select></div>
           <div><label for="teacherTimeSelect">倒數時間</label><select id="teacherTimeSelect"><option value="0">不限時間</option><option value="20" selected>每題 20 秒</option><option value="15">每題 15 秒</option><option value="10">每題 10 秒</option></select></div>
           <div><label for="teacherZhuyinSelect">顯示注音</label><select id="teacherZhuyinSelect"><option value="on">顯示</option><option value="off" selected>隱藏</option></select></div>
         </div>
@@ -1117,7 +1118,7 @@
             <label>暱稱</label>
             <input id="mpHostName" placeholder="例如：Fox" value="房主">
             <div class="panel" style="margin-top:12px;grid-template-columns:1fr 1fr;box-shadow:none;">
-              <div><label>題數</label><select id="mpRoundSelect"><option value="5">5 題</option><option value="10" selected>10 題</option><option value="20">20 題</option><option value="30">30 題</option></select></div>
+              <div><label>題數</label><select id="mpRoundSelect"><option value="5">5 題</option><option value="10" selected>10 題</option><option value="20">20 題</option><option value="30">30 題</option><option value="40">40 題</option><option value="50">50 題</option><option value="60">60 題</option><option value="70">70 題</option><option value="80">80 題</option><option value="90">90 題</option><option value="100">100 題</option></select></div>
               <div><label>每題秒數</label><select id="mpTimeSelect"><option value="5">5 秒</option><option value="8">8 秒</option><option value="10">10 秒</option><option value="15" selected>15 秒</option><option value="20">20 秒</option></select></div>
               <div><label>難度</label><select id="mpLevelSelect"><option value="全部">全部</option><option value="簡單">簡單</option><option value="中等">中等</option><option value="困難">困難</option></select></div>
               <div><label>分類</label><select id="mpCategorySelect"><option value="全部">全部</option></select></div>
@@ -1191,7 +1192,7 @@
       </div>
     </section>
 
-    <div class="version">版本：v4.6.9｜第六批校對與偽題移除版｜校對如法炮製至小家碧玉，移除偽造安分題型，正式題庫與候選題庫分離</div>
+    <div class="version">版本：v4.6.10｜每輪題數擴充版｜新增每輪題數 40 至 100 題選項，保留正式題庫品質檢查</div>
 
 
     <section id="classroomScreen" class="screen">
@@ -1219,7 +1220,7 @@
         <div class="panel">
           <div><label for="classAssignLevel">難度</label><select id="classAssignLevel"></select></div>
           <div><label for="classAssignCategory">分類</label><select id="classAssignCategory"></select></div>
-          <div><label for="classAssignCount">題數</label><select id="classAssignCount"><option value="10">10 題</option><option value="20">20 題</option><option value="30">30 題</option></select></div>
+          <div><label for="classAssignCount">題數</label><select id="classAssignCount"><option value="10">10 題</option><option value="20">20 題</option><option value="30">30 題</option><option value="40">40 題</option><option value="50">50 題</option><option value="60">60 題</option><option value="70">70 題</option><option value="80">80 題</option><option value="90">90 題</option><option value="100">100 題</option></select></div>
           <div><label for="classAssignTime">倒數</label><select id="classAssignTime"><option value="0">不限時間</option><option value="20">每題 20 秒</option><option value="15" selected>每題 15 秒</option><option value="10">每題 10 秒</option></select></div>
         </div>
         <div class="actions"><button onclick="classCreateAssignment()">建立班級練習</button><button class="secondary" onclick="classStartSelectedStudent()">學生開始練習</button><button class="secondary" onclick="showHome()">回首頁</button></div>
@@ -1758,7 +1759,7 @@
     }
     async function mpCopyFinalSummary() {
       const sorted = [...mpPlayers].sort((a,b) => (b.score||0)-(a.score||0) || (b.correct||0)-(a.correct||0));
-      const lines = ['成語大挑戰多人搶答成績表', `房號：${mpRoomId}`, `版本：v4.6.9`, ''];
+      const lines = ['成語大挑戰多人搶答成績表', `房號：${mpRoomId}`, `版本：v4.6.10`, ''];
       sorted.forEach((p,i) => {
         const total = (p.correct||0) + (p.wrong||0);
         const rate = total ? Math.round((p.correct||0)/total*100) + '%' : '--';
@@ -2259,7 +2260,7 @@
     function showTransfer() { setScreen('transferScreen'); }
     function exportLearningData() {
       const data = {
-        version: 'v4.6.9',
+        version: 'v4.6.10',
         exportedAt: new Date().toISOString(),
         records: loadRecords(),
         wrongBook: loadWrongBook(),
@@ -2356,8 +2357,8 @@
         if (isGenericExample(q)) reasons.push('例句待校對');
         return `<tr><td>${i+1}</td><td>${escapeHtml(q.full)}</td><td>${escapeHtml(reasons.join('、') || '待校對')}</td></tr>`;
       }).join('');
-      lastQualityReport = `成語大挑戰 v4.6.9 題庫品質檢查\n總題數：${all.length}\n正式可出題題數：${official.length}\n候選待校對題數：${candidates.length}\n正式題庫問題數：${issues.length}\n候選題庫待校對數：${candidateProblems.length}\n` + issues.map(([i,full,msg]) => `#${i} ${full}：${msg}`).join('\n') + (candidateProblems.length ? `\n\n候選題庫待校對示例：\n` + candidateProblems.slice(0, 200).map((q,idx)=>`#${idx+1} ${q.full}：${[isPlaceholderZhuyin(q)&&'注音', isGenericMeaning(q)&&'解釋', isGenericExample(q)&&'例句'].filter(Boolean).join('、')}待校對`).join('\n') : '');
-      $('qualityBox').innerHTML = `<div class="record-grid"><div class="record-box"><small>全部題庫</small>${all.length}</div><div class="record-box"><small>正式可出題</small>${official.length}</div><div class="record-box"><small>候選待校對</small>${candidates.length}</div><div class="record-box"><small>正式題庫問題</small>${issues.length}</div></div><p class="meaning">${summary}</p><p class="meaning">v4.6.9 將題庫分成「正式可出題」與「候選待校對」。遊戲只會從正式可出題題庫抽題；候選題庫保留在檔案中，待注音、解釋、例句校對後再放入遊戲。</p>${issues.length ? `<h3>正式題庫問題</h3><div class="table-wrap"><table><thead><tr><th>序號</th><th>成語</th><th>問題</th></tr></thead><tbody>${rows}</tbody></table></div>${issues.length > 300 ? '<p class="meaning">只顯示前 300 筆，完整內容可用「複製檢查報告」。</p>' : ''}` : '<div class="empty">正式可出題題庫目前沒有發現明顯問題。</div>'}${candidateProblems.length ? `<h3>候選待校對題庫示例</h3><p class="meaning">以下題目暫不會進入遊戲出題，避免未校對內容影響學習品質。</p><div class="table-wrap"><table><thead><tr><th>序號</th><th>成語</th><th>待校對項目</th></tr></thead><tbody>${candidateRows}</tbody></table></div>${candidateProblems.length > 80 ? '<p class="meaning">只顯示前 80 筆候選題，完整示例可用「複製檢查報告」。</p>' : ''}` : ''}`;
+      lastQualityReport = `成語大挑戰 v4.6.10 題庫品質檢查\n總題數：${all.length}\n正式可出題題數：${official.length}\n候選待校對題數：${candidates.length}\n正式題庫問題數：${issues.length}\n候選題庫待校對數：${candidateProblems.length}\n` + issues.map(([i,full,msg]) => `#${i} ${full}：${msg}`).join('\n') + (candidateProblems.length ? `\n\n候選題庫待校對示例：\n` + candidateProblems.slice(0, 200).map((q,idx)=>`#${idx+1} ${q.full}：${[isPlaceholderZhuyin(q)&&'注音', isGenericMeaning(q)&&'解釋', isGenericExample(q)&&'例句'].filter(Boolean).join('、')}待校對`).join('\n') : '');
+      $('qualityBox').innerHTML = `<div class="record-grid"><div class="record-box"><small>全部題庫</small>${all.length}</div><div class="record-box"><small>正式可出題</small>${official.length}</div><div class="record-box"><small>候選待校對</small>${candidates.length}</div><div class="record-box"><small>正式題庫問題</small>${issues.length}</div></div><p class="meaning">${summary}</p><p class="meaning">v4.6.10 將題庫分成「正式可出題」與「候選待校對」。遊戲只會從正式可出題題庫抽題；候選題庫保留在檔案中，待注音、解釋、例句校對後再放入遊戲。</p>${issues.length ? `<h3>正式題庫問題</h3><div class="table-wrap"><table><thead><tr><th>序號</th><th>成語</th><th>問題</th></tr></thead><tbody>${rows}</tbody></table></div>${issues.length > 300 ? '<p class="meaning">只顯示前 300 筆，完整內容可用「複製檢查報告」。</p>' : ''}` : '<div class="empty">正式可出題題庫目前沒有發現明顯問題。</div>'}${candidateProblems.length ? `<h3>候選待校對題庫示例</h3><p class="meaning">以下題目暫不會進入遊戲出題，避免未校對內容影響學習品質。</p><div class="table-wrap"><table><thead><tr><th>序號</th><th>成語</th><th>待校對項目</th></tr></thead><tbody>${candidateRows}</tbody></table></div>${candidateProblems.length > 80 ? '<p class="meaning">只顯示前 80 筆候選題，完整示例可用「複製檢查報告」。</p>' : ''}` : ''}`;
     }
     async function copyQualityReport() { if (!lastQualityReport) showQualityCheck(); try { await navigator.clipboard.writeText(lastQualityReport); alert('已複製題庫品質檢查報告！'); } catch(e) { alert('無法自動複製，請手動選取檢查結果。'); } }
 
@@ -2522,7 +2523,7 @@
     function renderDataCleanupStatus() {
       const roomText = mpRoomId ? `目前多人房間：${mpRoomId}${mpIsHost ? '（你是房主）' : '（你不是房主）'}` : '目前沒有加入多人房間。';
       const parts = [
-        `程式版本：v4.6.9`,
+        `程式版本：v4.6.10`,
         `題庫數量：${safeIdioms().length}`,
         `本機資料約：${Math.round(localStorageBytes()/1024)} KB`,
         `錯題數：${Object.keys(loadWrongBook()).length}`,
@@ -2558,7 +2559,7 @@
     async function runFirebaseDiagnostics() {
       const lines = [];
       function mark(label, ok, extra='') { lines.push(`${ok ? '✅' : '⚠️'} ${label}${extra ? '：' + extra : ''}`); }
-      mark('程式版本', true, 'v4.6.9');
+      mark('程式版本', true, 'v4.6.10');
       mark('題庫數量', safeIdioms().length >= 1000, `${safeIdioms().length} 題`);
       mark('Firebase 設定檔', mpHasFirebaseConfig(), mpHasFirebaseConfig() ? 'firebase-config.js 已讀取' : '尚未設定或未上傳 firebase-config.js');
       let authOk = false;
@@ -2569,9 +2570,9 @@
       mark('Firebase 匿名登入', authOk, authOk ? mpAuth.currentUser.uid : '請確認 Authentication → Anonymous 已啟用');
       if (authOk && mpDb) {
         try {
-          await mpDb.collection('diagnostics').doc(mpPlayerId).set({ uid:mpPlayerId, version:'v4.6.9', checkedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge:true });
+          await mpDb.collection('diagnostics').doc(mpPlayerId).set({ uid:mpPlayerId, version:'v4.6.10', checkedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge:true });
           mark('Firestore 寫入測試', true, 'diagnostics 測試寫入成功');
-        } catch(e) { lines.push('❌ Firestore 寫入測試失敗：' + e.message + '。請確認 Firestore Rules 已更新為 v4.6.9。'); }
+        } catch(e) { lines.push('❌ Firestore 寫入測試失敗：' + e.message + '。請確認 Firestore Rules 已更新為 v4.6.10。'); }
       }
       const sw = navigator.serviceWorker && navigator.serviceWorker.controller;
       mark('PWA 快取', !!sw, sw ? 'Service Worker 已控制頁面' : '尚未控制，重新整理後通常會生效');
@@ -2595,7 +2596,7 @@
       const customCount = loadCustomIdioms().length;
       const sw = navigator.serviceWorker && navigator.serviceWorker.controller ? '已啟用' : '未啟用 / 尚未控制';
       return `成語大挑戰除錯資訊
-程式版本：v4.6.9
+程式版本：v4.6.10
 題庫版本：2026.05.30
 題庫數量：${safeIdioms().length}
 內建題庫：${baseIdioms().length}
