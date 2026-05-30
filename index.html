@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>成語大挑戰老師班級版 v4.3</title>
+  <title>成語大挑戰正式上線穩定版 v4.4</title>
   <script src="idioms.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
@@ -524,6 +524,12 @@
     .classroom-small { font-size:13px; color:var(--muted); }
     @media (max-width: 760px) { .classroom-grid { grid-template-columns:1fr; } }
 
+    .guide-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:16px; }
+    .diag-ok { color:#1b5e20; font-weight:700; }
+    .diag-warn { color:#b26a00; font-weight:700; }
+    .diag-bad { color:#b71c1c; font-weight:700; }
+    @media (max-width: 760px) { .guide-grid { grid-template-columns:1fr; } }
+
     @media print {
       body { background: #fff !important; color: #000 !important; }
       header, .menu-grid, .actions, .version, .stats, .progress-track, .timer-wrap, .game-card, .screen:not(.active) { display: none !important; }
@@ -559,8 +565,8 @@
     <div class="update-banner" id="updateBanner">發現新版，可立即更新。<button onclick="applyPwaUpdate()">立即更新</button><button class="secondary" onclick="hideUpdateBanner()">稍後</button></div>
     <section id="homeScreen" class="screen active">
       <div class="card hero">
-        <h2>v4.3 成語大挑戰老師班級版</h2>
-        <p>新增班級名單、班級指派練習、學生練習入口、班級成績表與 CSV 匯出，保留多人搶答與手機版優化。</p>
+        <h2>v4.4 成語大挑戰正式上線穩定版</h2>
+        <p>強化 Firebase 安全規則、過期資料清理、錯誤診斷、題庫健康檢查、手機多人流程與操作教學。</p>
         <div class="menu-grid">
           <button class="menu-btn" onclick="goSetup()">開始遊戲</button>
           <button class="menu-btn" onclick="startQuickGame()">快速遊戲</button>
@@ -587,7 +593,10 @@
           <button class="menu-btn secondary" onclick="showAchievements()">成就徽章</button>
           <button class="menu-btn secondary" onclick="showReports()">題目回報</button>
           <button class="menu-btn secondary" onclick="showCategoryStats()">題庫分類統計</button>
-          <button class="menu-btn secondary" onclick="showQualityCheck()">題庫品質檢查</button>
+          <button class="menu-btn secondary" onclick="showQualityCheck()">題庫健康檢查</button>
+          <button class="menu-btn secondary" onclick="showDataCleanup()">資料清理</button>
+          <button class="menu-btn secondary" onclick="showFirebaseDiagnostics()">錯誤診斷</button>
+          <button class="menu-btn secondary" onclick="showGuide()">操作教學</button>
         </div>
         <div class="actions"><button class="secondary" id="muteHomeBtn" onclick="toggleMute()">音效：開</button><button class="secondary" onclick="showDebugInfo()">版本 / 除錯資訊</button><button class="secondary" onclick="showInstallHelp()">安裝到手機桌面</button></div>
         <div class="backup-banner" id="backupBanner">建議備份學習紀錄。<button class="secondary" onclick="showTransfer()">前往匯出 / 匯入</button><button class="secondary" onclick="dismissBackupReminder()">本週不再提醒</button></div>
@@ -771,9 +780,50 @@
     <section id="qualityScreen" class="screen">
       <div class="card">
         <h2>題庫品質檢查</h2>
-        <p class="meaning">自動檢查缺少注音、例句、解釋、提示、重複成語、答案不在完整成語內、題目沒有空格等問題。</p>
+        <p class="meaning">自動檢查缺少注音、例句、解釋、提示、重複成語、答案不在完整成語內、缺字題格式、注音音節數與可疑字元等問題。</p>
         <div id="qualityBox"></div>
         <div class="actions"><button onclick="copyQualityReport()">複製檢查報告</button><button class="secondary" onclick="showHome()">回首頁</button></div>
+      </div>
+    </section>
+
+    <section id="dataCleanupScreen" class="screen">
+      <div class="card">
+        <h2>過期房間與舊資料清理</h2>
+        <p class="meaning">正式上線後，建議定期清理瀏覽器舊紀錄與已關閉的多人房間，避免快取或測試資料影響使用。</p>
+        <div class="actions">
+          <button onclick="renderDataCleanupStatus()">重新檢查</button>
+          <button onclick="cleanupLocalOldData()">清理本機舊資料</button>
+          <button onclick="cleanupCurrentRoom()">關閉目前多人房間</button>
+          <button class="secondary" onclick="showHome()">回首頁</button>
+        </div>
+        <div id="dataCleanupBox" class="debug-box"></div>
+      </div>
+    </section>
+
+    <section id="firebaseDiagnosticsScreen" class="screen">
+      <div class="card">
+        <h2>錯誤診斷頁面</h2>
+        <p class="meaning">檢查 Firebase 連線、匿名登入、Firestore 權限、PWA 快取與目前版本。多人遊戲出錯時，請先來這裡按「執行診斷」。</p>
+        <div class="actions">
+          <button onclick="runFirebaseDiagnostics()">執行診斷</button>
+          <button onclick="copyFirebaseDiagnostics()">複製診斷資訊</button>
+          <button onclick="clearAppCacheAndReload()">清除快取並重新載入</button>
+          <button class="secondary" onclick="showHome()">回首頁</button>
+        </div>
+        <div id="firebaseDiagBox" class="debug-box">尚未診斷。</div>
+      </div>
+    </section>
+
+    <section id="guideScreen" class="screen">
+      <div class="card">
+        <h2>操作教學</h2>
+        <div class="guide-grid">
+          <div class="mp-box"><h3>單人 / 快速遊戲</h3><ol><li>回首頁選「開始遊戲」或「快速遊戲」。</li><li>選難度、分類、題數與倒數時間。</li><li>點答案作答，快速遊戲會自動下一題。</li></ol></div>
+          <div class="mp-box"><h3>多人搶答</h3><ol><li>房主進入「多人連線搶答」並建立房間。</li><li>按「顯示 QR Code」或「複製邀請連結」。</li><li>玩家掃碼後輸入暱稱，按「加入房間」。</li><li>大家按準備後，房主開始遊戲。</li></ol></div>
+          <div class="mp-box"><h3>老師班級版</h3><ol><li>建立班級與學生名單。</li><li>建立班級指派練習。</li><li>學生選擇自己的名字開始練習。</li><li>老師可查看、列印或匯出 CSV 成績。</li></ol></div>
+          <div class="mp-box"><h3>更新與離線</h3><ol><li>若看到舊版，按「立即更新」。</li><li>仍無效時進入「錯誤診斷」清除快取。</li><li>手機可加入主畫面，開啟過一次後可離線使用。</li></ol></div>
+        </div>
+        <div class="actions"><button class="secondary" onclick="showHome()">回首頁</button></div>
       </div>
     </section>
 
@@ -975,7 +1025,7 @@
     <section id="multiplayerScreen" class="screen">
       <div class="card">
         <h2>多人連線搶答</h2>
-        <p class="meaning">使用 Firebase Firestore 開房間，朋友輸入房號即可加入。每位玩家各自計分，排行榜會即時更新。</p>
+        <p class="meaning">使用 Firebase 匿名登入與 Firestore 開房間。手機掃 QR Code 或點邀請連結會自動帶入房號，再輸入暱稱即可加入等待室。</p>
         <div class="mp-box">
           <h3>Firebase 狀態</h3>
           <div id="mpFirebaseStatus" class="mp-status">正在檢查 Firebase 設定...</div>
@@ -991,7 +1041,7 @@
               <div><label>難度</label><select id="mpLevelSelect"><option value="全部">全部</option><option value="簡單">簡單</option><option value="中等">中等</option><option value="困難">困難</option></select></div>
               <div><label>分類</label><select id="mpCategorySelect"><option value="全部">全部</option></select></div>
             </div>
-            <button onclick="mpCreateRoom()">建立房間</button>
+            <button onclick="mpCreateRoom()">建立房間</button><p class="meaning">手機版建議房主建立房間後按「顯示 QR Code」，讓玩家掃碼加入。</p>
           </div>
           <div class="mp-box">
             <h3>加入房間</h3>
@@ -999,7 +1049,7 @@
             <input id="mpJoinName" placeholder="輸入你的名字">
             <label>房號</label>
             <input id="mpRoomInput" placeholder="例如：AB12CD" maxlength="6" style="text-transform:uppercase;"><div id="mpJoinHint" class="meaning"></div>
-            <button onclick="mpJoinRoom()">加入房間</button>
+            <button onclick="mpJoinRoom()">加入房間</button><p class="meaning">若你是掃 QR Code 進來，房號會自動填入。</p>
           </div>
         </div>
         <div class="actions"><button class="secondary" onclick="showHome()">回首頁</button></div>
@@ -1024,7 +1074,7 @@
         </div>
         <div id="mpHostTools" class="mp-host-tools">
           <button class="secondary" onclick="mpResetRoomScores()">房主重設分數</button>
-          <button class="secondary" onclick="mpCloseRoom()">房主關閉房間</button>
+          <button class="secondary" onclick="mpCloseRoom()">房主關閉房間</button><button class="secondary" onclick="showDataCleanup()">資料清理</button>
         </div>
         <div id="mpInviteQrBox" class="mp-invite-qr">
           <h3>掃 QR Code 加入房間</h3>
@@ -1060,7 +1110,7 @@
       </div>
     </section>
 
-    <div class="version">版本：v4.3｜老師班級版｜題庫 1000 題、班級管理、多人大廳、搶答、QR Code、匿名登入安全規則</div>
+    <div class="version">版本：v4.4｜正式上線穩定版｜題庫 1000 題、Firebase 安全規則、過期資料清理、錯誤診斷、操作教學</div>
 
 
     <section id="classroomScreen" class="screen">
@@ -1233,6 +1283,7 @@
       if (room && $('mpRoomInput')) {
         $('mpRoomInput').value = room;
         if ($('mpJoinHint')) $('mpJoinHint').textContent = '已從邀請連結帶入房號，請輸入暱稱後按「加入房間」。';
+        setTimeout(() => { if ($('mpJoinName')) $('mpJoinName').focus(); }, 150);
       }
       if (mpInitFirebase()) mpEnsureAuth().catch(() => {});
     }
@@ -1593,7 +1644,7 @@
     }
     async function mpCopyFinalSummary() {
       const sorted = [...mpPlayers].sort((a,b) => (b.score||0)-(a.score||0) || (b.correct||0)-(a.correct||0));
-      const lines = ['成語大挑戰多人搶答成績表', `房號：${mpRoomId}`, `版本：v4.3`, ''];
+      const lines = ['成語大挑戰多人搶答成績表', `房號：${mpRoomId}`, `版本：v4.4`, ''];
       sorted.forEach((p,i) => {
         const total = (p.correct||0) + (p.wrong||0);
         const rate = total ? Math.round((p.correct||0)/total*100) + '%' : '--';
@@ -2087,7 +2138,7 @@
     function showTransfer() { setScreen('transferScreen'); }
     function exportLearningData() {
       const data = {
-        version: 'v4.3',
+        version: 'v4.4',
         exportedAt: new Date().toISOString(),
         records: loadRecords(),
         wrongBook: loadWrongBook(),
@@ -2140,21 +2191,29 @@
       const items = safeIdioms();
       const issues = [];
       const seen = {};
+      const seenBlank = {};
+      const zhuyinChars = /^[ㄅ-ㄩˊˇˋ˙\s・，,、]+$/;
       items.forEach((q, idx) => {
         const n = idx + 1;
         if (!q.full) issues.push([n, q.full || '(空白)', '缺少完整成語 full']);
         if (!q.blank || !String(q.blank).includes('＿')) issues.push([n, q.full || '(空白)', '題目 blank 沒有全形空格「＿」']);
+        if (q.blank && (String(q.blank).match(/＿/g) || []).length !== 1) issues.push([n, q.full || '(空白)', '題目 blank 建議只留一個缺字空格']);
+        if (q.full && q.blank && String(q.full).length !== String(q.blank).length) issues.push([n, q.full || '(空白)', '完整成語與缺字題長度不一致']);
         if (!q.answer) issues.push([n, q.full || '(空白)', '缺少答案 answer']);
         if (q.full && q.answer && !String(q.full).includes(String(q.answer))) issues.push([n, q.full, '答案不在完整成語中']);
         if (!q.zhuyin) issues.push([n, q.full || '(空白)', '缺少注音 zhuyin']);
+        if (q.zhuyin && !zhuyinChars.test(String(q.zhuyin))) issues.push([n, q.full || '(空白)', '注音含有非注音符號，請人工確認']);
+        if (q.full && q.zhuyin) { const syllables = String(q.zhuyin).trim().split(/\s+/).filter(Boolean).length; if (syllables && Math.abs(syllables - String(q.full).length) > 1) issues.push([n, q.full, `注音音節數 ${syllables} 與成語字數 ${String(q.full).length} 差異較大`]); }
         if (!q.meaning) issues.push([n, q.full || '(空白)', '缺少解釋 meaning']);
         if (!q.example) issues.push([n, q.full || '(空白)', '缺少例句 example']);
         if (!q.hint) issues.push([n, q.full || '(空白)', '缺少提示 hint']);
         if (!q.level) issues.push([n, q.full || '(空白)', '缺少難度 level']);
         if (!q.category) issues.push([n, q.full || '(空白)', '缺少分類 category']);
         if (q.full) seen[q.full] = (seen[q.full] || 0) + 1;
+        if (q.blank) seenBlank[q.blank] = (seenBlank[q.blank] || 0) + 1;
       });
       Object.entries(seen).forEach(([full,count]) => { if (count > 1) issues.push(['重複', full, `完整成語重複 ${count} 次`]); });
+      Object.entries(seenBlank).forEach(([blank,count]) => { if (count > 1) issues.push(['重複題型', blank, `缺字題重複 ${count} 次`]); });
       return issues;
     }
     function showQualityCheck() {
@@ -2163,7 +2222,7 @@
       const items = safeIdioms();
       const summary = issues.length ? `<span class="issue-bad">發現 ${issues.length} 個可改善項目</span>` : `<span class="issue-ok">題庫品質檢查通過</span>`;
       const rows = issues.slice(0, 300).map(([i,full,msg]) => `<tr><td>${i}</td><td>${escapeHtml(full)}</td><td>${escapeHtml(msg)}</td></tr>`).join('');
-      lastQualityReport = `成語大挑戰 v4.3 題庫品質檢查\n總題數：${items.length}\n問題數：${issues.length}\n` + issues.map(([i,full,msg]) => `#${i} ${full}：${msg}`).join('\n');
+      lastQualityReport = `成語大挑戰 v4.4 題庫品質檢查\n總題數：${items.length}\n問題數：${issues.length}\n` + issues.map(([i,full,msg]) => `#${i} ${full}：${msg}`).join('\n');
       $('qualityBox').innerHTML = `<div class="record-grid"><div class="record-box"><small>總題數</small>${items.length}</div><div class="record-box"><small>問題數</small>${issues.length}</div><div class="record-box"><small>有注音</small>${items.filter(q=>q.zhuyin).length}</div><div class="record-box"><small>有例句</small>${items.filter(q=>q.example).length}</div></div><p class="meaning">${summary}</p>${issues.length ? `<div class="table-wrap"><table><thead><tr><th>序號</th><th>成語</th><th>問題</th></tr></thead><tbody>${rows}</tbody></table></div>${issues.length > 300 ? '<p class="meaning">只顯示前 300 筆，完整內容可用「複製檢查報告」。</p>' : ''}` : '<div class="empty">目前沒有發現明顯問題。</div>'}`;
     }
     async function copyQualityReport() { if (!lastQualityReport) showQualityCheck(); try { await navigator.clipboard.writeText(lastQualityReport); alert('已複製題庫品質檢查報告！'); } catch(e) { alert('無法自動複製，請手動選取檢查結果。'); } }
@@ -2315,6 +2374,85 @@
 
 
 
+
+    function showDataCleanup() { setScreen('dataCleanupScreen'); renderDataCleanupStatus(); }
+    function localStorageBytes() {
+      let total = 0;
+      for (let i=0; i<localStorage.length; i++) {
+        const k = localStorage.key(i) || '';
+        const v = localStorage.getItem(k) || '';
+        total += k.length + v.length;
+      }
+      return total;
+    }
+    function renderDataCleanupStatus() {
+      const roomText = mpRoomId ? `目前多人房間：${mpRoomId}${mpIsHost ? '（你是房主）' : '（你不是房主）'}` : '目前沒有加入多人房間。';
+      const parts = [
+        `程式版本：v4.4`,
+        `題庫數量：${safeIdioms().length}`,
+        `本機資料約：${Math.round(localStorageBytes()/1024)} KB`,
+        `錯題數：${Object.keys(loadWrongBook()).length}`,
+        `收藏數：${loadFavorites().length}`,
+        `自訂題庫：${loadCustomIdioms().length} 題`,
+        roomText,
+        '',
+        '建議：多人測試後，房主可先關閉房間；若頁面一直看到舊版，可清除快取並重新載入。'
+      ];
+      const box = $('dataCleanupBox'); if (box) box.textContent = parts.join('\n');
+    }
+    async function cleanupLocalOldData() {
+      if (!confirm('這會清除本機舊快取與暫存狀態，但不會刪除你的錯題、收藏、筆記與學習紀錄。確定繼續嗎？')) return;
+      ['idiomMpPlayerName','idiomMpPlayerId','idiomLastReport'].forEach(k => localStorage.removeItem(k));
+      try {
+        if ('caches' in window) {
+          const keys = await caches.keys();
+          await Promise.all(keys.filter(k => k.includes('idiom-game')).map(k => caches.delete(k)));
+        }
+      } catch(e) {}
+      alert('本機舊快取與暫存狀態已清理。請重新整理或按「立即更新」。');
+      renderDataCleanupStatus();
+    }
+    async function cleanupCurrentRoom() {
+      if (!mpRoomId) { alert('目前沒有多人房間可清理。'); return; }
+      if (!mpIsHost) { alert('只有房主可以關閉目前房間。'); return; }
+      if (!confirm(`確定要關閉房間 ${mpRoomId} 嗎？`)) return;
+      try { await mpEnsureAuth(); await mpRoomRef().update({ status:'closed', updatedAt: firebase.firestore.FieldValue.serverTimestamp(), closedAt: firebase.firestore.FieldValue.serverTimestamp() }); alert('房間已關閉。'); renderDataCleanupStatus(); }
+      catch(e) { alert('關閉房間失敗：' + e.message); }
+    }
+
+    function showFirebaseDiagnostics() { setScreen('firebaseDiagnosticsScreen'); runFirebaseDiagnostics(); }
+    async function runFirebaseDiagnostics() {
+      const lines = [];
+      function mark(label, ok, extra='') { lines.push(`${ok ? '✅' : '⚠️'} ${label}${extra ? '：' + extra : ''}`); }
+      mark('程式版本', true, 'v4.4');
+      mark('題庫數量', safeIdioms().length >= 1000, `${safeIdioms().length} 題`);
+      mark('Firebase 設定檔', mpHasFirebaseConfig(), mpHasFirebaseConfig() ? 'firebase-config.js 已讀取' : '尚未設定或未上傳 firebase-config.js');
+      let authOk = false;
+      if (mpHasFirebaseConfig()) {
+        try { await mpEnsureAuth(); authOk = !!(mpAuth && mpAuth.currentUser); }
+        catch(e) { lines.push('❌ 匿名登入失敗：' + e.message); }
+      }
+      mark('Firebase 匿名登入', authOk, authOk ? mpAuth.currentUser.uid : '請確認 Authentication → Anonymous 已啟用');
+      if (authOk && mpDb) {
+        try {
+          await mpDb.collection('diagnostics').doc(mpPlayerId).set({ uid:mpPlayerId, version:'v4.4', checkedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge:true });
+          mark('Firestore 寫入測試', true, 'diagnostics 測試寫入成功');
+        } catch(e) { lines.push('❌ Firestore 寫入測試失敗：' + e.message + '。請確認 Firestore Rules 已更新為 v4.4。'); }
+      }
+      const sw = navigator.serviceWorker && navigator.serviceWorker.controller;
+      mark('PWA 快取', !!sw, sw ? 'Service Worker 已控制頁面' : '尚未控制，重新整理後通常會生效');
+      lines.push('', '目前網址：' + location.href, '瀏覽器：' + navigator.userAgent);
+      const box = $('firebaseDiagBox'); if (box) box.textContent = lines.join('\n');
+      return lines.join('\n');
+    }
+    async function copyFirebaseDiagnostics() {
+      const box = $('firebaseDiagBox');
+      const text = box ? box.textContent : await runFirebaseDiagnostics();
+      try { await navigator.clipboard.writeText(text); alert('已複製診斷資訊。'); } catch(e) { prompt('請複製診斷資訊：', text); }
+    }
+
+    function showGuide() { setScreen('guideScreen'); }
+
     function showDebugInfo() { setScreen('debugScreen'); $('debugInfoBox').textContent = makeDebugInfo(); }
     function makeDebugInfo() {
       const r = loadRecords();
@@ -2323,7 +2461,7 @@
       const customCount = loadCustomIdioms().length;
       const sw = navigator.serviceWorker && navigator.serviceWorker.controller ? '已啟用' : '未啟用 / 尚未控制';
       return `成語大挑戰除錯資訊
-程式版本：v4.3
+程式版本：v4.4
 題庫版本：2026.05.30
 題庫數量：${safeIdioms().length}
 內建題庫：${baseIdioms().length}
@@ -2335,6 +2473,9 @@
 總作答：${r.totalAnswered}
 最高分：${r.bestScore}
 PWA Service Worker：${sw}
+Firebase 設定：${mpHasFirebaseConfig() ? '已讀取' : '未設定'}
+匿名登入：${mpAuth && mpAuth.currentUser ? mpAuth.currentUser.uid : '尚未登入 / 未檢查'}
+目前多人房間：${mpRoomId || '無'}
 網址：${location.href}
 瀏覽器：${navigator.userAgent}
 問題描述：`;
