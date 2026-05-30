@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>成語大挑戰教學與離線強化版 v3.3</title>
+  <title>成語大挑戰教材與題庫管理版 v3.4</title>
   <script src="idioms.js"></script>
   <style>
     :root {
@@ -143,6 +143,7 @@
       .choices { grid-template-columns: 1fr; }
     }
 
+    .update-banner { position: sticky; top: 0; z-index: 10; margin-bottom: 14px; padding: 12px; border-radius: 14px; background: rgba(79,138,76,.16); border: 1px solid var(--border); display: none; text-align:center; font-weight:900; }
     .backup-banner { margin-top: 14px; padding: 12px; border-radius: 14px; background: rgba(255, 193, 7, .20); border: 1px solid rgba(0,0,0,.12); display: none; }
     .print-area { background: white; color: #111; border-radius: 18px; padding: 18px; margin-top: 14px; }
     .sheet-item { break-inside: avoid; padding: 10px 0; border-bottom: 1px dashed #aaa; }
@@ -167,10 +168,11 @@
   </header>
 
   <main>
+    <div class="update-banner" id="updateBanner">發現新版，可立即更新。<button onclick="applyPwaUpdate()">立即更新</button><button class="secondary" onclick="hideUpdateBanner()">稍後</button></div>
     <section id="homeScreen" class="screen active">
       <div class="card hero">
-        <h2>v3.3 成語大挑戰教學與離線強化版</h2>
-        <p>新增練習卷 / 答案卷、列印功能、離線可用 PWA、資料備份提醒、錯題熟練度與本機排行榜。</p>
+        <h2>v3.4 成語大挑戰教材與題庫管理版</h2>
+        <p>新增老師出題模式、自訂題庫匯入、題庫管理工具、錯題列印學習單、考試成績單與 PWA 更新提醒。</p>
         <div class="menu-grid">
           <button class="menu-btn" onclick="goSetup()">開始遊戲</button>
           <button class="menu-btn" onclick="startQuickGame()">快速遊戲</button>
@@ -182,7 +184,12 @@
           <button class="menu-btn secondary" onclick="showCards()">成語學習卡</button>
           <button class="menu-btn secondary" onclick="showFavorites()">收藏成語</button>
           <button class="menu-btn secondary" onclick="showTransfer()">匯出 / 匯入</button>
+          <button class="menu-btn secondary" onclick="showTeacherMode()">老師出題模式</button>
           <button class="menu-btn secondary" onclick="showWorksheet()">練習卷 / 答案卷</button>
+          <button class="menu-btn secondary" onclick="showWrongWorksheet()">錯題列印學習單</button>
+          <button class="menu-btn secondary" onclick="showQuestionBankManager()">題庫管理工具</button>
+          <button class="menu-btn secondary" onclick="showCustomImport()">自訂題庫匯入</button>
+          <button class="menu-btn secondary" onclick="showExamReport()">考試成績單</button>
           <button class="menu-btn secondary" onclick="showLeaderboard()">本機排行榜</button>
           <button class="menu-btn secondary" onclick="startDailyChallenge()">每日挑戰</button>
           <button class="menu-btn secondary" onclick="goExamSetup()">考試模式</button>
@@ -439,6 +446,87 @@
       </div>
     </section>
 
+
+    <section id="teacherScreen" class="screen">
+      <div class="card">
+        <h2>老師出題模式</h2>
+        <p class="meaning">可建立一組指定條件的成語練習，適合家長或老師安排測驗。</p>
+        <div class="panel">
+          <div><label for="teacherTitleInput">測驗名稱</label><input id="teacherTitleInput" value="成語測驗" /></div>
+          <div><label for="teacherLevelSelect">難度</label><select id="teacherLevelSelect"></select></div>
+          <div><label for="teacherCategorySelect">分類</label><select id="teacherCategorySelect"></select></div>
+          <div><label for="teacherCountSelect">題數</label><select id="teacherCountSelect"><option value="10">10 題</option><option value="20">20 題</option><option value="30">30 題</option><option value="50">50 題</option></select></div>
+          <div><label for="teacherTimeSelect">倒數時間</label><select id="teacherTimeSelect"><option value="0">不限時間</option><option value="20" selected>每題 20 秒</option><option value="15">每題 15 秒</option><option value="10">每題 10 秒</option></select></div>
+          <div><label for="teacherZhuyinSelect">顯示注音</label><select id="teacherZhuyinSelect"><option value="on">顯示</option><option value="off" selected>隱藏</option></select></div>
+        </div>
+        <div class="actions">
+          <button onclick="startTeacherGame('normal')">開始練習</button>
+          <button onclick="startTeacherGame('exam')">開始考試</button>
+          <button onclick="generateTeacherWorksheet('practice')">產生練習卷</button>
+          <button onclick="generateTeacherWorksheet('answer')">產生答案卷</button>
+          <button class="secondary" onclick="showHome()">回首頁</button>
+        </div>
+        <div id="teacherOutput" class="print-area"></div>
+      </div>
+    </section>
+
+    <section id="customImportScreen" class="screen">
+      <div class="card">
+        <h2>自訂題庫匯入</h2>
+        <p class="meaning">貼上 JSON 陣列即可匯入自己的成語題庫。必要欄位：full、blank、answer。建議也提供 zhuyin、meaning、example、hint、level、category。</p>
+        <div class="actions">
+          <button onclick="loadImportExample()">載入範例</button>
+          <button onclick="importCustomIdioms()">匯入題庫</button>
+          <button onclick="exportCustomIdioms()">匯出自訂題庫</button>
+          <button class="danger" onclick="clearCustomIdioms()">清除自訂題庫</button>
+          <button class="secondary" onclick="showHome()">回首頁</button>
+        </div>
+        <textarea id="customImportText" style="min-height:260px" placeholder="請貼上 JSON 題庫"></textarea>
+        <div id="customImportResult" class="share-box">目前自訂題庫：0 題</div>
+      </div>
+    </section>
+
+    <section id="bankManagerScreen" class="screen">
+      <div class="card">
+        <h2>題庫管理工具</h2>
+        <p class="meaning">可查看題庫總數、內建與自訂題庫數、檢查品質、匯出目前全部題庫。</p>
+        <div class="actions">
+          <button onclick="renderQuestionBankManager()">重新整理</button>
+          <button onclick="exportAllIdioms()">匯出全部題庫 JSON</button>
+          <button onclick="showQualityCheck()">題庫品質檢查</button>
+          <button class="secondary" onclick="showHome()">回首頁</button>
+        </div>
+        <textarea id="bankExportText" style="min-height:120px" placeholder="匯出題庫後會顯示在這裡"></textarea>
+        <div id="bankManagerBox"></div>
+      </div>
+    </section>
+
+    <section id="wrongWorksheetScreen" class="screen">
+      <div class="card">
+        <h2>錯題列印學習單</h2>
+        <p class="meaning">把錯題本整理成適合列印的學習單，包含題目、完整成語、注音、解釋、例句與我的筆記。</p>
+        <div class="actions">
+          <button onclick="generateWrongWorksheet()">產生錯題學習單</button>
+          <button onclick="window.print()">列印</button>
+          <button class="secondary" onclick="showHome()">回首頁</button>
+        </div>
+        <div id="wrongWorksheetOutput" class="print-area">請先按「產生錯題學習單」。</div>
+      </div>
+    </section>
+
+    <section id="examReportScreen" class="screen">
+      <div class="card">
+        <h2>考試成績單</h2>
+        <p class="meaning">考試模式結束後會自動產生成績單，也可以在這裡列印最近一次考試結果。</p>
+        <div class="actions">
+          <button onclick="renderExamReport()">重新產生成績單</button>
+          <button onclick="window.print()">列印成績單</button>
+          <button class="secondary" onclick="showHome()">回首頁</button>
+        </div>
+        <div id="examReportOutput" class="print-area"></div>
+      </div>
+    </section>
+
     <section id="leaderboardScreen" class="screen">
       <div class="card">
         <h2>本機排行榜</h2>
@@ -463,7 +551,7 @@
       </div>
     </section>
 
-    <div class="version">版本：v3.3｜成語大挑戰教學與離線強化版｜練習卷 / 答案卷｜列印｜PWA 離線｜備份提醒｜錯題熟練度｜本機排行榜</div>
+    <div class="version">版本：v3.4｜成語大挑戰教材與題庫管理版｜老師出題｜自訂題庫｜題庫管理｜錯題學習單｜考試成績單｜PWA 更新提醒</div>
   </main>
 
   <script>
@@ -478,6 +566,8 @@
     const STORAGE_QSTATS = 'idiomGameQuestionStatsV32';
     const STORAGE_LEADERBOARD = 'idiomGameLeaderboardV33';
     const STORAGE_BACKUP = 'idiomGameBackupReminderV33';
+    const STORAGE_CUSTOM_IDIOMS = 'idiomGameCustomIdiomsV34';
+    const STORAGE_EXAM_REPORT = 'idiomGameExamReportV34';
     const labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
     let pool = [];
     let currentIndex = 0;
@@ -501,7 +591,10 @@
     let gameStartedAt = 0;
 
     function $(id) { return document.getElementById(id); }
-    function safeIdioms() { return Array.isArray(window.IDIOMS || IDIOMS) ? (window.IDIOMS || IDIOMS) : []; }
+    function baseIdioms() { try { return Array.isArray(window.IDIOMS || IDIOMS) ? (window.IDIOMS || IDIOMS) : []; } catch(e) { return []; } }
+    function loadCustomIdioms() { try { return JSON.parse(localStorage.getItem(STORAGE_CUSTOM_IDIOMS) || '[]') || []; } catch { return []; } }
+    function saveCustomIdioms(list) { localStorage.setItem(STORAGE_CUSTOM_IDIOMS, JSON.stringify(list || [])); }
+    function safeIdioms() { const map = new Map(); [...baseIdioms(), ...loadCustomIdioms()].forEach(q => { if (q && q.full) map.set(q.full, q); }); return [...map.values()]; }
     function shuffle(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
     function uniqueValues(key) { return [...new Set(safeIdioms().map(q => q[key]).filter(Boolean))]; }
     function todayString() { return new Date().toLocaleDateString('zh-TW'); }
@@ -518,6 +611,8 @@
       $('cardCategorySelect').innerHTML = categories.map(v => `<option value="${v}">${v}</option>`).join('');
       if ($('sheetLevelSelect')) $('sheetLevelSelect').innerHTML = levels.map(v => `<option value="${v}">${v}</option>`).join('');
       if ($('sheetCategorySelect')) $('sheetCategorySelect').innerHTML = categories.map(v => `<option value="${v}">${v}</option>`).join('');
+      if ($('teacherLevelSelect')) $('teacherLevelSelect').innerHTML = levels.map(v => `<option value="${v}">${v}</option>`).join('');
+      if ($('teacherCategorySelect')) $('teacherCategorySelect').innerHTML = categories.map(v => `<option value="${v}">${v}</option>`).join('');
       if ($('zhuyinSelect')) $('zhuyinSelect').value = showZhuyinSetting;
       updateMuteButtons();
       updateWrongCount();
@@ -674,7 +769,8 @@
       const accuracy = pool.length ? Math.round((correctCount / pool.length) * 100) : 0;
       $('resultText').style.color = 'var(--text)'; $('resultText').textContent = `總分：${score}，答對 ${correctCount} / ${pool.length} 題，正確率 ${accuracy}%`;
       $('meaningText').textContent = currentMode === 'exam' ? '考試模式已結束，現在可以查看本輪錯題與成績。' : '可以複製成績分享給朋友，或進入錯題本專門複習答錯的題目。';
-      $('exampleText').style.display = 'block'; $('exampleText').innerHTML = `<strong>分享文字：</strong><div class="share-box" id="shareText">${makeShareText()}</div><div class="actions"><button onclick="copyShareText()">複製成績</button></div>`;
+      $('exampleText').style.display = 'block'; $('exampleText').innerHTML = `<strong>分享文字：</strong><div class="share-box" id="shareText">${makeShareText()}</div><div class="actions"><button onclick="copyShareText()">複製成績</button>${currentMode === 'exam' ? '<button onclick="showExamReport()">查看考試成績單</button>' : ''}</div>`;
+      if (currentMode === 'exam') saveExamReport();
       answered = true; updateStats(true); renderRoundReview();
     }
 
@@ -814,7 +910,7 @@
     function showTransfer() { setScreen('transferScreen'); }
     function exportLearningData() {
       const data = {
-        version: 'v3.3',
+        version: 'v3.4',
         exportedAt: new Date().toISOString(),
         records: loadRecords(),
         wrongBook: loadWrongBook(),
@@ -881,7 +977,7 @@
       const items = safeIdioms();
       const summary = issues.length ? `<span class="issue-bad">發現 ${issues.length} 個可改善項目</span>` : `<span class="issue-ok">題庫品質檢查通過</span>`;
       const rows = issues.slice(0, 300).map(([i,full,msg]) => `<tr><td>${i}</td><td>${escapeHtml(full)}</td><td>${escapeHtml(msg)}</td></tr>`).join('');
-      lastQualityReport = `成語大挑戰 v3.3 題庫品質檢查\n總題數：${items.length}\n問題數：${issues.length}\n` + issues.map(([i,full,msg]) => `#${i} ${full}：${msg}`).join('\n');
+      lastQualityReport = `成語大挑戰 v3.4 題庫品質檢查\n總題數：${items.length}\n問題數：${issues.length}\n` + issues.map(([i,full,msg]) => `#${i} ${full}：${msg}`).join('\n');
       $('qualityBox').innerHTML = `<div class="record-grid"><div class="record-box"><small>總題數</small>${items.length}</div><div class="record-box"><small>問題數</small>${issues.length}</div><div class="record-box"><small>有注音</small>${items.filter(q=>q.zhuyin).length}</div><div class="record-box"><small>有例句</small>${items.filter(q=>q.example).length}</div></div><p class="meaning">${summary}</p>${issues.length ? `<div class="table-wrap"><table><thead><tr><th>序號</th><th>成語</th><th>問題</th></tr></thead><tbody>${rows}</tbody></table></div>${issues.length > 300 ? '<p class="meaning">只顯示前 300 筆，完整內容可用「複製檢查報告」。</p>' : ''}` : '<div class="empty">目前沒有發現明顯問題。</div>'}`;
     }
     async function copyQualityReport() { if (!lastQualityReport) showQualityCheck(); try { await navigator.clipboard.writeText(lastQualityReport); alert('已複製題庫品質檢查報告！'); } catch(e) { alert('無法自動複製，請手動選取檢查結果。'); } }
@@ -950,9 +1046,104 @@
     }
     function dismissBackupReminder() { localStorage.setItem(STORAGE_BACKUP, String(Date.now())); checkBackupReminder(); }
 
+
+    function showTeacherMode() { setScreen('teacherScreen'); if (!($('teacherOutput').innerHTML || '').trim()) $('teacherOutput').innerHTML = '<div class="empty">請先選擇條件，再開始練習、考試或產生試卷。</div>'; }
+    function applyTeacherSettings() {
+      $('levelSelect').value = $('teacherLevelSelect').value;
+      $('categorySelect').value = $('teacherCategorySelect').value;
+      $('roundSelect').value = $('teacherCountSelect').value;
+      $('timeSelect').value = $('teacherTimeSelect').value;
+      $('zhuyinSelect').value = $('teacherZhuyinSelect').value;
+      updateZhuyinSetting();
+    }
+    function startTeacherGame(mode) { applyTeacherSettings(); startGame(mode); }
+    function generateTeacherWorksheet(type) {
+      const title = $('teacherTitleInput').value || '成語測驗';
+      const level = $('teacherLevelSelect').value;
+      const category = $('teacherCategorySelect').value;
+      const count = Number($('teacherCountSelect').value || 10);
+      let items = safeIdioms().filter(q => (level === '全部' || q.level === level) && (category === '全部' || q.category === category));
+      items = shuffle(items).slice(0, Math.min(count, items.length));
+      if (!items.length) { $('teacherOutput').innerHTML = '<div class="empty">這個條件沒有題目。</div>'; return; }
+      const showAnswer = type === 'answer';
+      const showZhuyin = $('teacherZhuyinSelect').value === 'on';
+      const rows = items.map((q,i)=>`<div class="sheet-item"><strong>${i+1}. ${escapeHtml(q.blank)}</strong>${showAnswer ? `　答案：<strong>${escapeHtml(q.answer)}</strong>　完整成語：${escapeHtml(q.full)}` : '　答案：＿＿'}<br>${showZhuyin ? `注音：${escapeHtml(q.zhuyin || '')}<br>` : ''}分類：${escapeHtml(q.category || '未分類')}｜難度：${escapeHtml(q.level || '未分類')}<br>${showAnswer ? `解釋：${escapeHtml(q.meaning || '')}<br>例句：${escapeHtml(getExample(q))}` : '解釋：＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿'}</div>`).join('');
+      $('teacherOutput').innerHTML = `<h2>${escapeHtml(title)}${showAnswer ? '答案卷' : '練習卷'}</h2><p>日期：${todayString()}｜題數：${items.length}｜分類：${escapeHtml(category)}｜難度：${escapeHtml(level)}</p>${rows}`;
+    }
+
+    function normalizeCustomIdiom(q) {
+      if (!q || !q.full || !q.blank || !q.answer) return null;
+      return { full:String(q.full), blank:String(q.blank), answer:String(q.answer), zhuyin:String(q.zhuyin || ''), meaning:String(q.meaning || ''), example:String(q.example || ''), hint:String(q.hint || ''), level:String(q.level || '自訂'), category:String(q.category || '自訂題庫') };
+    }
+    function showCustomImport() { setScreen('customImportScreen'); $('customImportResult').textContent = `目前自訂題庫：${loadCustomIdioms().length} 題`; }
+    function loadImportExample() { $('customImportText').value = JSON.stringify([{ full:'畫蛇添足', blank:'畫＿添足', answer:'蛇', zhuyin:'ㄏㄨㄚˋ ㄕㄜˊ ㄊㄧㄢ ㄗㄨˊ', meaning:'比喻多此一舉，反而壞事。', example:'說明已經很清楚，再加這段反而畫蛇添足。', hint:'一種爬行動物', level:'簡單', category:'動物成語' }], null, 2); }
+    function importCustomIdioms() {
+      try {
+        const arr = JSON.parse($('customImportText').value || '[]');
+        if (!Array.isArray(arr)) throw new Error('不是陣列');
+        const valid = arr.map(normalizeCustomIdiom).filter(Boolean);
+        if (!valid.length) { alert('沒有可匯入的題目，請確認至少有 full、blank、answer。'); return; }
+        const merged = new Map(loadCustomIdioms().map(q => [q.full, q]));
+        valid.forEach(q => merged.set(q.full, q));
+        saveCustomIdioms([...merged.values()]);
+        initSelects();
+        $('customImportResult').textContent = `匯入完成：新增 / 更新 ${valid.length} 題，目前自訂題庫 ${loadCustomIdioms().length} 題。`;
+      } catch(e) { alert('匯入失敗，請確認內容是 JSON 陣列格式。'); }
+    }
+    function exportCustomIdioms() { $('customImportText').value = JSON.stringify(loadCustomIdioms(), null, 2); $('customImportResult').textContent = `已匯出自訂題庫 ${loadCustomIdioms().length} 題。`; }
+    function clearCustomIdioms() { if (!confirm('確定要清除自訂題庫嗎？')) return; saveCustomIdioms([]); initSelects(); showCustomImport(); }
+
+    function showQuestionBankManager() { setScreen('bankManagerScreen'); renderQuestionBankManager(); }
+    function renderQuestionBankManager() {
+      const all = safeIdioms(); const base = baseIdioms(); const custom = loadCustomIdioms();
+      const cats = {}; const levels = {};
+      all.forEach(q => { cats[q.category || '未分類'] = (cats[q.category || '未分類'] || 0) + 1; levels[q.level || '未分類'] = (levels[q.level || '未分類'] || 0) + 1; });
+      const catRows = Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<tr><td>${escapeHtml(k)}</td><td>${v}</td></tr>`).join('');
+      const levelRows = Object.entries(levels).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<tr><td>${escapeHtml(k)}</td><td>${v}</td></tr>`).join('');
+      $('bankManagerBox').innerHTML = `<div class="record-grid"><div class="record-box"><small>全部題庫</small>${all.length}</div><div class="record-box"><small>內建題庫</small>${base.length}</div><div class="record-box"><small>自訂題庫</small>${custom.length}</div><div class="record-box"><small>分類數</small>${Object.keys(cats).length}</div></div><div class="table-wrap"><table><thead><tr><th>分類</th><th>題數</th></tr></thead><tbody>${catRows}</tbody></table></div><div class="table-wrap"><table><thead><tr><th>難度</th><th>題數</th></tr></thead><tbody>${levelRows}</tbody></table></div>`;
+    }
+    async function exportAllIdioms() { const text = JSON.stringify(safeIdioms(), null, 2); $('bankExportText').value = text; try { await navigator.clipboard.writeText(text); alert('已匯出並複製全部題庫 JSON。'); } catch(e) { alert('已匯出到文字框，請手動複製。'); } }
+
+    function showWrongWorksheet() { setScreen('wrongWorksheetScreen'); }
+    function generateWrongWorksheet() {
+      const list = getWrongItems(); const notes = loadNotes();
+      if (!list.length) { $('wrongWorksheetOutput').innerHTML = '<div class="empty">目前沒有錯題可產生學習單。</div>'; return; }
+      $('wrongWorksheetOutput').innerHTML = `<h2>錯題列印學習單</h2><p>日期：${todayString()}｜錯題數：${list.length}</p>` + list.map((q,i)=>`<div class="sheet-item"><strong>${i+1}. ${escapeHtml(q.blank)}</strong>　答案：<strong>${escapeHtml(q.answer)}</strong>　完整成語：${escapeHtml(q.full)}<br>注音：${escapeHtml(q.zhuyin || '')}<br>解釋：${escapeHtml(q.meaning || '')}<br>例句：${escapeHtml(getExample(q))}<br>我的筆記：${escapeHtml(notes[q.full] || '＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿')}<br>重新練習：□ 已複習　□ 已掌握</div>`).join('');
+    }
+
+    function saveExamReport() {
+      const accuracy = pool.length ? Math.round((correctCount / pool.length) * 100) : 0;
+      const weakRows = getWeakCategories().slice(0, 3);
+      const data = { date: todayString(), title: $('teacherTitleInput') ? $('teacherTitleInput').value || '成語考試' : '成語考試', score, correct: correctCount, total: pool.length, accuracy, wrong: wrongThisRound.map(q => q.full), weakRows };
+      localStorage.setItem(STORAGE_EXAM_REPORT, JSON.stringify(data));
+    }
+    function showExamReport() { setScreen('examReportScreen'); renderExamReport(); }
+    function renderExamReport() {
+      let data = null; try { data = JSON.parse(localStorage.getItem(STORAGE_EXAM_REPORT) || 'null'); } catch(e) {}
+      if (!data) { $('examReportOutput').innerHTML = '<div class="empty">尚未有考試模式成績。請先完成一次考試模式。</div>'; return; }
+      const wrongSet = new Set(data.wrong || []); const wrongItems = safeIdioms().filter(q => wrongSet.has(q.full));
+      const weak = (data.weakRows || []).map(r => `<li>${escapeHtml(r.category)}：正確率 ${r.accuracy}%</li>`).join('') || '<li>目前資料不足，尚無弱點分類。</li>';
+      const wrongHtml = wrongItems.length ? wrongItems.map((q,i)=>`<div class="sheet-item"><strong>${i+1}. ${escapeHtml(q.full)}</strong>（${escapeHtml(q.zhuyin || '')}）｜題目：${escapeHtml(q.blank)}｜答案：${escapeHtml(q.answer)}<br>解釋：${escapeHtml(q.meaning || '')}<br>例句：${escapeHtml(getExample(q))}</div>`).join('') : '<div class="empty">本次考試沒有錯題。</div>';
+      $('examReportOutput').innerHTML = `<h2>${escapeHtml(data.title || '成語考試')}成績單</h2><p>姓名：＿＿＿＿＿　日期：${escapeHtml(data.date || todayString())}</p><div class="record-grid"><div class="record-box"><small>總分</small>${data.score}</div><div class="record-box"><small>答對</small>${data.correct}/${data.total}</div><div class="record-box"><small>正確率</small>${data.accuracy}%</div><div class="record-box"><small>錯題數</small>${wrongItems.length}</div></div><h3>建議複習分類</h3><ul>${weak}</ul><h3>錯題清單</h3>${wrongHtml}`;
+    }
+
+    function hideUpdateBanner() { const b = $('updateBanner'); if (b) b.style.display = 'none'; }
+    function showUpdateBanner() { const b = $('updateBanner'); if (b) b.style.display = 'block'; }
+    function applyPwaUpdate() { if (window.waitingWorker) { window.waitingWorker.postMessage({type:'SKIP_WAITING'}); } else { location.reload(); } }
+
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+        navigator.serviceWorker.register('./service-worker.js').then(reg => {
+          if (reg.waiting) { window.waitingWorker = reg.waiting; showUpdateBanner(); }
+          reg.addEventListener('updatefound', () => {
+            const worker = reg.installing;
+            if (!worker) return;
+            worker.addEventListener('statechange', () => {
+              if (worker.state === 'installed' && navigator.serviceWorker.controller) { window.waitingWorker = worker; showUpdateBanner(); }
+            });
+          });
+        }).catch(() => {});
+        navigator.serviceWorker.addEventListener('controllerchange', () => location.reload());
       });
     }
 
