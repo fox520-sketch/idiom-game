@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>成語大挑戰多人搶答版 v3.7</title>
+  <title>成語大挑戰多人搶答版 v3.7.2</title>
   <script src="idioms.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
@@ -191,6 +191,152 @@
     th { background: var(--soft); }
     .issue-ok { color: var(--good); font-weight:950; }
     .issue-bad { color: var(--bad); font-weight:950; }
+
+
+    /* v3.7.2 多人搶答畫面優化 */
+    #multiplayerGameScreen .mp-game-card {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: clamp(18px, 2.4vw, 32px);
+    }
+    #multiplayerGameScreen .stats {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    #multiplayerGameScreen .stat {
+      padding: 14px 12px;
+      font-size: 22px;
+    }
+    #multiplayerGameScreen .stat small {
+      font-size: 14px;
+    }
+    .mp-question {
+      width: 100%;
+      text-align: center;
+      font-size: clamp(68px, 9.5vw, 138px);
+      font-weight: 950;
+      letter-spacing: .10em;
+      line-height: 1.08;
+      margin: 22px auto 8px;
+      padding: 26px 16px;
+      border-radius: 28px;
+      background: var(--soft);
+      border: 1px solid var(--border);
+      word-break: keep-all;
+    }
+    #mpZhuyinText.zhuyin {
+      font-size: clamp(20px, 2.2vw, 30px);
+      line-height: 1.7;
+      margin: 10px auto 18px;
+      max-width: 980px;
+      word-break: keep-all;
+    }
+    .mp-choice-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      max-width: 980px;
+      margin: 18px auto 12px;
+    }
+    .mp-choice-grid .choice-btn {
+      min-height: 92px;
+      font-size: clamp(30px, 3.2vw, 44px);
+      border-radius: 22px;
+      padding: 14px 12px;
+      flex-direction: column;
+      gap: 8px;
+      line-height: 1.05;
+    }
+    .mp-choice-grid .choice-label {
+      width: 36px;
+      height: 36px;
+      font-size: 17px;
+      flex: 0 0 auto;
+    }
+    .mp-result {
+      min-height: 40px;
+      text-align: center;
+      font-size: clamp(22px, 3vw, 34px);
+      font-weight: 950;
+      margin-top: 12px;
+    }
+    #mpMeaningText.meaning {
+      font-size: clamp(17px, 1.9vw, 22px);
+      max-width: 980px;
+      text-align: left;
+      background: var(--soft);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 12px 16px;
+    }
+    .mp-box {
+      margin-top: 16px;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--soft);
+    }
+    .mp-box h3 {
+      margin: 0 0 10px;
+      font-size: 20px;
+    }
+    .mp-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .mp-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .mp-status {
+      font-weight: 900;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+    .mp-answer-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      font-size: 17px;
+      font-weight: 800;
+    }
+    .mp-answer-list > div {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px 12px;
+    }
+    .mp-scoreboard th,
+    .mp-scoreboard td {
+      font-size: 17px;
+      padding: 12px;
+    }
+    .mp-scoreboard td:nth-child(3),
+    .mp-scoreboard th:nth-child(3) {
+      font-size: 20px;
+      font-weight: 950;
+    }
+    .mp-room-code {
+      font-size: 24px;
+      letter-spacing: .08em;
+    }
+    @media (max-width: 860px) {
+      #multiplayerGameScreen .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .mp-question { font-size: clamp(48px, 17vw, 86px); padding: 20px 10px; letter-spacing: .06em; }
+      .mp-choice-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+      .mp-choice-grid .choice-btn { min-height: 86px; font-size: clamp(28px, 10vw, 40px); }
+      .mp-grid, .mp-grid-3, .mp-answer-list { grid-template-columns: 1fr; }
+      .mp-scoreboard th, .mp-scoreboard td { font-size: 15px; padding: 9px 7px; }
+    }
+    @media (max-width: 430px) {
+      .mp-choice-grid { grid-template-columns: 1fr; }
+      .mp-choice-grid .choice-btn { flex-direction: row; justify-content: flex-start; padding-left: 22px; }
+    }
+
     @media (max-width: 860px) {
       .panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -727,7 +873,7 @@
     </section>
 
     <section id="multiplayerGameScreen" class="screen">
-      <div class="card">
+      <div class="card mp-game-card">
         <div class="stats">
           <div class="stat"><small>房號</small><span id="mpGameRoomCode">------</span></div>
           <div class="stat"><small>題數</small><span id="mpProgress">0 / 0</span></div>
@@ -746,7 +892,7 @@
       </div>
     </section>
 
-    <div class="version">版本：v3.7.1｜成語大挑戰多人搶答版｜題庫 800 題｜Firebase 開房間、搶答、即時排名</div>
+    <div class="version">版本：v3.7.2｜多人搶答畫面優化版｜題庫 800 題｜Firebase 開房間、搶答、即時排名</div>
   </main>
 
   <script>

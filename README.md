@@ -62,6 +62,14 @@ Firebase config 不是資料庫密碼，可以放在前端；真正要保護資�
 本版有 PWA 離線快取。如果上傳新版後看到舊畫面，請按網頁中的「立即更新」，或到「版本 / 除錯資訊」按「清除快取並重新載入」。
 
 
-## v3.7.1 權限修正提醒
+## v3.7.2 權限修正提醒
 如果多人搶答出現「Missing or insufficient permissions」，請到 Firebase Console → Firestore Database → Rules，貼上 `firestore.rules` 的內容並 Publish。
 注意：重新上傳本壓縮檔時，請保留你已填好的 `firebase-config.js`，不要把它覆蓋成範例設定。
+
+
+## v3.7.2 更新
+
+- 優化多人搶答畫面。
+- 放大多人題目字體與注音字體。
+- 八個答案改為電腦四欄、手機自動兩欄或一欄。
+- 排名表與搶答狀態更清楚。
