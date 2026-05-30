@@ -1,4 +1,4 @@
-const CACHE_NAME = 'idiom-game-v4-4-1-cache';
+const CACHE_NAME = 'idiom-game-v4-5-cache';
 const ASSETS = ['./', './index.html', './idioms.js', './README.md', './manifest.json', './service-worker.js', './firebase-config.js'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)));
