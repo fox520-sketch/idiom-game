@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>成語大挑戰多人搶答版 v3.7.4</title>
+  <title>成語大挑戰多人搶答版 v3.7.5</title>
   <script src="idioms.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
@@ -193,7 +193,7 @@
     .issue-bad { color: var(--bad); font-weight:950; }
 
 
-    /* v3.7.4 多人搶答字型與手機版版面優化 */
+    /* v3.7.5 多人搶答字型與手機版版面優化 */
     #multiplayerGameScreen .mp-game-card {
       max-width: 1180px;
       margin: 0 auto;
@@ -409,7 +409,7 @@
     <div class="update-banner" id="updateBanner">發現新版，可立即更新。<button onclick="applyPwaUpdate()">立即更新</button><button class="secondary" onclick="hideUpdateBanner()">稍後</button></div>
     <section id="homeScreen" class="screen active">
       <div class="card hero">
-        <h2>v3.7.4 成語大挑戰多人搶答鎖題版</h2>
+        <h2>v3.7.5 成語大挑戰多人搶答連續遊戲版</h2>
         <p>新增 Firebase 多人連線、開房間、加入房間、同步題目、搶答計分與即時排名。</p>
         <div class="menu-grid">
           <button class="menu-btn" onclick="goSetup()">開始遊戲</button>
@@ -889,11 +889,11 @@
         <div class="meaning" id="mpMeaningText"></div>
         <div class="mp-box"><h3>本題搶答狀態</h3><div id="mpAnswerList" class="mp-answer-list">等待作答...</div></div>
         <div class="mp-box"><h3>即時排名</h3><div id="mpScoreboard">等待排名...</div></div>
-        <div class="actions"><button class="secondary" onclick="mpLeaveRoom()">離開房間</button></div>
+        <div class="actions"><button id="mpRestartBtn" onclick="mpRestartGame()">房主再玩一局</button><button class="secondary" onclick="mpLeaveRoom()">離開房間</button></div>
       </div>
     </section>
 
-    <div class="version">版本：v3.7.4｜多人搶答鎖題版｜答對即鎖題、自動下一題、只有答對者得分</div>
+    <div class="version">版本：v3.7.5｜多人搶答連續遊戲版｜同房再玩一局、重新計分、即時排名</div>
   </main>
 
   <script>
@@ -1026,7 +1026,7 @@
           roomId: mpRoomId, hostId: mpPlayerId, hostName: name, status: 'waiting',
           currentIndex: 0, total: questions.length, secondsPerQuestion: seconds,
           winnerQuestionIndex: -1, winnerPlayerId: '', winnerName: '',
-          questions, createdAt: firebase.firestore.FieldValue.serverTimestamp(), updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          roundId: 'R' + Date.now(), questions, createdAt: firebase.firestore.FieldValue.serverTimestamp(), updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         await mpRoomRef().collection('players').doc(mpPlayerId).set({ name, score:0, correct:0, wrong:0, answered:0, joinedAt: firebase.firestore.FieldValue.serverTimestamp(), lastSeen: firebase.firestore.FieldValue.serverTimestamp() }, {merge:true});
         mpSubscribeRoom();
@@ -1098,10 +1098,13 @@
     function mpRenderQuestion() {
       const q = mpCurrentQuestion(); if (!q) return;
       const idx = mpCurrentRoom.currentIndex || 0;
-      const isNewQuestion = mpRenderedQuestionIndex !== idx;
+      const roundKey = mpCurrentRoom.roundId || 'R0';
+      const questionKey = `${roundKey}_${idx}`;
+      const isNewQuestion = mpRenderedQuestionIndex !== questionKey;
       if (isNewQuestion) {
-        mpRenderedQuestionIndex = idx;
+        mpRenderedQuestionIndex = questionKey;
         mpAnsweredIndex = null;
+        if ($('mpRestartBtn')) $('mpRestartBtn').style.display = 'none';
         $('mpQuestionText').textContent = q.blank;
         $('mpZhuyinText').textContent = q.zhuyin ? `注音：${q.zhuyin}` : '';
         $('mpProgress').textContent = `${idx+1} / ${mpCurrentRoom.total || mpCurrentRoom.questions.length}`;
@@ -1144,9 +1147,11 @@
     async function mpChooseAnswer(choice, btn) {
       if (!mpCurrentRoom) return;
       const idx = mpCurrentRoom.currentIndex || 0;
-      if (mpAnsweredIndex === idx) return;
+      const roundKey = mpCurrentRoom.roundId || 'R0';
+      const questionKey = `${roundKey}_${idx}`;
+      if (mpAnsweredIndex === questionKey) return;
       if (mpCurrentRoom.winnerQuestionIndex === idx && mpCurrentRoom.winnerPlayerId) { mpApplyQuestionLock(); return; }
-      mpAnsweredIndex = idx;
+      mpAnsweredIndex = questionKey;
       const q = mpCurrentQuestion(); const ok = choice === q.answer;
       const started = Number(mpCurrentRoom.currentStartedAt || Date.now());
       const limit = Number(mpCurrentRoom.secondsPerQuestion || 15);
@@ -1160,7 +1165,7 @@
       }
       try {
         const roomRef = mpRoomRef();
-        const answerRef = roomRef.collection('answers').doc(`${idx}_${mpPlayerId}`);
+        const answerRef = roomRef.collection('answers').doc(`${roundKey}_${idx}_${mpPlayerId}`);
         const playerRef = roomRef.collection('players').doc(mpPlayerId);
         const inc = firebase.firestore.FieldValue.increment;
         await mpDb.runTransaction(async tx => {
@@ -1169,7 +1174,7 @@
           const room = roomSnap.data() || {};
           if (room.status !== 'playing' || (room.currentIndex || 0) !== idx) throw new Error('本題已結束');
           if (room.winnerQuestionIndex === idx && room.winnerPlayerId) throw new Error('已有人答對，本題已鎖定');
-          tx.set(answerRef, { playerId:mpPlayerId, playerName:mpPlayerName || '玩家', questionIndex:idx, choice, correct:ok, scoreDelta:delta, answerAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge:true });
+          tx.set(answerRef, { roundId:roundKey, playerId:mpPlayerId, playerName:mpPlayerName || '玩家', questionIndex:idx, choice, correct:ok, scoreDelta:delta, answerAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge:true });
           tx.set(playerRef, { name:mpPlayerName || '玩家', score:inc(delta), correct:inc(ok?1:0), wrong:inc(ok?0:1), answered:inc(1), lastSeen:firebase.firestore.FieldValue.serverTimestamp() }, { merge:true });
           if (ok) tx.update(roomRef, { winnerQuestionIndex:idx, winnerPlayerId:mpPlayerId, winnerName:mpPlayerName || '玩家', updatedAt:firebase.firestore.FieldValue.serverTimestamp() });
         });
@@ -1177,13 +1182,14 @@
         if (String(e.message || '').includes('已有人答對')) { mpApplyQuestionLock(); return; }
         alert('送出答案失敗：' + e.message);
         mpAnsweredIndex = null;
-        document.querySelectorAll('#mpChoicesBox .choice-btn').forEach(b => b.disabled = false);
+        if (!(mpCurrentRoom.winnerQuestionIndex === idx && mpCurrentRoom.winnerPlayerId)) document.querySelectorAll('#mpChoicesBox .choice-btn').forEach(b => b.disabled = false);
       }
     }
     function mpRenderAnswers(list) {
       if (!$('mpAnswerList') || !mpCurrentRoom) return;
       const idx = mpCurrentRoom.currentIndex || 0;
-      const rows = list.filter(a => a.questionIndex === idx).sort((a,b) => (a.answerAt?.seconds||0) - (b.answerAt?.seconds||0));
+      const roundKey = mpCurrentRoom.roundId || 'R0';
+      const rows = list.filter(a => a.questionIndex === idx && (a.roundId || 'R0') === roundKey).sort((a,b) => (a.answerAt?.seconds||0) - (b.answerAt?.seconds||0));
       const winner = rows.find(a => a.correct);
       $('mpAnswerList').innerHTML = rows.length ? rows.map((a,i)=>`<div>${i+1}. ${escapeHtml(a.playerName||'玩家')}：${a.correct?'搶答成功':'答錯'} ${a.correct?`+${a.scoreDelta}`:''}</div>`).join('') : '等待作答...';
       if (winner) {
@@ -1218,6 +1224,40 @@
       $('mpResultText').textContent = '請查看下方即時排名。';
       $('mpMeaningText').textContent = '';
       $('mpTimer').textContent = '--';
+      if ($('mpRestartBtn')) $('mpRestartBtn').style.display = mpIsHost ? '' : 'none';
+      if (mpIsHost) {
+        $('mpResultText').textContent = '請查看下方即時排名。要在同一個房間繼續，請按「房主再玩一局」。';
+      } else {
+        $('mpResultText').textContent = '請查看下方即時排名。等待房主開始下一局。';
+      }
+    }
+    async function mpRestartGame() {
+      if (!mpInitFirebase() || !mpIsHost || !mpCurrentRoom) return;
+      const total = Number(mpCurrentRoom.total || (mpCurrentRoom.questions || []).length || 10);
+      const seconds = Number(mpCurrentRoom.secondsPerQuestion || 15);
+      const questions = mpMakeQuestions(total);
+      const newRoundId = 'R' + Date.now();
+      try {
+        const batch = mpDb.batch();
+        mpPlayers.forEach(p => {
+          batch.set(mpRoomRef().collection('players').doc(p.id), {
+            score:0, correct:0, wrong:0, answered:0,
+            lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge:true });
+        });
+        batch.update(mpRoomRef(), {
+          status:'playing', currentIndex:0, total:questions.length, secondsPerQuestion:seconds,
+          roundId:newRoundId, questions, currentStartedAt: Date.now(),
+          winnerQuestionIndex:-1, winnerPlayerId:'', winnerName:'',
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        await batch.commit();
+        mpAnsweredIndex = null;
+        mpRenderedQuestionIndex = null;
+        if ($('mpRestartBtn')) $('mpRestartBtn').style.display = 'none';
+      } catch(e) {
+        alert('開始下一局失敗：' + e.message);
+      }
     }
     async function mpCopyInvite() {
       const url = `${location.origin}${location.pathname}?room=${mpRoomId}`;
@@ -1575,7 +1615,7 @@
     function showTransfer() { setScreen('transferScreen'); }
     function exportLearningData() {
       const data = {
-        version: 'v3.7.4',
+        version: 'v3.7.5',
         exportedAt: new Date().toISOString(),
         records: loadRecords(),
         wrongBook: loadWrongBook(),
@@ -1811,7 +1851,7 @@
       const customCount = loadCustomIdioms().length;
       const sw = navigator.serviceWorker && navigator.serviceWorker.controller ? '已啟用' : '未啟用 / 尚未控制';
       return `成語大挑戰除錯資訊
-程式版本：v3.7.4
+程式版本：v3.7.5
 題庫版本：2026.05.30
 題庫數量：${safeIdioms().length}
 內建題庫：${baseIdioms().length}

@@ -5,5 +5,5 @@
   "display": "standalone",
   "background_color": "#f4f7f1",
   "theme_color": "#5b8c5a",
-  "description": "成語填空八選一學習遊戲，v3.7.4 新增多人搶答鎖題：有人答對即自動下一題，只有答對者得分。"
+  "description": "成語填空八選一學習遊戲，v3.7.5 多人搶答支援同房再玩一局，房主可直接重新開局並重置分數。"
 }
