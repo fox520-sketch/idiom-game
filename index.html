@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>成語大挑戰多人搶答進階版 v3.8</title>
+  <title>成語大挑戰多人搶答進階版 v3.9</title>
   <script src="idioms.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
   <script src="firebase-config.js"></script>
   <style>
     :root {
@@ -466,8 +467,8 @@
     <div class="update-banner" id="updateBanner">發現新版，可立即更新。<button onclick="applyPwaUpdate()">立即更新</button><button class="secondary" onclick="hideUpdateBanner()">稍後</button></div>
     <section id="homeScreen" class="screen active">
       <div class="card hero">
-        <h2>v3.8 成語大挑戰多人搶答進階版</h2>
-        <p>新增 Firebase 多人連線、房主設定規則、玩家管理、完整成績表、搶答計分與即時排名。</p>
+        <h2>v3.9 成語大挑戰多人搶答進階版</h2>
+        <p>新增 Firebase 匿名登入，讓多人房間、玩家資料與搶答答案可用更安全的 Firestore Rules 控制。</p>
         <div class="menu-grid">
           <button class="menu-btn" onclick="goSetup()">開始遊戲</button>
           <button class="menu-btn" onclick="startQuickGame()">快速遊戲</button>
@@ -965,7 +966,7 @@
       </div>
     </section>
 
-    <div class="version">版本：v3.8｜多人搶答進階版｜房主設定、成績表、玩家管理、QR Code 邀請</div>
+    <div class="version">版本：v3.9｜多人搶答進階版｜房主設定、成績表、玩家管理、QR Code 邀請</div>
   </main>
 
   <script>
@@ -1009,6 +1010,9 @@
     let childMode = localStorage.getItem(STORAGE_CHILD) === '1';
 
     let mpDb = null;
+    let mpAuth = null;
+    let mpAuthPromise = null;
+    let mpAuthUid = '';
     let mpRoomId = '';
     let mpPlayerId = localStorage.getItem('idiomMpPlayerId') || ('P' + Math.random().toString(36).slice(2, 10).toUpperCase());
     localStorage.setItem('idiomMpPlayerId', mpPlayerId);
@@ -1043,8 +1047,8 @@
       return Boolean(window.firebase && window.firebaseConfig && window.firebaseConfig.apiKey && !String(window.firebaseConfig.apiKey).includes('請填入'));
     }
     function mpInitFirebase() {
-      if (mpDb) return true;
       const status = $('mpFirebaseStatus');
+      if (mpDb && mpAuth) return true;
       if (!mpHasFirebaseConfig()) {
         if (status) status.innerHTML = '尚未設定 Firebase。請先編輯 <strong>firebase-config.js</strong>，填入你的 Firebase 專案設定。';
         return false;
@@ -1052,12 +1056,38 @@
       try {
         if (!firebase.apps.length) firebase.initializeApp(window.firebaseConfig);
         mpDb = firebase.firestore();
-        if (status) status.textContent = 'Firebase 已連線，可以建立或加入房間。';
+        mpAuth = firebase.auth();
+        if (status) status.textContent = 'Firebase 已連線，正在進行匿名登入...';
         return true;
       } catch (e) {
         if (status) status.textContent = 'Firebase 初始化失敗：' + e.message;
         return false;
       }
+    }
+    async function mpEnsureAuth() {
+      const status = $('mpFirebaseStatus');
+      if (!mpInitFirebase()) throw new Error('Firebase 尚未完成設定');
+      if (mpAuth.currentUser) {
+        mpAuthUid = mpAuth.currentUser.uid;
+        mpPlayerId = mpAuthUid;
+        localStorage.setItem('idiomMpPlayerId', mpPlayerId);
+        if (status) status.textContent = 'Firebase 已連線，匿名登入完成，可以建立或加入房間。';
+        return mpAuth.currentUser;
+      }
+      if (!mpAuthPromise) {
+        mpAuthPromise = mpAuth.signInAnonymously().then(result => {
+          mpAuthUid = result.user.uid;
+          mpPlayerId = mpAuthUid;
+          localStorage.setItem('idiomMpPlayerId', mpPlayerId);
+          if (status) status.textContent = 'Firebase 已連線，匿名登入完成，可以建立或加入房間。';
+          return result.user;
+        }).catch(err => {
+          mpAuthPromise = null;
+          if (status) status.textContent = '匿名登入失敗：' + err.message;
+          throw err;
+        });
+      }
+      return mpAuthPromise;
     }
     function showMultiplayerHome() {
       setChildMode(false);
@@ -1071,7 +1101,7 @@
         $('mpRoomInput').value = room;
         if ($('mpJoinHint')) $('mpJoinHint').textContent = '已從邀請連結帶入房號，請輸入暱稱後按「加入房間」。';
       }
-      mpInitFirebase();
+      if (mpInitFirebase()) mpEnsureAuth().catch(() => {});
     }
     function mpUpdateMultiplayerCategoryOptions() {
       const sel = $('mpCategorySelect');
@@ -1106,6 +1136,7 @@
     }
     async function mpCreateRoom() {
       if (!mpInitFirebase()) return;
+      try { await mpEnsureAuth(); } catch(e) { alert('匿名登入失敗：' + e.message); return; }
       const name = ($('mpHostName').value || '房主').trim().slice(0, 20);
       const round = Number($('mpRoundSelect').value || 10);
       const seconds = Number($('mpTimeSelect').value || 15);
@@ -1130,6 +1161,7 @@
     }
     async function mpJoinRoom() {
       if (!mpInitFirebase()) return;
+      try { await mpEnsureAuth(); } catch(e) { alert('匿名登入失敗：' + e.message); return; }
       const name = ($('mpJoinName').value || '玩家').trim().slice(0, 20);
       const room = ($('mpRoomInput').value || '').trim().toUpperCase();
       if (!room) { alert('請輸入房號。'); return; }
@@ -1199,6 +1231,7 @@
     }
     async function mpStartGame() {
       if (!mpIsHost || !mpCurrentRoom) return;
+      try { await mpEnsureAuth(); } catch(e) { alert('匿名登入失敗：' + e.message); return; }
       try {
         const batch = mpDb.batch();
         mpPlayers.forEach(p => batch.set(mpRoomRef().collection('players').doc(p.id), { score:0, correct:0, wrong:0, answered:0, lastSeen: firebase.firestore.FieldValue.serverTimestamp() }, { merge:true }));
@@ -1262,6 +1295,7 @@
     }
     async function mpChooseAnswer(choice, btn) {
       if (!mpCurrentRoom) return;
+      try { await mpEnsureAuth(); } catch(e) { alert('匿名登入失敗：' + e.message); return; }
       const idx = mpCurrentRoom.currentIndex || 0;
       const roundKey = mpCurrentRoom.roundId || 'R0';
       const questionKey = `${roundKey}_${idx}`;
@@ -1317,6 +1351,7 @@
     }
     async function mpNextQuestion() {
       if (!mpIsHost || !mpCurrentRoom || mpCurrentRoom.status !== 'playing') return;
+      try { await mpEnsureAuth(); } catch(e) { console.warn('匿名登入失敗', e); return; }
       const cur = mpCurrentRoom.currentIndex || 0;
       if (mpAdvancingQuestionIndex === cur) return;
       mpAdvancingQuestionIndex = cur;
@@ -1350,6 +1385,7 @@
     }
     async function mpRestartGame() {
       if (!mpInitFirebase() || !mpIsHost || !mpCurrentRoom) return;
+      try { await mpEnsureAuth(); } catch(e) { alert('匿名登入失敗：' + e.message); return; }
       const total = Number(mpCurrentRoom.total || (mpCurrentRoom.questions || []).length || 10);
       const seconds = Number(mpCurrentRoom.secondsPerQuestion || 15);
       const level = mpCurrentRoom.level || '全部';
@@ -1393,6 +1429,7 @@
     }
     async function mpResetRoomScores() {
       if (!mpIsHost || !mpCurrentRoom) return;
+      try { await mpEnsureAuth(); } catch(e) { alert('匿名登入失敗：' + e.message); return; }
       if (!confirm('確定要重設本房間所有玩家分數嗎？')) return;
       try {
         const batch = mpDb.batch();
@@ -1402,12 +1439,14 @@
     }
     async function mpKickPlayer(playerId) {
       if (!mpIsHost || !mpCurrentRoom || playerId === mpCurrentRoom.hostId) return;
+      try { await mpEnsureAuth(); } catch(e) { alert('匿名登入失敗：' + e.message); return; }
       if (!confirm('確定要移除此玩家嗎？')) return;
       try { await mpRoomRef().collection('players').doc(playerId).set({ kicked:true, lastSeen: firebase.firestore.FieldValue.serverTimestamp() }, { merge:true }); }
       catch(e) { alert('移除玩家失敗：' + e.message); }
     }
     async function mpCloseRoom() {
       if (!mpIsHost || !mpCurrentRoom) return;
+      try { await mpEnsureAuth(); } catch(e) { alert('匿名登入失敗：' + e.message); return; }
       if (!confirm('確定要關閉這個房間嗎？其他玩家會無法繼續遊戲。')) return;
       try { await mpRoomRef().update({status:'closed', updatedAt: firebase.firestore.FieldValue.serverTimestamp()}); mpLeaveRoom(true); }
       catch(e) { alert('關閉房間失敗：' + e.message); }
