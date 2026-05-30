@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>成語大挑戰進階版 v3.1</title>
+  <title>成語大挑戰題庫與複習強化版 v3.2</title>
   <script src="idioms.js"></script>
   <style>
     :root {
@@ -116,6 +116,7 @@
     .learn-title { font-size: clamp(32px, 7vw, 56px); font-weight: 950; text-align:center; margin: 8px 0; letter-spacing:.08em; }
     .zhuyin { color: var(--muted); text-align:center; font-size: 20px; font-weight: 900; margin-bottom: 12px; }
     .share-box { background: var(--soft); border:1px solid var(--border); border-radius:16px; padding:12px; margin-top:12px; white-space:pre-wrap; text-align:left; }
+    textarea { width: 100%; min-height: 110px; border: 2px solid var(--border); border-radius: 14px; padding: 11px 12px; font-size: 16px; background: var(--card); color: var(--text); }
     input { width: 100%; border: 2px solid var(--border); border-radius: 14px; padding: 11px 12px; font-size: 17px; background: var(--card); color: var(--text); }
     .badge-grid { display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:12px; margin-top:14px; }
     .badge { border:1px solid var(--border); border-radius:18px; padding:16px; background:var(--soft); line-height:1.65; }
@@ -152,15 +153,19 @@
   <main>
     <section id="homeScreen" class="screen active">
       <div class="card hero">
-        <h2>v3.1 成語大挑戰進階版</h2>
-        <p>新增答題動畫、音效與靜音、連續答對加分、注音開關、題庫分類統計與題庫品質檢查。</p>
+        <h2>v3.2 成語大挑戰題庫與複習強化版</h2>
+        <p>題庫擴充到 500 題，新增弱點分類分析、智慧複習、收藏成語、我的筆記與匯出 / 匯入學習紀錄。</p>
         <div class="menu-grid">
           <button class="menu-btn" onclick="goSetup()">開始遊戲</button>
           <button class="menu-btn" onclick="startQuickGame()">快速遊戲</button>
           <button class="menu-btn secondary" onclick="startWrongBookPractice()">錯題複習</button>
           <button class="menu-btn secondary" onclick="showWrongBook()">查看錯題本</button>
+          <button class="menu-btn secondary" onclick="startSmartReview()">智慧複習</button>
+          <button class="menu-btn secondary" onclick="showWeaknessAnalysis()">弱點分析</button>
           <button class="menu-btn secondary" onclick="showRecords()">學習紀錄</button>
           <button class="menu-btn secondary" onclick="showCards()">成語學習卡</button>
+          <button class="menu-btn secondary" onclick="showFavorites()">收藏成語</button>
+          <button class="menu-btn secondary" onclick="showTransfer()">匯出 / 匯入</button>
           <button class="menu-btn secondary" onclick="startDailyChallenge()">每日挑戰</button>
           <button class="menu-btn secondary" onclick="goExamSetup()">考試模式</button>
           <button class="menu-btn secondary" onclick="showAchievements()">成就徽章</button>
@@ -249,6 +254,7 @@
         <div class="actions">
           <button class="secondary" id="hintBtn" onclick="showHint()">提示</button>
           <button class="secondary" onclick="nextQuestion()">下一題</button>
+          <button class="secondary" onclick="toggleFavoriteCurrent()">收藏此題</button>
           <button class="secondary" onclick="makeReportText(current)">回報此題</button>
           <button class="secondary" onclick="toggleMute()" id="muteGameBtn">音效：開</button>
           <button class="secondary" onclick="showHome()">回首頁</button>
@@ -353,6 +359,46 @@
       </div>
     </section>
 
+
+    <section id="weaknessScreen" class="screen">
+      <div class="card">
+        <h2>弱點分類分析</h2>
+        <p class="meaning">依照你的作答紀錄，統計各分類的答對率，找出最需要加強的分類。</p>
+        <div id="weaknessBox"></div>
+        <div class="actions">
+          <button onclick="startSmartReview()">依弱點開始智慧複習</button>
+          <button class="secondary" onclick="showHome()">回首頁</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="favoritesScreen" class="screen">
+      <div class="card">
+        <h2>收藏成語</h2>
+        <p class="meaning">你可以在學習卡或答題時收藏重要成語，之後只練收藏題。</p>
+        <div class="actions">
+          <button onclick="startFavoritePractice()">只練收藏題</button>
+          <button class="danger" onclick="clearFavorites()">清除收藏</button>
+          <button class="secondary" onclick="showHome()">回首頁</button>
+        </div>
+        <div class="wrong-list" id="favoritesList"></div>
+      </div>
+    </section>
+
+    <section id="transferScreen" class="screen">
+      <div class="card">
+        <h2>匯出 / 匯入學習紀錄</h2>
+        <p class="meaning">換手機或電腦時，可以先匯出 JSON 文字，再到新裝置貼上匯入。</p>
+        <div class="actions">
+          <button onclick="exportLearningData()">產生匯出資料</button>
+          <button onclick="importLearningData()">匯入資料</button>
+          <button class="secondary" onclick="copyTransferText()">複製文字</button>
+          <button class="secondary" onclick="showHome()">回首頁</button>
+        </div>
+        <textarea id="transferText" placeholder="按「產生匯出資料」或貼上要匯入的 JSON 文字"></textarea>
+      </div>
+    </section>
+
     <section id="reportsScreen" class="screen">
       <div class="card">
         <h2>題目回報</h2>
@@ -365,7 +411,7 @@
       </div>
     </section>
 
-    <div class="version">版本：v3.1｜成語大挑戰進階版｜答題動畫｜音效靜音｜連續答對加分｜注音開關｜分類統計｜題庫品質檢查｜八選一｜適合 GitHub Pages</div>
+    <div class="version">版本：v3.2｜成語大挑戰題庫與複習強化版｜500 題題庫｜弱點分析｜智慧複習｜收藏成語｜我的筆記｜匯出匯入｜八選一｜適合 GitHub Pages</div>
   </main>
 
   <script>
@@ -375,6 +421,9 @@
     const STORAGE_REPORT = 'idiomGameReportV30';
     const STORAGE_MUTE = 'idiomGameMutedV31';
     const STORAGE_ZHUYIN = 'idiomGameZhuyinV31';
+    const STORAGE_FAVORITES = 'idiomGameFavoritesV32';
+    const STORAGE_NOTES = 'idiomGameNotesV32';
+    const STORAGE_QSTATS = 'idiomGameQuestionStatsV32';
     const labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
     let pool = [];
     let currentIndex = 0;
@@ -452,13 +501,17 @@
         selected = getWrongItems();
       } else if (currentMode === 'daily') {
         selected = seededShuffle(all, 'daily-' + todayKey()).slice(0, Math.min(10, all.length));
+      } else if (currentMode === 'smart') {
+        selected = getSmartReviewItems();
+      } else if (currentMode === 'favorite') {
+        selected = getFavoriteItems();
       } else {
         const level = $('levelSelect').value; const category = $('categorySelect').value;
         selected = all.filter(q => (level === '全部' || q.level === level) && (category === '全部' || q.category === category));
       }
       if (!selected.length) { alert(currentMode === 'wrong' ? '目前沒有錯題可以練習。' : '這個條件沒有題目，請換一個難度或分類。'); return; }
       const roundValue = $('roundSelect').value;
-      const roundSize = currentMode === 'wrong' ? selected.length : (roundValue === 'all' ? selected.length : Number(roundValue));
+      const roundSize = (currentMode === 'wrong' || currentMode === 'smart' || currentMode === 'favorite') ? Math.min(selected.length, 20) : (roundValue === 'all' ? selected.length : Number(roundValue));
       pool = shuffle(selected).slice(0, Math.min(roundSize, selected.length));
       timeLimit = Number($('timeSelect').value || 0);
       if (currentMode === 'daily') timeLimit = 15;
@@ -476,6 +529,8 @@
       startGame('daily');
     }
     function startWrongBookPractice() { if (!Object.keys(loadWrongBook()).length) { showWrongBook(); return; } startGame('wrong'); }
+    function startSmartReview() { startGame('smart'); }
+    function startFavoritePractice() { if (!getFavoriteItems().length) { showFavorites(); return; } startGame('favorite'); }
 
     function showQuestion() {
       stopTimer(); if (currentIndex >= pool.length) return endGame();
@@ -485,6 +540,8 @@
       $('levelTag').textContent = current.level || '未分類難度'; $('categoryTag').textContent = current.category || '未分類';
       if (currentMode === 'exam') $('categoryTag').textContent = '考試模式';
       if (currentMode === 'daily') $('categoryTag').textContent = '每日挑戰';
+      if (currentMode === 'smart') $('categoryTag').textContent = '智慧複習';
+      if (currentMode === 'favorite') $('categoryTag').textContent = '收藏練習';
       $('hintBox').textContent = ''; $('resultText').textContent = ''; $('meaningText').textContent = ''; $('exampleText').style.display = 'none'; $('exampleText').textContent = '';
       renderChoices(current); updateStats(); startTimer();
     }
@@ -605,7 +662,7 @@
     function defaultRecords() { return { totalAnswered:0, correct:0, wrong:0, gamesPlayed:0, bestScore:0, bestStreak:0, lastPlayed:'尚未開始' }; }
     function loadRecords() { try { return Object.assign(defaultRecords(), JSON.parse(localStorage.getItem(STORAGE_RECORDS) || '{}')); } catch { return defaultRecords(); } }
     function saveRecords(r) { localStorage.setItem(STORAGE_RECORDS, JSON.stringify(r)); }
-    function updateRecords(isCorrect) { const r = loadRecords(); r.totalAnswered += 1; if (isCorrect) r.correct += 1; else r.wrong += 1; r.lastPlayed = todayString(); r.bestStreak = Math.max(r.bestStreak || 0, maxStreakThisRound); saveRecords(r); }
+    function updateRecords(isCorrect) { const r = loadRecords(); r.totalAnswered += 1; if (isCorrect) r.correct += 1; else r.wrong += 1; r.lastPlayed = todayString(); r.bestStreak = Math.max(r.bestStreak || 0, maxStreakThisRound); saveRecords(r); recordQuestionStat(current, isCorrect); }
     function saveBestScore() { const r = loadRecords(); r.gamesPlayed += 1; r.bestScore = Math.max(r.bestScore || 0, score); r.bestStreak = Math.max(r.bestStreak || 0, maxStreakThisRound); r.lastPlayed = todayString(); saveRecords(r); }
     function showRecords() { setScreen('recordsScreen'); const r = loadRecords(); const acc = r.totalAnswered ? Math.round((r.correct / r.totalAnswered) * 100) : 0; const data = [['總作答題數', r.totalAnswered], ['答對題數', r.correct], ['答錯題數', r.wrong], ['總正確率', `${acc}%`], ['遊玩次數', r.gamesPlayed], ['最高分', r.bestScore], ['最高連續答對', r.bestStreak], ['最近遊玩日期', r.lastPlayed]]; $('recordGrid').innerHTML = data.map(([k,v]) => `<div class="record-box"><small>${k}</small>${v}</div>`).join(''); }
     function clearRecords() { if (!confirm('確定要清除學習紀錄嗎？')) return; localStorage.removeItem(STORAGE_RECORDS); showRecords(); }
@@ -633,8 +690,97 @@
     function filteredCardItems() { const level = $('cardLevelSelect').value; const category = $('cardCategorySelect').value; const key = ($('cardSearchInput')?.value || '').trim(); return safeIdioms().filter(q => { const okFilter = (level === '全部' || q.level === level) && (category === '全部' || q.category === category); if (!okFilter) return false; if (!key) return true; const text = [q.full,q.blank,q.answer,q.zhuyin,q.meaning,q.example,q.hint,q.level,q.category].join(' '); return text.includes(key); }); }
     function renderCards() { let list = filteredCardItems(); const limit = $('cardLimitSelect').value; list = shuffle(list); if (limit !== 'all') list = list.slice(0, Number(limit)); if (!list.length) { $('cardsList').innerHTML = '<div class="empty">這個條件沒有學習卡。</div>'; return; } $('cardsList').innerHTML = list.map(renderOneCard).join(''); }
     function renderRandomCard() { const list = filteredCardItems(); if (!list.length) { $('cardsList').innerHTML = '<div class="empty">這個條件沒有學習卡。</div>'; return; } $('cardsList').innerHTML = renderOneCard(shuffle(list)[0]); }
-    function renderOneCard(q) { return `<div class="learn-card"><div class="learn-title">${q.full}</div><div class="zhuyin">${q.zhuyin || '尚未提供注音'}</div><strong>題目：</strong>${q.blank}　<strong>答案：</strong>${q.answer}<br><strong>難度：</strong>${q.level || '未分類'}　<strong>分類：</strong>${q.category || '未分類'}<br><strong>意思：</strong>${q.meaning || '尚未提供解釋。'}<br><strong>例句：</strong>${getExample(q)}<br><strong>提示：</strong>${q.hint || '尚未提供提示。'}<div class="actions"><button class="secondary" onclick="makeReportTextByFull('${escapeJs(q.full)}')">回報此題</button></div></div>`; }
+    function renderOneCard(q) { const fav = isFavorite(q.full); const notes = loadNotes(); const note = notes[q.full] || ''; return `<div class="learn-card"><div class="learn-title">${q.full}</div><div class="zhuyin">${q.zhuyin || '尚未提供注音'}</div><strong>題目：</strong>${q.blank}　<strong>答案：</strong>${q.answer}<br><strong>難度：</strong>${q.level || '未分類'}　<strong>分類：</strong>${q.category || '未分類'}<br><strong>意思：</strong>${q.meaning || '尚未提供解釋。'}<br><strong>例句：</strong>${getExample(q)}<br><strong>提示：</strong>${q.hint || '尚未提供提示。'}<br><label>我的成語筆記</label><textarea onblur="saveNote('${escapeJs(q.full)}', this.value)" placeholder="可以寫下自己的記憶方法或造句">${escapeHtml(note)}</textarea><div class="actions"><button class="secondary" onclick="toggleFavorite('${escapeJs(q.full)}'); renderCards();">${fav ? '取消收藏' : '收藏成語'}</button><button class="secondary" onclick="makeReportTextByFull('${escapeJs(q.full)}')">回報此題</button></div></div>`; }
 
+
+
+
+    function loadQuestionStats() { try { return JSON.parse(localStorage.getItem(STORAGE_QSTATS) || '{}') || {}; } catch { return {}; } }
+    function saveQuestionStats(obj) { localStorage.setItem(STORAGE_QSTATS, JSON.stringify(obj)); }
+    function recordQuestionStat(q, isCorrect) {
+      if (!q || !q.full) return;
+      const stats = loadQuestionStats();
+      const cat = q.category || '未分類';
+      stats[cat] = stats[cat] || { answered:0, correct:0 };
+      stats[cat].answered += 1;
+      if (isCorrect) stats[cat].correct += 1;
+      stats.byId = stats.byId || {};
+      stats.byId[q.full] = stats.byId[q.full] || { answered:0, correct:0, category: cat };
+      stats.byId[q.full].answered += 1;
+      if (isCorrect) stats.byId[q.full].correct += 1;
+      saveQuestionStats(stats);
+    }
+    function getWeakCategories() {
+      const stats = loadQuestionStats();
+      return Object.entries(stats).filter(([k,v]) => k !== 'byId' && v && v.answered >= 3).map(([category,v]) => ({ category, answered:v.answered, correct:v.correct || 0, accuracy: Math.round(((v.correct || 0) / v.answered) * 100) })).sort((a,b)=>a.accuracy-b.accuracy || b.answered-a.answered);
+    }
+    function showWeaknessAnalysis() {
+      setScreen('weaknessScreen');
+      const rows = getWeakCategories();
+      if (!rows.length) { $('weaknessBox').innerHTML = '<div class="empty">目前作答紀錄還不夠。多玩幾題後，這裡會顯示弱點分類。</div>'; return; }
+      const tableRows = rows.map(r => `<tr><td>${escapeHtml(r.category)}</td><td>${r.answered}</td><td>${r.correct}</td><td>${r.accuracy}%</td><td>${r.accuracy < 70 ? '需要加強' : r.accuracy < 85 ? '可再練習' : '表現穩定'}</td></tr>`).join('');
+      $('weaknessBox').innerHTML = `<div class="record-grid"><div class="record-box"><small>已分析分類</small>${rows.length}</div><div class="record-box"><small>最低正確率</small>${rows[0].accuracy}%</div><div class="record-box"><small>最弱分類</small>${rows[0].category}</div><div class="record-box"><small>建議</small>智慧複習</div></div><div class="table-wrap"><table><thead><tr><th>分類</th><th>作答</th><th>答對</th><th>正確率</th><th>建議</th></tr></thead><tbody>${tableRows}</tbody></table></div>`;
+    }
+    function getSmartReviewItems() {
+      const all = safeIdioms();
+      const wrong = new Set(getWrongItems().map(q => q.full));
+      const weakCats = getWeakCategories().filter(r => r.accuracy < 85).slice(0, 3).map(r => r.category);
+      let list = all.filter(q => wrong.has(q.full) || weakCats.includes(q.category));
+      if (!list.length && wrong.size) list = getWrongItems();
+      if (!list.length) list = shuffle(all).slice(0, Math.min(30, all.length));
+      const weighted = [];
+      list.forEach(q => { weighted.push(q); if (wrong.has(q.full)) weighted.push(q); if (weakCats.includes(q.category)) weighted.push(q); });
+      const unique = [];
+      const seen = new Set();
+      shuffle(weighted).forEach(q => { if (!seen.has(q.full)) { seen.add(q.full); unique.push(q); } });
+      return unique;
+    }
+
+    function loadFavorites() { try { return JSON.parse(localStorage.getItem(STORAGE_FAVORITES) || '[]') || []; } catch { return []; } }
+    function saveFavorites(list) { localStorage.setItem(STORAGE_FAVORITES, JSON.stringify([...new Set(list)])); }
+    function isFavorite(full) { return loadFavorites().includes(full); }
+    function toggleFavorite(full) { const list = loadFavorites(); const idx = list.indexOf(full); if (idx >= 0) { list.splice(idx, 1); } else { list.push(full); } saveFavorites(list); }
+    function toggleFavoriteCurrent() { if (!current) return; toggleFavorite(current.full); $('resultText').style.color = 'var(--text)'; $('resultText').textContent = isFavorite(current.full) ? `已收藏「${current.full}」` : `已取消收藏「${current.full}」`; }
+    function getFavoriteItems() { const fav = new Set(loadFavorites()); return safeIdioms().filter(q => fav.has(q.full)); }
+    function showFavorites() {
+      setScreen('favoritesScreen');
+      const list = getFavoriteItems();
+      if (!list.length) { $('favoritesList').innerHTML = '<div class="empty">目前沒有收藏成語。你可以在學習卡或答題時按「收藏」。</div>'; return; }
+      $('favoritesList').innerHTML = list.map(q => `<div class="wrong-item"><strong>${q.full}</strong>（${q.zhuyin || '尚未提供注音'}）<br>題目：${q.blank}｜答案：${q.answer}<br>解釋：${q.meaning || '尚未提供解釋。'}<br>例句：${getExample(q)}<div class="actions"><button class="secondary" onclick="toggleFavorite('${escapeJs(q.full)}'); showFavorites();">取消收藏</button></div></div>`).join('');
+    }
+    function clearFavorites() { if (!confirm('確定要清除所有收藏成語嗎？')) return; saveFavorites([]); showFavorites(); }
+    function loadNotes() { try { return JSON.parse(localStorage.getItem(STORAGE_NOTES) || '{}') || {}; } catch { return {}; } }
+    function saveNotes(obj) { localStorage.setItem(STORAGE_NOTES, JSON.stringify(obj)); }
+    function saveNote(full, value) { const notes = loadNotes(); if (value && value.trim()) notes[full] = value.trim(); else delete notes[full]; saveNotes(notes); }
+
+    function showTransfer() { setScreen('transferScreen'); }
+    function exportLearningData() {
+      const data = {
+        version: 'v3.2',
+        exportedAt: new Date().toISOString(),
+        records: loadRecords(),
+        wrongBook: loadWrongBook(),
+        daily: JSON.parse(localStorage.getItem(STORAGE_DAILY) || '{}'),
+        favorites: loadFavorites(),
+        notes: loadNotes(),
+        questionStats: loadQuestionStats()
+      };
+      $('transferText').value = JSON.stringify(data, null, 2);
+    }
+    function importLearningData() {
+      try {
+        const data = JSON.parse($('transferText').value || '{}');
+        if (data.records) localStorage.setItem(STORAGE_RECORDS, JSON.stringify(data.records));
+        if (data.wrongBook) localStorage.setItem(STORAGE_WRONG, JSON.stringify(data.wrongBook));
+        if (data.daily) localStorage.setItem(STORAGE_DAILY, JSON.stringify(data.daily));
+        if (data.favorites) localStorage.setItem(STORAGE_FAVORITES, JSON.stringify(data.favorites));
+        if (data.notes) localStorage.setItem(STORAGE_NOTES, JSON.stringify(data.notes));
+        if (data.questionStats) localStorage.setItem(STORAGE_QSTATS, JSON.stringify(data.questionStats));
+        alert('匯入完成！');
+        updateWrongCount();
+      } catch(e) { alert('匯入失敗，請確認貼上的內容是正確 JSON。'); }
+    }
+    async function copyTransferText() { try { await navigator.clipboard.writeText($('transferText').value); alert('已複製匯出資料！'); } catch(e) { alert('無法自動複製，請手動選取文字。'); } }
 
     function showCategoryStats() {
       setScreen('categoryStatsScreen');
@@ -674,7 +820,7 @@
       const items = safeIdioms();
       const summary = issues.length ? `<span class="issue-bad">發現 ${issues.length} 個可改善項目</span>` : `<span class="issue-ok">題庫品質檢查通過</span>`;
       const rows = issues.slice(0, 300).map(([i,full,msg]) => `<tr><td>${i}</td><td>${escapeHtml(full)}</td><td>${escapeHtml(msg)}</td></tr>`).join('');
-      lastQualityReport = `成語大挑戰 v3.1 題庫品質檢查\n總題數：${items.length}\n問題數：${issues.length}\n` + issues.map(([i,full,msg]) => `#${i} ${full}：${msg}`).join('\n');
+      lastQualityReport = `成語大挑戰 v3.2 題庫品質檢查\n總題數：${items.length}\n問題數：${issues.length}\n` + issues.map(([i,full,msg]) => `#${i} ${full}：${msg}`).join('\n');
       $('qualityBox').innerHTML = `<div class="record-grid"><div class="record-box"><small>總題數</small>${items.length}</div><div class="record-box"><small>問題數</small>${issues.length}</div><div class="record-box"><small>有注音</small>${items.filter(q=>q.zhuyin).length}</div><div class="record-box"><small>有例句</small>${items.filter(q=>q.example).length}</div></div><p class="meaning">${summary}</p>${issues.length ? `<div class="table-wrap"><table><thead><tr><th>序號</th><th>成語</th><th>問題</th></tr></thead><tbody>${rows}</tbody></table></div>${issues.length > 300 ? '<p class="meaning">只顯示前 300 筆，完整內容可用「複製檢查報告」。</p>' : ''}` : '<div class="empty">目前沒有發現明顯問題。</div>'}`;
     }
     async function copyQualityReport() { if (!lastQualityReport) showQualityCheck(); try { await navigator.clipboard.writeText(lastQualityReport); alert('已複製題庫品質檢查報告！'); } catch(e) { alert('無法自動複製，請手動選取檢查結果。'); } }
