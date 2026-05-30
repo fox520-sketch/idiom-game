@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>成語大挑戰題庫 1000 題正式教材版 v4.1</title>
+  <title>成語大挑戰手機版 UI 全面優化版 v4.2</title>
   <script src="idioms.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
@@ -194,7 +194,7 @@
     .issue-bad { color: var(--bad); font-weight:950; }
 
 
-    /* v4.1 多人搶答字型與手機版版面優化 */
+    /* v4.2 手機版 UI 全面優化 */
     #multiplayerGameScreen .mp-game-card {
       max-width: 1180px;
       margin: 0 auto;
@@ -432,6 +432,90 @@
     body.child-mode .meaning::before { content: '🌱 '; }
     .debug-box, .install-box { background: var(--soft); border:1px solid var(--border); border-radius:16px; padding:14px; white-space:pre-wrap; line-height:1.7; text-align:left; }
 
+
+    /* v4.2 手機版 UI 全面優化：降低擁擠、改善觸控、避免橫向捲動 */
+    html { -webkit-text-size-adjust: 100%; }
+    button, select, input, textarea { touch-action: manipulation; }
+    .mobile-sticky-actions { display: none; }
+
+    @media (max-width: 720px) {
+      body { background: var(--bg); overflow-x: hidden; }
+      .portal-bar { padding: 10px 12px; position: sticky; top: 0; z-index: 20; }
+      .portal-inner { gap: 8px; align-items: center; }
+      .portal-brand { font-size: 18px; gap: 8px; flex: 1 1 100%; justify-content: center; }
+      .portal-logo { width: 38px; height: 38px; border-radius: 12px; font-size: 22px; }
+      .portal-nav { width: 100%; gap: 8px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .portal-nav a { padding: 10px 8px; background: var(--soft); border: 1px solid var(--border); text-align: center; }
+      header { padding: 10px 12px; }
+      header h1 { font-size: 24px; letter-spacing: .04em; }
+      .home-link { margin-top: 4px; font-size: 14px; }
+      main { width: 100%; margin: 10px auto; padding: 0 10px 28px; }
+      .card, .panel, .game-card, .review-card, .wrong-card { border-radius: 18px; padding: 14px; box-shadow: 0 6px 18px rgba(35,70,35,.10); }
+      .hero { padding: 18px 12px; }
+      .hero h2 { font-size: 28px; line-height: 1.25; }
+      .hero p { font-size: 15px; line-height: 1.65; }
+      .menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+      .menu-btn { min-height: 64px; font-size: 17px; padding: 10px 8px; border-radius: 16px; }
+      .actions { gap: 8px; }
+      .actions button { flex: 1 1 calc(50% - 8px); min-height: 46px; padding: 10px 8px; font-size: 15px; }
+      .panel { grid-template-columns: 1fr; gap: 10px; margin-bottom: 12px; }
+      label { font-size: 13px; }
+      select, input, textarea { font-size: 16px; border-radius: 12px; padding: 10px 11px; }
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+      .stat { padding: 9px 6px; border-radius: 14px; font-size: 16px; }
+      .stat small { font-size: 12px; }
+      .timer-row { font-size: 14px; }
+      .question { font-size: clamp(36px, 12vw, 56px); letter-spacing: .06em; margin: 12px 0; line-height: 1.15; }
+      .tag-row { gap: 6px; }
+      .tag { font-size: 13px; padding: 5px 9px; }
+      .choices { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; margin: 14px auto; max-width: 100%; }
+      .choice-btn { min-height: 58px; font-size: clamp(20px, 6vw, 26px); padding: 9px 8px; border-radius: 16px; gap: 8px; }
+      .choice-label { width: 28px; height: 28px; font-size: 14px; flex: 0 0 auto; }
+      .result { font-size: 19px; margin-top: 10px; }
+      .meaning, .example, .hint-box { font-size: 15px; line-height: 1.65; }
+      .learn-title { font-size: clamp(30px, 10vw, 46px); }
+      .zhuyin { font-size: 17px; line-height: 1.6; }
+      .record-grid, .card-toolbar, .badge-grid { grid-template-columns: 1fr; gap: 10px; }
+      .table-wrap { -webkit-overflow-scrolling: touch; }
+      th, td { padding: 8px 7px; font-size: 14px; }
+      .rank-item { grid-template-columns: 52px 1fr; gap: 8px; }
+      .rank-item > *:nth-child(n+3) { grid-column: 2; }
+      .debug-box, .install-box, .share-box { font-size: 14px; }
+    }
+
+    @media (max-width: 430px) {
+      .menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .menu-btn { min-height: 58px; font-size: 15px; }
+      .choices { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+      .choice-btn { min-height: 54px; font-size: clamp(18px, 6vw, 23px); }
+      .actions button { flex-basis: 100%; }
+      body.child-mode .choice-btn { min-height: 66px; font-size: clamp(22px, 7vw, 30px); }
+    }
+
+    @media (max-width: 720px) {
+      #multiplayerHomeScreen .card,
+      #multiplayerRoomScreen .card,
+      #multiplayerGameScreen .card { padding: 13px; }
+      #multiplayerGameScreen .mp-game-card { padding: 12px; border-radius: 18px; }
+      #multiplayerGameScreen .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+      #multiplayerGameScreen .stat { padding: 8px 6px; font-size: 16px; }
+      .mp-question { font-size: clamp(30px, 10vw, 46px); line-height: 1.15; padding: 12px 8px; margin: 10px auto 6px; border-radius: 18px; letter-spacing: .04em; }
+      #mpZhuyinText.zhuyin { font-size: 15px; line-height: 1.5; margin: 6px auto 10px; }
+      .mp-choice-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px; margin: 12px auto 8px; }
+      .mp-choice-grid .choice-btn { min-height: 54px; font-size: clamp(18px, 6vw, 23px); padding: 8px 6px; border-radius: 14px; gap: 6px; }
+      .mp-choice-grid .choice-label { width: 26px; height: 26px; font-size: 13px; }
+      .mp-result { font-size: 18px; min-height: 26px; margin-top: 8px; }
+      #mpMeaningText.meaning { font-size: 14px; padding: 9px 10px; border-radius: 14px; }
+      .mp-grid, .mp-grid-3 { grid-template-columns: 1fr; gap: 9px; }
+      .mp-answer-list { grid-template-columns: 1fr; font-size: 14px; }
+      .mp-box { padding: 11px; margin-top: 10px; border-radius: 16px; }
+      .mp-box h3 { font-size: 17px; margin-bottom: 7px; }
+      .mp-scoreboard th, .mp-scoreboard td { font-size: 13px; padding: 7px 5px; white-space: nowrap; }
+      .mp-host-tools button { flex: 1 1 calc(50% - 8px); font-size: 14px; padding: 9px 6px; }
+      .mp-room-code { font-size: 20px; }
+      .mp-invite-qr img { width: min(220px, 74vw); height: min(220px, 74vw); }
+    }
+
     @media print {
       body { background: #fff !important; color: #000 !important; }
       header, .menu-grid, .actions, .version, .stats, .progress-track, .timer-wrap, .game-card, .screen:not(.active) { display: none !important; }
@@ -467,7 +551,7 @@
     <div class="update-banner" id="updateBanner">發現新版，可立即更新。<button onclick="applyPwaUpdate()">立即更新</button><button class="secondary" onclick="hideUpdateBanner()">稍後</button></div>
     <section id="homeScreen" class="screen active">
       <div class="card hero">
-        <h2>v4.1 成語大挑戰題庫 1000 題正式教材版</h2>
+        <h2>v4.2 成語大挑戰手機版 UI 全面優化版</h2>
         <p>整合匿名登入、安全規則、等待室準備狀態、房主控場、完整成績與 QR Code 邀請，讓多人搶答更接近正式版。</p>
         <div class="menu-grid">
           <button class="menu-btn" onclick="goSetup()">開始遊戲</button>
@@ -967,7 +1051,7 @@
       </div>
     </section>
 
-    <div class="version">版本：v4.1｜題庫 1000 題正式教材版｜等待室準備、房主控場、完整成績、匿名登入安全規則</div>
+    <div class="version">版本：v4.2｜手機版 UI 全面優化版｜題庫 1000 題、多人大廳、搶答、QR Code、匿名登入安全規則</div>
   </main>
 
   <script>
@@ -1461,7 +1545,7 @@
     }
     async function mpCopyFinalSummary() {
       const sorted = [...mpPlayers].sort((a,b) => (b.score||0)-(a.score||0) || (b.correct||0)-(a.correct||0));
-      const lines = ['成語大挑戰多人搶答成績表', `房號：${mpRoomId}`, `版本：v4.1`, ''];
+      const lines = ['成語大挑戰多人搶答成績表', `房號：${mpRoomId}`, `版本：v4.2`, ''];
       sorted.forEach((p,i) => {
         const total = (p.correct||0) + (p.wrong||0);
         const rate = total ? Math.round((p.correct||0)/total*100) + '%' : '--';
@@ -1871,7 +1955,7 @@
     function showTransfer() { setScreen('transferScreen'); }
     function exportLearningData() {
       const data = {
-        version: 'v4.1',
+        version: 'v4.2',
         exportedAt: new Date().toISOString(),
         records: loadRecords(),
         wrongBook: loadWrongBook(),
@@ -1947,7 +2031,7 @@
       const items = safeIdioms();
       const summary = issues.length ? `<span class="issue-bad">發現 ${issues.length} 個可改善項目</span>` : `<span class="issue-ok">題庫品質檢查通過</span>`;
       const rows = issues.slice(0, 300).map(([i,full,msg]) => `<tr><td>${i}</td><td>${escapeHtml(full)}</td><td>${escapeHtml(msg)}</td></tr>`).join('');
-      lastQualityReport = `成語大挑戰 v4.1 題庫品質檢查\n總題數：${items.length}\n問題數：${issues.length}\n` + issues.map(([i,full,msg]) => `#${i} ${full}：${msg}`).join('\n');
+      lastQualityReport = `成語大挑戰 v4.2 題庫品質檢查\n總題數：${items.length}\n問題數：${issues.length}\n` + issues.map(([i,full,msg]) => `#${i} ${full}：${msg}`).join('\n');
       $('qualityBox').innerHTML = `<div class="record-grid"><div class="record-box"><small>總題數</small>${items.length}</div><div class="record-box"><small>問題數</small>${issues.length}</div><div class="record-box"><small>有注音</small>${items.filter(q=>q.zhuyin).length}</div><div class="record-box"><small>有例句</small>${items.filter(q=>q.example).length}</div></div><p class="meaning">${summary}</p>${issues.length ? `<div class="table-wrap"><table><thead><tr><th>序號</th><th>成語</th><th>問題</th></tr></thead><tbody>${rows}</tbody></table></div>${issues.length > 300 ? '<p class="meaning">只顯示前 300 筆，完整內容可用「複製檢查報告」。</p>' : ''}` : '<div class="empty">目前沒有發現明顯問題。</div>'}`;
     }
     async function copyQualityReport() { if (!lastQualityReport) showQualityCheck(); try { await navigator.clipboard.writeText(lastQualityReport); alert('已複製題庫品質檢查報告！'); } catch(e) { alert('無法自動複製，請手動選取檢查結果。'); } }
@@ -2107,7 +2191,7 @@
       const customCount = loadCustomIdioms().length;
       const sw = navigator.serviceWorker && navigator.serviceWorker.controller ? '已啟用' : '未啟用 / 尚未控制';
       return `成語大挑戰除錯資訊
-程式版本：v4.1
+程式版本：v4.2
 題庫版本：2026.05.30
 題庫數量：${safeIdioms().length}
 內建題庫：${baseIdioms().length}
