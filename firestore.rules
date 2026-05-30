@@ -7,8 +7,7 @@ service cloud.firestore {
       allow delete: if false;
 
       match /players/{playerId} {
-        allow read, create, update: if true;
-        allow delete: if false;
+        allow read, create, update, delete: if true;
       }
 
       match /answers/{answerId} {

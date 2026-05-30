@@ -1,35 +1,29 @@
-# 成語大挑戰 v3.7.7 多人搶答題庫擴充版
+# 成語大挑戰 v3.8 多人搶答進階版
 
-本版為 GitHub Pages 上傳專用版。
+這是可上傳 GitHub Pages 的版本。
 
-## v3.7.7 更新重點
+## 本版更新
 
-1. 多人搶答遊戲結束後，可在同一個房間繼續下一局。
-2. 房主在結束畫面會看到「房主再玩一局」按鈕。
-3. 再玩一局會重新抽題、重新計分、保留同一個房號與玩家。
-4. 修正舊局答案可能影響新局搶答狀態的問題。
-5. 保留答對即鎖題、自動下一題、只有答對者得分。
-6. PWA 快取版本更新為 v3.7.7。
+1. 多人遊戲加入房間後自動進入等待室
+2. 掃 QR Code 或邀請連結會自動帶入房號
+3. 新玩家加入時即時顯示玩家清單與排名
+4. 房主可設定題數、倒數秒數、分類、難度
+5. 多人遊戲結束後顯示完整成績表
+6. 房主可移除玩家、重設分數、關閉房間
 
-## 上傳 GitHub 檔案
+## 上傳檔案
 
-請把下列檔案上傳到 repository 第一層：
+請把以下檔案上傳到 GitHub repository 第一層：
 
-```text
-index.html
-idioms.js
-README.md
-manifest.json
-service-worker.js
-firestore.rules
-```
+- index.html
+- idioms.js
+- README.md
+- manifest.json
+- service-worker.js
+- firestore.rules
 
-如果你的 `firebase-config.js` 已經填好 Firebase 設定，請不要覆蓋它。
+請保留你原本已設定好的 firebase-config.js，不要覆蓋。
 
 ## Firebase Rules
 
-若多人搶答出現 Missing or insufficient permissions，請到 Firebase Console 的 Firestore Rules 確認允許 `idiomRooms`、`players`、`answers` 的讀寫。
-
-## 快取提醒
-
-上傳新版後如果仍看到舊版，請在網頁內按「立即更新」，或清除瀏覽器快取後重新開啟。
+本版若要使用「移除玩家」功能，請到 Firebase Console 的 Firestore Rules 貼上 `firestore.rules` 的內容並發布。

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>成語大挑戰多人搶答版 v3.7.7</title>
+  <title>成語大挑戰多人搶答進階版 v3.8</title>
   <script src="idioms.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
@@ -350,6 +350,37 @@
       line-height: 1.5;
     }
 
+
+    .mp-room-settings {
+      margin-top: 14px;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--soft);
+      font-weight: 800;
+      line-height: 1.8;
+    }
+    .mp-host-tools {
+      margin-top: 12px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .mp-final-summary {
+      background: var(--soft);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+      margin: 14px 0;
+      text-align: left;
+    }
+    .mp-final-summary h3 { margin-top: 0; }
+    .mp-kick-btn {
+      padding: 6px 10px;
+      font-size: 14px;
+      border-radius: 10px;
+    }
     @media (max-width: 860px) {
       #multiplayerGameScreen .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .mp-question { font-size: clamp(36px, 11vw, 58px); padding: 16px 10px; letter-spacing: .05em; }
@@ -435,8 +466,8 @@
     <div class="update-banner" id="updateBanner">發現新版，可立即更新。<button onclick="applyPwaUpdate()">立即更新</button><button class="secondary" onclick="hideUpdateBanner()">稍後</button></div>
     <section id="homeScreen" class="screen active">
       <div class="card hero">
-        <h2>v3.7.7 成語大挑戰多人搶答題庫擴充版</h2>
-        <p>新增 Firebase 多人連線、開房間、加入房間、同步題目、搶答計分與即時排名。</p>
+        <h2>v3.8 成語大挑戰多人搶答進階版</h2>
+        <p>新增 Firebase 多人連線、房主設定規則、玩家管理、完整成績表、搶答計分與即時排名。</p>
         <div class="menu-grid">
           <button class="menu-btn" onclick="goSetup()">開始遊戲</button>
           <button class="menu-btn" onclick="startQuickGame()">快速遊戲</button>
@@ -861,8 +892,10 @@
             <label>暱稱</label>
             <input id="mpHostName" placeholder="例如：Fox" value="房主">
             <div class="panel" style="margin-top:12px;grid-template-columns:1fr 1fr;box-shadow:none;">
-              <div><label>題數</label><select id="mpRoundSelect"><option value="10">10 題</option><option value="20">20 題</option><option value="30">30 題</option></select></div>
-              <div><label>每題秒數</label><select id="mpTimeSelect"><option value="10">10 秒</option><option value="15" selected>15 秒</option><option value="20">20 秒</option></select></div>
+              <div><label>題數</label><select id="mpRoundSelect"><option value="5">5 題</option><option value="10" selected>10 題</option><option value="20">20 題</option><option value="30">30 題</option></select></div>
+              <div><label>每題秒數</label><select id="mpTimeSelect"><option value="5">5 秒</option><option value="8">8 秒</option><option value="10">10 秒</option><option value="15" selected>15 秒</option><option value="20">20 秒</option></select></div>
+              <div><label>難度</label><select id="mpLevelSelect"><option value="全部">全部</option><option value="簡單">簡單</option><option value="中等">中等</option><option value="困難">困難</option></select></div>
+              <div><label>分類</label><select id="mpCategorySelect"><option value="全部">全部</option></select></div>
             </div>
             <button onclick="mpCreateRoom()">建立房間</button>
           </div>
@@ -871,7 +904,7 @@
             <label>暱稱</label>
             <input id="mpJoinName" placeholder="輸入你的名字">
             <label>房號</label>
-            <input id="mpRoomInput" placeholder="例如：AB12CD" maxlength="6" style="text-transform:uppercase;">
+            <input id="mpRoomInput" placeholder="例如：AB12CD" maxlength="6" style="text-transform:uppercase;"><div id="mpJoinHint" class="meaning"></div>
             <button onclick="mpJoinRoom()">加入房間</button>
           </div>
         </div>
@@ -887,11 +920,16 @@
           <div class="stat"><small>狀態</small><span id="mpRoomStatus">等待中</span></div>
           <div class="stat"><small>你的分數</small><span id="mpMyScore">0</span></div>
         </div>
+        <div id="mpRoomSettingsBox" class="mp-room-settings"></div>
         <div class="actions">
           <button id="mpStartBtn" onclick="mpStartGame()">房主開始遊戲</button>
           <button class="secondary" onclick="mpCopyInvite()">複製邀請連結</button>
           <button class="secondary" onclick="mpToggleQr()">顯示 QR Code</button>
           <button class="secondary" onclick="mpLeaveRoom()">離開房間</button>
+        </div>
+        <div id="mpHostTools" class="mp-host-tools">
+          <button class="secondary" onclick="mpResetRoomScores()">房主重設分數</button>
+          <button class="secondary" onclick="mpCloseRoom()">房主關閉房間</button>
         </div>
         <div id="mpInviteQrBox" class="mp-invite-qr">
           <h3>掃 QR Code 加入房間</h3>
@@ -920,13 +958,14 @@
         <div id="mpChoicesBox" class="mp-choice-grid"></div>
         <div class="mp-result" id="mpResultText"></div>
         <div class="meaning" id="mpMeaningText"></div>
+        <div id="mpFinalSummary" class="mp-final-summary" style="display:none;"></div>
         <div class="mp-box"><h3>本題搶答狀態</h3><div id="mpAnswerList" class="mp-answer-list">等待作答...</div></div>
         <div class="mp-box"><h3>即時排名</h3><div id="mpScoreboard">等待排名...</div></div>
         <div class="actions"><button id="mpRestartBtn" onclick="mpRestartGame()">房主再玩一局</button><button class="secondary" onclick="mpLeaveRoom()">離開房間</button></div>
       </div>
     </section>
 
-    <div class="version">版本：v3.7.7｜多人搶答題庫擴充版｜同房再玩一局、QR Code 邀請、即時排名</div>
+    <div class="version">版本：v3.8｜多人搶答進階版｜房主設定、成績表、玩家管理、QR Code 邀請</div>
   </main>
 
   <script>
@@ -1023,12 +1062,25 @@
     function showMultiplayerHome() {
       setChildMode(false);
       setScreen('multiplayerScreen');
+      mpUpdateMultiplayerCategoryOptions();
       if ($('mpHostName')) $('mpHostName').value = mpPlayerName || '房主';
       if ($('mpJoinName')) $('mpJoinName').value = mpPlayerName || '';
       const params = new URLSearchParams(location.search);
       const room = (params.get('room') || '').toUpperCase();
-      if (room && $('mpRoomInput')) $('mpRoomInput').value = room;
+      if (room && $('mpRoomInput')) {
+        $('mpRoomInput').value = room;
+        if ($('mpJoinHint')) $('mpJoinHint').textContent = '已從邀請連結帶入房號，請輸入暱稱後按「加入房間」。';
+      }
       mpInitFirebase();
+    }
+    function mpUpdateMultiplayerCategoryOptions() {
+      const sel = $('mpCategorySelect');
+      if (!sel || sel.dataset.ready === '1') return;
+      const cats = uniqueValues('category').sort();
+      cats.forEach(c => {
+        const opt = document.createElement('option'); opt.value = c; opt.textContent = c; sel.appendChild(opt);
+      });
+      sel.dataset.ready = '1';
     }
     function mpRoomRef(id=mpRoomId) { return mpDb.collection('idiomRooms').doc(id); }
     function mpNewRoomId() {
@@ -1037,9 +1089,16 @@
       for (let i=0; i<6; i++) s += chars[Math.floor(Math.random()*chars.length)];
       return s;
     }
-    function mpMakeQuestions(count) {
-      const items = shuffle(safeIdioms()).slice(0, count).map(q => {
-        const answers = [...new Set(safeIdioms().map(item => item.answer).filter(a => a && a !== q.answer))];
+    function mpMakeQuestions(count, level='全部', category='全部') {
+      const all = safeIdioms();
+      let pool = all.filter(q =>
+        (!level || level === '全部' || q.level === level) &&
+        (!category || category === '全部' || q.category === category)
+      );
+      if (pool.length < count) pool = all;
+      const answerSource = [...new Set(all.map(item => item.answer).filter(Boolean))];
+      const items = shuffle(pool).slice(0, count).map(q => {
+        const answers = answerSource.filter(a => a !== q.answer);
         const choices = shuffle([q.answer, ...shuffle(answers).slice(0, 7)]);
         return { full:q.full, blank:q.blank, answer:q.answer, zhuyin:q.zhuyin||'', meaning:q.meaning||'', example:getExample(q), hint:q.hint||'', level:q.level||'', category:q.category||'', choices };
       });
@@ -1050,18 +1109,21 @@
       const name = ($('mpHostName').value || '房主').trim().slice(0, 20);
       const round = Number($('mpRoundSelect').value || 10);
       const seconds = Number($('mpTimeSelect').value || 15);
+      const level = ($('mpLevelSelect') && $('mpLevelSelect').value) || '全部';
+      const category = ($('mpCategorySelect') && $('mpCategorySelect').value) || '全部';
       mpPlayerName = name; localStorage.setItem('idiomMpPlayerName', name);
       mpIsHost = true;
       mpRoomId = mpNewRoomId();
-      const questions = mpMakeQuestions(round);
+      const questions = mpMakeQuestions(round, level, category);
       try {
         await mpRoomRef().set({
           roomId: mpRoomId, hostId: mpPlayerId, hostName: name, status: 'waiting',
           currentIndex: 0, total: questions.length, secondsPerQuestion: seconds,
+          level, category,
           winnerQuestionIndex: -1, winnerPlayerId: '', winnerName: '',
           roundId: 'R' + Date.now(), questions, createdAt: firebase.firestore.FieldValue.serverTimestamp(), updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-        await mpRoomRef().collection('players').doc(mpPlayerId).set({ name, score:0, correct:0, wrong:0, answered:0, joinedAt: firebase.firestore.FieldValue.serverTimestamp(), lastSeen: firebase.firestore.FieldValue.serverTimestamp() }, {merge:true});
+        await mpRoomRef().collection('players').doc(mpPlayerId).set({ name, kicked:false, score:0, correct:0, wrong:0, answered:0, joinedAt: firebase.firestore.FieldValue.serverTimestamp(), lastSeen: firebase.firestore.FieldValue.serverTimestamp() }, {merge:true});
         mpSubscribeRoom();
         setScreen('multiplayerRoomScreen');
       } catch(e) { alert('建立房間失敗：' + e.message); }
@@ -1077,7 +1139,12 @@
         const doc = await mpRoomRef().get();
         if (!doc.exists) { alert('找不到這個房間。'); return; }
         mpIsHost = doc.data().hostId === mpPlayerId;
-        await mpRoomRef().collection('players').doc(mpPlayerId).set({ name, score:0, correct:0, wrong:0, answered:0, joinedAt: firebase.firestore.FieldValue.serverTimestamp(), lastSeen: firebase.firestore.FieldValue.serverTimestamp() }, {merge:true});
+        const playersSnap = await mpRoomRef().collection('players').get();
+        let displayName = name;
+        const existingNames = playersSnap.docs.filter(d => d.id !== mpPlayerId).map(d => (d.data().name || '').trim());
+        if (existingNames.includes(displayName)) displayName = `${displayName}-${existingNames.filter(n => n === name || n.startsWith(name + '-')).length + 1}`;
+        mpPlayerName = displayName; localStorage.setItem('idiomMpPlayerName', displayName);
+        await mpRoomRef().collection('players').doc(mpPlayerId).set({ name:displayName, kicked:false, score:0, correct:0, wrong:0, answered:0, joinedAt: firebase.firestore.FieldValue.serverTimestamp(), lastSeen: firebase.firestore.FieldValue.serverTimestamp() }, {merge:true});
         mpSubscribeRoom();
         const status = doc.data().status;
         setScreen(status === 'playing' ? 'multiplayerGameScreen' : 'multiplayerRoomScreen');
@@ -1090,11 +1157,16 @@
         mpCurrentRoom = snap.data();
         mpIsHost = mpCurrentRoom.hostId === mpPlayerId;
         mpRenderRoom();
+        if (mpCurrentRoom.status === 'closed') { alert('房間已關閉。'); mpLeaveRoom(true); return; }
+        if (mpCurrentRoom.status === 'waiting') { setScreen('multiplayerRoomScreen'); }
         if (mpCurrentRoom.status === 'playing') { setScreen('multiplayerGameScreen'); mpRenderQuestion(); }
         if (mpCurrentRoom.status === 'finished') { setScreen('multiplayerGameScreen'); mpRenderFinished(); }
       });
       mpPlayersUnsub = mpRoomRef().collection('players').onSnapshot(qs => {
-        mpPlayers = qs.docs.map(d => ({id:d.id, ...d.data()}));
+        const allPlayers = qs.docs.map(d => ({id:d.id, ...d.data()}));
+        const me = allPlayers.find(p => p.id === mpPlayerId);
+        if (me && me.kicked) { alert('你已被房主移出房間。'); mpLeaveRoom(true); return; }
+        mpPlayers = allPlayers.filter(p => !p.kicked);
         mpRenderPlayers();
       });
       mpAnswersUnsub = mpRoomRef().collection('answers').onSnapshot(qs => {
@@ -1107,13 +1179,20 @@
       if ($('mpGameRoomCode')) $('mpGameRoomCode').textContent = mpRoomId;
       if ($('mpRoomStatus')) $('mpRoomStatus').textContent = mpCurrentRoom.status === 'waiting' ? '等待開始' : mpCurrentRoom.status === 'playing' ? '遊戲中' : '已結束';
       if ($('mpStartBtn')) $('mpStartBtn').style.display = mpIsHost && mpCurrentRoom.status === 'waiting' ? '' : 'none';
+      if ($('mpHostTools')) $('mpHostTools').style.display = mpIsHost && mpCurrentRoom.status !== 'playing' ? '' : 'none';
+      if ($('mpRoomSettingsBox')) $('mpRoomSettingsBox').innerHTML = `本局設定：${mpCurrentRoom.total || 0} 題｜每題 ${mpCurrentRoom.secondsPerQuestion || 15} 秒｜難度：${escapeHtml(mpCurrentRoom.level || '全部')}｜分類：${escapeHtml(mpCurrentRoom.category || '全部')}`;
       const me = mpPlayers.find(p => p.id === mpPlayerId);
       if ($('mpMyScore')) $('mpMyScore').textContent = me ? (me.score || 0) : 0;
       if ($('mpGameMyScore')) $('mpGameMyScore').textContent = me ? (me.score || 0) : 0;
     }
     function mpRenderPlayers() {
       const sorted = [...mpPlayers].sort((a,b) => (b.score||0)-(a.score||0) || (b.correct||0)-(a.correct||0));
-      const html = `<table class="mp-scoreboard"><thead><tr><th>排名</th><th>玩家</th><th>分數</th><th>答對</th><th>答錯</th></tr></thead><tbody>${sorted.map((p,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(p.name || '玩家')}${p.id===mpPlayerId?'（你）':''}</td><td>${p.score||0}</td><td>${p.correct||0}</td><td>${p.wrong||0}</td></tr>`).join('')}</tbody></table>`;
+      const showTools = mpIsHost && mpCurrentRoom && mpCurrentRoom.status !== 'playing';
+      const html = `<table class="mp-scoreboard"><thead><tr><th>排名</th><th>玩家</th><th>分數</th><th>答對</th><th>答錯</th><th>正確率</th>${showTools?'<th>管理</th>':''}</tr></thead><tbody>${sorted.map((p,i)=>{
+        const total = (p.correct||0) + (p.wrong||0);
+        const rate = total ? Math.round((p.correct||0) / total * 100) + '%' : '--';
+        return `<tr><td>${i+1}</td><td>${escapeHtml(p.name || '玩家')}${p.id===mpPlayerId?'（你）':''}</td><td>${p.score||0}</td><td>${p.correct||0}</td><td>${p.wrong||0}</td><td>${rate}</td>${showTools?`<td>${p.id===mpCurrentRoom.hostId?'房主':`<button class="secondary mp-kick-btn" onclick="mpKickPlayer('${p.id}')">移除</button>`}</td>`:''}</tr>`;
+      }).join('')}</tbody></table>`;
       if ($('mpPlayerList')) $('mpPlayerList').innerHTML = html;
       if ($('mpScoreboard')) $('mpScoreboard').innerHTML = html;
       mpRenderRoom();
@@ -1121,7 +1200,10 @@
     async function mpStartGame() {
       if (!mpIsHost || !mpCurrentRoom) return;
       try {
-        await mpRoomRef().update({ status:'playing', currentIndex:0, currentStartedAt: Date.now(), winnerQuestionIndex:-1, winnerPlayerId:'', winnerName:'', updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+        const batch = mpDb.batch();
+        mpPlayers.forEach(p => batch.set(mpRoomRef().collection('players').doc(p.id), { score:0, correct:0, wrong:0, answered:0, lastSeen: firebase.firestore.FieldValue.serverTimestamp() }, { merge:true }));
+        batch.update(mpRoomRef(), { status:'playing', currentIndex:0, currentStartedAt: Date.now(), winnerQuestionIndex:-1, winnerPlayerId:'', winnerName:'', updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+        await batch.commit();
       } catch(e) { alert('開始遊戲失敗：' + e.message); }
     }
     function mpCurrentQuestion() {
@@ -1144,6 +1226,7 @@
         $('mpProgressBar').style.width = `${((idx+1) / (mpCurrentRoom.total || mpCurrentRoom.questions.length)) * 100}%`;
         $('mpResultText').textContent = '';
         $('mpMeaningText').textContent = '';
+        if ($('mpFinalSummary')) { $('mpFinalSummary').style.display = 'none'; $('mpFinalSummary').innerHTML = ''; }
         $('mpChoicesBox').innerHTML = (q.choices||[]).map((choice,i)=>`<button class="choice-btn" onclick="mpChooseAnswer('${escapeJs(choice)}', this)"><span class="choice-label">${labels[i]||''}</span><span>${escapeHtml(choice)}</span></button>`).join('');
         mpStartCountdown();
       }
@@ -1257,6 +1340,7 @@
       $('mpResultText').textContent = '請查看下方即時排名。';
       $('mpMeaningText').textContent = '';
       $('mpTimer').textContent = '--';
+      mpRenderFinalSummary();
       if ($('mpRestartBtn')) $('mpRestartBtn').style.display = mpIsHost ? '' : 'none';
       if (mpIsHost) {
         $('mpResultText').textContent = '請查看下方即時排名。要在同一個房間繼續，請按「房主再玩一局」。';
@@ -1268,7 +1352,9 @@
       if (!mpInitFirebase() || !mpIsHost || !mpCurrentRoom) return;
       const total = Number(mpCurrentRoom.total || (mpCurrentRoom.questions || []).length || 10);
       const seconds = Number(mpCurrentRoom.secondsPerQuestion || 15);
-      const questions = mpMakeQuestions(total);
+      const level = mpCurrentRoom.level || '全部';
+      const category = mpCurrentRoom.category || '全部';
+      const questions = mpMakeQuestions(total, level, category);
       const newRoundId = 'R' + Date.now();
       try {
         const batch = mpDb.batch();
@@ -1291,6 +1377,40 @@
       } catch(e) {
         alert('開始下一局失敗：' + e.message);
       }
+    }
+
+
+    function mpRenderFinalSummary() {
+      const box = $('mpFinalSummary'); if (!box) return;
+      const sorted = [...mpPlayers].sort((a,b) => (b.score||0)-(a.score||0) || (b.correct||0)-(a.correct||0));
+      const rows = sorted.map((p,i) => {
+        const total = (p.correct||0) + (p.wrong||0);
+        const rate = total ? Math.round((p.correct||0)/total*100) + '%' : '--';
+        return `<tr><td>${i+1}</td><td>${escapeHtml(p.name||'玩家')}${p.id===mpPlayerId?'（你）':''}</td><td>${p.score||0}</td><td>${p.correct||0}</td><td>${p.wrong||0}</td><td>${rate}</td></tr>`;
+      }).join('');
+      box.style.display = '';
+      box.innerHTML = `<h3>完整成績表</h3><table class="mp-scoreboard"><thead><tr><th>名次</th><th>玩家</th><th>總分</th><th>答對</th><th>答錯</th><th>正確率</th></tr></thead><tbody>${rows}</tbody></table>`;
+    }
+    async function mpResetRoomScores() {
+      if (!mpIsHost || !mpCurrentRoom) return;
+      if (!confirm('確定要重設本房間所有玩家分數嗎？')) return;
+      try {
+        const batch = mpDb.batch();
+        mpPlayers.forEach(p => batch.set(mpRoomRef().collection('players').doc(p.id), {score:0, correct:0, wrong:0, answered:0, lastSeen: firebase.firestore.FieldValue.serverTimestamp()}, {merge:true}));
+        await batch.commit();
+      } catch(e) { alert('重設分數失敗：' + e.message); }
+    }
+    async function mpKickPlayer(playerId) {
+      if (!mpIsHost || !mpCurrentRoom || playerId === mpCurrentRoom.hostId) return;
+      if (!confirm('確定要移除此玩家嗎？')) return;
+      try { await mpRoomRef().collection('players').doc(playerId).set({ kicked:true, lastSeen: firebase.firestore.FieldValue.serverTimestamp() }, { merge:true }); }
+      catch(e) { alert('移除玩家失敗：' + e.message); }
+    }
+    async function mpCloseRoom() {
+      if (!mpIsHost || !mpCurrentRoom) return;
+      if (!confirm('確定要關閉這個房間嗎？其他玩家會無法繼續遊戲。')) return;
+      try { await mpRoomRef().update({status:'closed', updatedAt: firebase.firestore.FieldValue.serverTimestamp()}); mpLeaveRoom(true); }
+      catch(e) { alert('關閉房間失敗：' + e.message); }
     }
 
     function mpInviteUrl() {
@@ -1745,7 +1865,7 @@
       const items = safeIdioms();
       const summary = issues.length ? `<span class="issue-bad">發現 ${issues.length} 個可改善項目</span>` : `<span class="issue-ok">題庫品質檢查通過</span>`;
       const rows = issues.slice(0, 300).map(([i,full,msg]) => `<tr><td>${i}</td><td>${escapeHtml(full)}</td><td>${escapeHtml(msg)}</td></tr>`).join('');
-      lastQualityReport = `成語大挑戰 v3.891 題庫品質檢查\n總題數：${items.length}\n問題數：${issues.length}\n` + issues.map(([i,full,msg]) => `#${i} ${full}：${msg}`).join('\n');
+      lastQualityReport = `成語大挑戰 v3.4 題庫品質檢查\n總題數：${items.length}\n問題數：${issues.length}\n` + issues.map(([i,full,msg]) => `#${i} ${full}：${msg}`).join('\n');
       $('qualityBox').innerHTML = `<div class="record-grid"><div class="record-box"><small>總題數</small>${items.length}</div><div class="record-box"><small>問題數</small>${issues.length}</div><div class="record-box"><small>有注音</small>${items.filter(q=>q.zhuyin).length}</div><div class="record-box"><small>有例句</small>${items.filter(q=>q.example).length}</div></div><p class="meaning">${summary}</p>${issues.length ? `<div class="table-wrap"><table><thead><tr><th>序號</th><th>成語</th><th>問題</th></tr></thead><tbody>${rows}</tbody></table></div>${issues.length > 300 ? '<p class="meaning">只顯示前 300 筆，完整內容可用「複製檢查報告」。</p>' : ''}` : '<div class="empty">目前沒有發現明顯問題。</div>'}`;
     }
     async function copyQualityReport() { if (!lastQualityReport) showQualityCheck(); try { await navigator.clipboard.writeText(lastQualityReport); alert('已複製題庫品質檢查報告！'); } catch(e) { alert('無法自動複製，請手動選取檢查結果。'); } }
@@ -1905,7 +2025,9 @@
       const customCount = loadCustomIdioms().length;
       const sw = navigator.serviceWorker && navigator.serviceWorker.controller ? '已啟用' : '未啟用 / 尚未控制';
       return `成語大挑戰除錯資訊
-程式版本：v3.7.891 題庫版本：2026.05.891 題庫數量：${safeIdioms().length}
+程式版本：v3.7.7
+題庫版本：2026.05.30
+題庫數量：${safeIdioms().length}
 內建題庫：${baseIdioms().length}
 自訂題庫：${customCount}
 目前模式：${modeName(currentMode)}
