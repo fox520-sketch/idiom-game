@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>成語大挑戰多人遊戲正式版 v4.0</title>
+  <title>成語大挑戰題庫 1000 題正式教材版 v4.1</title>
   <script src="idioms.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
@@ -194,7 +194,7 @@
     .issue-bad { color: var(--bad); font-weight:950; }
 
 
-    /* v3.7.7 多人搶答字型與手機版版面優化 */
+    /* v4.1 多人搶答字型與手機版版面優化 */
     #multiplayerGameScreen .mp-game-card {
       max-width: 1180px;
       margin: 0 auto;
@@ -467,7 +467,7 @@
     <div class="update-banner" id="updateBanner">發現新版，可立即更新。<button onclick="applyPwaUpdate()">立即更新</button><button class="secondary" onclick="hideUpdateBanner()">稍後</button></div>
     <section id="homeScreen" class="screen active">
       <div class="card hero">
-        <h2>v4.0 成語大挑戰多人遊戲正式版</h2>
+        <h2>v4.1 成語大挑戰題庫 1000 題正式教材版</h2>
         <p>整合匿名登入、安全規則、等待室準備狀態、房主控場、完整成績與 QR Code 邀請，讓多人搶答更接近正式版。</p>
         <div class="menu-grid">
           <button class="menu-btn" onclick="goSetup()">開始遊戲</button>
@@ -967,7 +967,7 @@
       </div>
     </section>
 
-    <div class="version">版本：v4.0｜多人遊戲正式版｜等待室準備、房主控場、完整成績、匿名登入安全規則</div>
+    <div class="version">版本：v4.1｜題庫 1000 題正式教材版｜等待室準備、房主控場、完整成績、匿名登入安全規則</div>
   </main>
 
   <script>
@@ -1461,7 +1461,7 @@
     }
     async function mpCopyFinalSummary() {
       const sorted = [...mpPlayers].sort((a,b) => (b.score||0)-(a.score||0) || (b.correct||0)-(a.correct||0));
-      const lines = ['成語大挑戰多人搶答成績表', `房號：${mpRoomId}`, `版本：v4.0`, ''];
+      const lines = ['成語大挑戰多人搶答成績表', `房號：${mpRoomId}`, `版本：v4.1`, ''];
       sorted.forEach((p,i) => {
         const total = (p.correct||0) + (p.wrong||0);
         const rate = total ? Math.round((p.correct||0)/total*100) + '%' : '--';
@@ -1871,7 +1871,7 @@
     function showTransfer() { setScreen('transferScreen'); }
     function exportLearningData() {
       const data = {
-        version: 'v3.7.7',
+        version: 'v4.1',
         exportedAt: new Date().toISOString(),
         records: loadRecords(),
         wrongBook: loadWrongBook(),
@@ -1947,7 +1947,7 @@
       const items = safeIdioms();
       const summary = issues.length ? `<span class="issue-bad">發現 ${issues.length} 個可改善項目</span>` : `<span class="issue-ok">題庫品質檢查通過</span>`;
       const rows = issues.slice(0, 300).map(([i,full,msg]) => `<tr><td>${i}</td><td>${escapeHtml(full)}</td><td>${escapeHtml(msg)}</td></tr>`).join('');
-      lastQualityReport = `成語大挑戰 v3.4 題庫品質檢查\n總題數：${items.length}\n問題數：${issues.length}\n` + issues.map(([i,full,msg]) => `#${i} ${full}：${msg}`).join('\n');
+      lastQualityReport = `成語大挑戰 v4.1 題庫品質檢查\n總題數：${items.length}\n問題數：${issues.length}\n` + issues.map(([i,full,msg]) => `#${i} ${full}：${msg}`).join('\n');
       $('qualityBox').innerHTML = `<div class="record-grid"><div class="record-box"><small>總題數</small>${items.length}</div><div class="record-box"><small>問題數</small>${issues.length}</div><div class="record-box"><small>有注音</small>${items.filter(q=>q.zhuyin).length}</div><div class="record-box"><small>有例句</small>${items.filter(q=>q.example).length}</div></div><p class="meaning">${summary}</p>${issues.length ? `<div class="table-wrap"><table><thead><tr><th>序號</th><th>成語</th><th>問題</th></tr></thead><tbody>${rows}</tbody></table></div>${issues.length > 300 ? '<p class="meaning">只顯示前 300 筆，完整內容可用「複製檢查報告」。</p>' : ''}` : '<div class="empty">目前沒有發現明顯問題。</div>'}`;
     }
     async function copyQualityReport() { if (!lastQualityReport) showQualityCheck(); try { await navigator.clipboard.writeText(lastQualityReport); alert('已複製題庫品質檢查報告！'); } catch(e) { alert('無法自動複製，請手動選取檢查結果。'); } }
@@ -2107,7 +2107,7 @@
       const customCount = loadCustomIdioms().length;
       const sw = navigator.serviceWorker && navigator.serviceWorker.controller ? '已啟用' : '未啟用 / 尚未控制';
       return `成語大挑戰除錯資訊
-程式版本：v3.7.7
+程式版本：v4.1
 題庫版本：2026.05.30
 題庫數量：${safeIdioms().length}
 內建題庫：${baseIdioms().length}
