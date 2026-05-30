@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>成語大挑戰題庫與複習強化版 v3.2</title>
+  <title>成語大挑戰教學與離線強化版 v3.3</title>
   <script src="idioms.js"></script>
   <style>
     :root {
@@ -142,6 +142,22 @@
     @media (max-width: 390px) {
       .choices { grid-template-columns: 1fr; }
     }
+
+    .backup-banner { margin-top: 14px; padding: 12px; border-radius: 14px; background: rgba(255, 193, 7, .20); border: 1px solid rgba(0,0,0,.12); display: none; }
+    .print-area { background: white; color: #111; border-radius: 18px; padding: 18px; margin-top: 14px; }
+    .sheet-item { break-inside: avoid; padding: 10px 0; border-bottom: 1px dashed #aaa; }
+    .rank-item { display: grid; grid-template-columns: 70px 1fr 90px 120px; gap: 10px; align-items: center; padding: 12px; border-bottom: 1px solid var(--line); }
+    .mastery-badge { display:inline-block; padding:4px 8px; border-radius:999px; background: rgba(91,140,90,.18); font-weight:900; margin-left:6px; }
+    @media print {
+      body { background: #fff !important; color: #000 !important; }
+      header, .menu-grid, .actions, .version, .stats, .progress-track, .timer-wrap, .game-card, .screen:not(.active) { display: none !important; }
+      main { max-width: none; margin: 0; padding: 0; }
+      .screen.active, .card, .print-area { display: block !important; box-shadow: none !important; border: none !important; background: #fff !important; color: #000 !important; padding: 0 !important; }
+      .sheet-item { border-bottom: 1px solid #999; page-break-inside: avoid; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { border: 1px solid #999; padding: 6px; }
+    }
+
   </style>
 </head>
 <body>
@@ -153,8 +169,8 @@
   <main>
     <section id="homeScreen" class="screen active">
       <div class="card hero">
-        <h2>v3.2 成語大挑戰題庫與複習強化版</h2>
-        <p>題庫擴充到 500 題，新增弱點分類分析、智慧複習、收藏成語、我的筆記與匯出 / 匯入學習紀錄。</p>
+        <h2>v3.3 成語大挑戰教學與離線強化版</h2>
+        <p>新增練習卷 / 答案卷、列印功能、離線可用 PWA、資料備份提醒、錯題熟練度與本機排行榜。</p>
         <div class="menu-grid">
           <button class="menu-btn" onclick="goSetup()">開始遊戲</button>
           <button class="menu-btn" onclick="startQuickGame()">快速遊戲</button>
@@ -166,6 +182,8 @@
           <button class="menu-btn secondary" onclick="showCards()">成語學習卡</button>
           <button class="menu-btn secondary" onclick="showFavorites()">收藏成語</button>
           <button class="menu-btn secondary" onclick="showTransfer()">匯出 / 匯入</button>
+          <button class="menu-btn secondary" onclick="showWorksheet()">練習卷 / 答案卷</button>
+          <button class="menu-btn secondary" onclick="showLeaderboard()">本機排行榜</button>
           <button class="menu-btn secondary" onclick="startDailyChallenge()">每日挑戰</button>
           <button class="menu-btn secondary" onclick="goExamSetup()">考試模式</button>
           <button class="menu-btn secondary" onclick="showAchievements()">成就徽章</button>
@@ -174,6 +192,7 @@
           <button class="menu-btn secondary" onclick="showQualityCheck()">題庫品質檢查</button>
         </div>
         <div class="actions"><button class="secondary" id="muteHomeBtn" onclick="toggleMute()">音效：開</button></div>
+        <div class="backup-banner" id="backupBanner">建議備份學習紀錄。<button class="secondary" onclick="showTransfer()">前往匯出 / 匯入</button><button class="secondary" onclick="dismissBackupReminder()">本週不再提醒</button></div>
       </div>
     </section>
 
@@ -399,6 +418,39 @@
       </div>
     </section>
 
+
+
+    <section id="worksheetScreen" class="screen">
+      <div class="card">
+        <h2>練習卷 / 答案卷</h2>
+        <p class="meaning">可依難度、分類、題數產生練習卷，也可切換答案卷並列印。</p>
+        <div class="panel">
+          <div><label for="sheetLevelSelect">難度</label><select id="sheetLevelSelect"></select></div>
+          <div><label for="sheetCategorySelect">分類</label><select id="sheetCategorySelect"></select></div>
+          <div><label for="sheetCountSelect">題數</label><select id="sheetCountSelect"><option value="10">10 題</option><option value="20">20 題</option><option value="30">30 題</option><option value="50">50 題</option></select></div>
+          <div><label for="sheetTypeSelect">類型</label><select id="sheetTypeSelect"><option value="practice">練習卷</option><option value="answer">答案卷</option><option value="wrong">錯題練習卷</option><option value="favorite">收藏成語練習卷</option></select></div>
+        </div>
+        <div class="actions">
+          <button onclick="generateWorksheet()">產生</button>
+          <button onclick="window.print()">列印目前頁面</button>
+          <button class="secondary" onclick="showHome()">回首頁</button>
+        </div>
+        <div id="worksheetOutput" class="print-area">請先選擇條件後按「產生」。</div>
+      </div>
+    </section>
+
+    <section id="leaderboardScreen" class="screen">
+      <div class="card">
+        <h2>本機排行榜</h2>
+        <p class="meaning">排行榜只保存在目前這台裝置的瀏覽器中，不會上傳到網路。</p>
+        <div id="leaderboardBox"></div>
+        <div class="actions">
+          <button class="danger" onclick="clearLeaderboard()">清除排行榜</button>
+          <button class="secondary" onclick="showHome()">回首頁</button>
+        </div>
+      </div>
+    </section>
+
     <section id="reportsScreen" class="screen">
       <div class="card">
         <h2>題目回報</h2>
@@ -411,7 +463,7 @@
       </div>
     </section>
 
-    <div class="version">版本：v3.2｜成語大挑戰題庫與複習強化版｜500 題題庫｜弱點分析｜智慧複習｜收藏成語｜我的筆記｜匯出匯入｜八選一｜適合 GitHub Pages</div>
+    <div class="version">版本：v3.3｜成語大挑戰教學與離線強化版｜練習卷 / 答案卷｜列印｜PWA 離線｜備份提醒｜錯題熟練度｜本機排行榜</div>
   </main>
 
   <script>
@@ -424,6 +476,8 @@
     const STORAGE_FAVORITES = 'idiomGameFavoritesV32';
     const STORAGE_NOTES = 'idiomGameNotesV32';
     const STORAGE_QSTATS = 'idiomGameQuestionStatsV32';
+    const STORAGE_LEADERBOARD = 'idiomGameLeaderboardV33';
+    const STORAGE_BACKUP = 'idiomGameBackupReminderV33';
     const labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
     let pool = [];
     let currentIndex = 0;
@@ -444,6 +498,7 @@
     let showZhuyinSetting = localStorage.getItem(STORAGE_ZHUYIN) || 'on';
     let audioCtx = null;
     let lastQualityReport = '';
+    let gameStartedAt = 0;
 
     function $(id) { return document.getElementById(id); }
     function safeIdioms() { return Array.isArray(window.IDIOMS || IDIOMS) ? (window.IDIOMS || IDIOMS) : []; }
@@ -461,13 +516,15 @@
       $('categorySelect').innerHTML = categories.map(v => `<option value="${v}">${v}</option>`).join('');
       $('cardLevelSelect').innerHTML = levels.map(v => `<option value="${v}">${v}</option>`).join('');
       $('cardCategorySelect').innerHTML = categories.map(v => `<option value="${v}">${v}</option>`).join('');
+      if ($('sheetLevelSelect')) $('sheetLevelSelect').innerHTML = levels.map(v => `<option value="${v}">${v}</option>`).join('');
+      if ($('sheetCategorySelect')) $('sheetCategorySelect').innerHTML = categories.map(v => `<option value="${v}">${v}</option>`).join('');
       if ($('zhuyinSelect')) $('zhuyinSelect').value = showZhuyinSetting;
       updateMuteButtons();
       updateWrongCount();
     }
 
     function setScreen(id) { stopTimer(); document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); $(id).classList.add('active'); }
-    function showHome() { setScreen('homeScreen'); updateWrongCount(); }
+    function showHome() { setScreen('homeScreen'); updateWrongCount(); checkBackupReminder(); }
     function goSetup() {
       setupMode = 'normal';
       $('setupStartBtn').textContent = '開始八選一挑戰';
@@ -517,7 +574,7 @@
       if (currentMode === 'daily') timeLimit = 15;
       if ($('hintBtn')) $('hintBtn').style.display = currentMode === 'exam' ? 'none' : '';
       currentIndex = 0; score = 0; correctCount = 0; streak = 0; maxStreakThisRound = 0; streakBonusTotal = 0; answered = false;
-      $('reviewCard').style.display = 'none'; setScreen('gameScreen'); showQuestion();
+      $('reviewCard').style.display = 'none'; gameStartedAt = Date.now(); setScreen('gameScreen'); showQuestion();
     }
 
     function startDailyChallenge() {
@@ -612,7 +669,7 @@
     }
 
     function endGame() {
-      stopTimer(); saveBestScore(); if (currentMode === 'daily') saveDailyResult(); unlockAchievements(); playTone('finish');
+      stopTimer(); saveBestScore(); saveLeaderboard(); if (currentMode === 'daily') saveDailyResult(); unlockAchievements(); playTone('finish');
       $('questionText').textContent = '遊戲結束'; $('zhuyinText').textContent = ''; $('choicesBox').innerHTML = ''; $('hintBox').textContent = '';
       const accuracy = pool.length ? Math.round((correctCount / pool.length) * 100) : 0;
       $('resultText').style.color = 'var(--text)'; $('resultText').textContent = `總分：${score}，答對 ${correctCount} / ${pool.length} 題，正確率 ${accuracy}%`;
@@ -675,13 +732,14 @@
       } catch { return {}; }
     }
     function saveWrongBook(obj) { localStorage.setItem(STORAGE_WRONG, JSON.stringify(obj)); updateWrongCount(); }
-    function addWrong(q) { const obj = loadWrongBook(); const item = obj[q.full] || { wrongCount:0, correctReview:0, lastWrong:'' }; item.wrongCount += 1; item.correctReview = 0; item.lastWrong = todayString(); obj[q.full] = item; saveWrongBook(obj); }
-    function markWrongPracticeCorrect(q) { const obj = loadWrongBook(); if (!obj[q.full]) return; obj[q.full].correctReview = (obj[q.full].correctReview || 0) + 1; if (obj[q.full].correctReview >= 2) delete obj[q.full]; saveWrongBook(obj); }
+    function masteryLabel(item) { const c = item.correctReview || 0; const w = item.wrongCount || 0; if (c >= 3) return '已掌握'; if (c >= 2) return '逐漸熟悉'; if (w >= 2) return '加強練習'; return '待複習'; }
+    function addWrong(q) { const obj = loadWrongBook(); const item = obj[q.full] || { wrongCount:0, correctReview:0, lastWrong:'', mastery:'待複習' }; item.wrongCount += 1; item.correctReview = 0; item.mastery = masteryLabel(item); item.lastWrong = todayString(); obj[q.full] = item; saveWrongBook(obj); }
+    function markWrongPracticeCorrect(q) { const obj = loadWrongBook(); if (!obj[q.full]) return; obj[q.full].correctReview = (obj[q.full].correctReview || 0) + 1; obj[q.full].mastery = masteryLabel(obj[q.full]); if (obj[q.full].correctReview >= 3) delete obj[q.full]; saveWrongBook(obj); }
     function addWrongThisRound(q) { if (!wrongThisRound.some(item => item.full === q.full)) wrongThisRound.push(q); }
     function updateWrongCount() { const el = $('wrongCountText'); if (el) el.textContent = Object.keys(loadWrongBook()).length; }
     function getWrongItems() { const wrong = loadWrongBook(); return safeIdioms().filter(q => wrong[q.full]); }
 
-    function showWrongBook() { setScreen('wrongScreen'); const wrong = loadWrongBook(); const list = safeIdioms().filter(q => wrong[q.full]); if (!list.length) { $('wrongList').innerHTML = '<div class="empty">目前沒有錯題。答錯的題目會自動出現在這裡。</div>'; return; } $('wrongList').innerHTML = list.map(q => { const w = wrong[q.full] || {}; return `<div class="wrong-item"><strong>${q.full}</strong>（${q.zhuyin || '尚未提供注音'}）<br>缺字：${q.answer}｜錯誤次數：${w.wrongCount || 1}｜複習答對：${w.correctReview || 0} / 2<br>題目：${q.blank}<br>解釋：${q.meaning || '尚未提供解釋。'}<br>例句：${getExample(q)}</div>`; }).join(''); }
+    function showWrongBook() { setScreen('wrongScreen'); const wrong = loadWrongBook(); const list = safeIdioms().filter(q => wrong[q.full]); if (!list.length) { $('wrongList').innerHTML = '<div class="empty">目前沒有錯題。答錯的題目會自動出現在這裡。</div>'; return; } $('wrongList').innerHTML = list.map(q => { const w = wrong[q.full] || {}; return `<div class="wrong-item"><strong>${q.full}</strong>（${q.zhuyin || '尚未提供注音'}）<br>缺字：${q.answer}｜錯誤次數：${w.wrongCount || 1}｜複習答對：${w.correctReview || 0} / 3 <span class="mastery-badge">${masteryLabel(w)}</span><br>題目：${q.blank}<br>解釋：${q.meaning || '尚未提供解釋。'}<br>例句：${getExample(q)}</div>`; }).join(''); }
     function clearWrongBook() { if (!confirm('確定要清除錯題本嗎？')) return; saveWrongBook({}); showWrongBook(); }
 
     function renderRoundReview() { $('reviewCard').style.display = 'block'; if (!wrongThisRound.length) { $('reviewList').innerHTML = '<div class="review-item">太棒了！這一輪沒有錯題。</div>'; return; } $('reviewList').innerHTML = wrongThisRound.map(q => `<div class="review-item"><strong>${q.full}</strong>（${q.zhuyin || '尚未提供注音'}，答案：${q.answer}）<br>題目：${q.blank}<br>解釋：${q.meaning || '尚未提供解釋。'}<br>例句：${getExample(q)}</div>`).join(''); }
@@ -756,14 +814,15 @@
     function showTransfer() { setScreen('transferScreen'); }
     function exportLearningData() {
       const data = {
-        version: 'v3.2',
+        version: 'v3.3',
         exportedAt: new Date().toISOString(),
         records: loadRecords(),
         wrongBook: loadWrongBook(),
         daily: JSON.parse(localStorage.getItem(STORAGE_DAILY) || '{}'),
         favorites: loadFavorites(),
         notes: loadNotes(),
-        questionStats: loadQuestionStats()
+        questionStats: loadQuestionStats(),
+        leaderboard: loadLeaderboard()
       };
       $('transferText').value = JSON.stringify(data, null, 2);
     }
@@ -776,6 +835,8 @@
         if (data.favorites) localStorage.setItem(STORAGE_FAVORITES, JSON.stringify(data.favorites));
         if (data.notes) localStorage.setItem(STORAGE_NOTES, JSON.stringify(data.notes));
         if (data.questionStats) localStorage.setItem(STORAGE_QSTATS, JSON.stringify(data.questionStats));
+        if (data.leaderboard) localStorage.setItem(STORAGE_LEADERBOARD, JSON.stringify(data.leaderboard));
+        localStorage.setItem(STORAGE_BACKUP, String(Date.now()));
         alert('匯入完成！');
         updateWrongCount();
       } catch(e) { alert('匯入失敗，請確認貼上的內容是正確 JSON。'); }
@@ -820,7 +881,7 @@
       const items = safeIdioms();
       const summary = issues.length ? `<span class="issue-bad">發現 ${issues.length} 個可改善項目</span>` : `<span class="issue-ok">題庫品質檢查通過</span>`;
       const rows = issues.slice(0, 300).map(([i,full,msg]) => `<tr><td>${i}</td><td>${escapeHtml(full)}</td><td>${escapeHtml(msg)}</td></tr>`).join('');
-      lastQualityReport = `成語大挑戰 v3.2 題庫品質檢查\n總題數：${items.length}\n問題數：${issues.length}\n` + issues.map(([i,full,msg]) => `#${i} ${full}：${msg}`).join('\n');
+      lastQualityReport = `成語大挑戰 v3.3 題庫品質檢查\n總題數：${items.length}\n問題數：${issues.length}\n` + issues.map(([i,full,msg]) => `#${i} ${full}：${msg}`).join('\n');
       $('qualityBox').innerHTML = `<div class="record-grid"><div class="record-box"><small>總題數</small>${items.length}</div><div class="record-box"><small>問題數</small>${issues.length}</div><div class="record-box"><small>有注音</small>${items.filter(q=>q.zhuyin).length}</div><div class="record-box"><small>有例句</small>${items.filter(q=>q.example).length}</div></div><p class="meaning">${summary}</p>${issues.length ? `<div class="table-wrap"><table><thead><tr><th>序號</th><th>成語</th><th>問題</th></tr></thead><tbody>${rows}</tbody></table></div>${issues.length > 300 ? '<p class="meaning">只顯示前 300 筆，完整內容可用「複製檢查報告」。</p>' : ''}` : '<div class="empty">目前沒有發現明顯問題。</div>'}`;
     }
     async function copyQualityReport() { if (!lastQualityReport) showQualityCheck(); try { await navigator.clipboard.writeText(lastQualityReport); alert('已複製題庫品質檢查報告！'); } catch(e) { alert('無法自動複製，請手動選取檢查結果。'); } }
@@ -835,7 +896,68 @@
     function showReports() { setScreen('reportsScreen'); $('reportBox').textContent = localStorage.getItem(STORAGE_REPORT) || '尚未產生回報文字。'; }
     async function copyReportText() { const text = $('reportBox').textContent; try { await navigator.clipboard.writeText(text); alert('已複製回報文字！'); } catch(e) { alert('無法自動複製，請手動選取回報文字。'); } }
 
+
+    function showWorksheet() { setScreen('worksheetScreen'); }
+    function worksheetItems() {
+      const type = $('sheetTypeSelect').value;
+      let items = safeIdioms();
+      if (type === 'wrong') items = getWrongItems();
+      if (type === 'favorite') items = getFavoriteItems();
+      const level = $('sheetLevelSelect').value;
+      const category = $('sheetCategorySelect').value;
+      items = items.filter(q => (level === '全部' || q.level === level) && (category === '全部' || q.category === category));
+      const count = Number($('sheetCountSelect').value || 10);
+      return shuffle(items).slice(0, Math.min(count, items.length));
+    }
+    function generateWorksheet() {
+      const items = worksheetItems();
+      const type = $('sheetTypeSelect').value;
+      const showAnswer = type === 'answer';
+      if (!items.length) { $('worksheetOutput').innerHTML = '<div class="empty">這個條件沒有可產生的題目。</div>'; return; }
+      const titleMap = { practice:'成語練習卷', answer:'成語答案卷', wrong:'錯題練習卷', favorite:'收藏成語練習卷' };
+      const rows = items.map((q, i) => `<div class="sheet-item"><strong>${i+1}. ${escapeHtml(q.blank)}</strong>${showAnswer ? `　答案：<strong>${escapeHtml(q.answer)}</strong>　完整成語：${escapeHtml(q.full)}` : '　答案：＿＿'}<br>注音：${escapeHtml(q.zhuyin || '　　　　　　　')}<br>分類：${escapeHtml(q.category || '未分類')}｜難度：${escapeHtml(q.level || '未分類')}<br>${showAnswer ? `解釋：${escapeHtml(q.meaning || '')}<br>例句：${escapeHtml(getExample(q))}` : '解釋：＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿'}</div>`).join('');
+      $('worksheetOutput').innerHTML = `<h2>${titleMap[type] || '成語練習卷'}</h2><p>日期：${todayString()}｜題數：${items.length}</p>${rows}`;
+    }
+
+    function loadLeaderboard() { try { return JSON.parse(localStorage.getItem(STORAGE_LEADERBOARD) || '[]') || []; } catch { return []; } }
+    function saveLeaderboardList(list) { localStorage.setItem(STORAGE_LEADERBOARD, JSON.stringify(list.slice(0, 20))); }
+    function modeName(mode) { return ({normal:'一般遊戲', quick:'快速遊戲', daily:'每日挑戰', exam:'考試模式', wrong:'錯題複習', smart:'智慧複習', favorite:'收藏練習'}[mode] || mode); }
+    function saveLeaderboard() {
+      if (!pool.length) return;
+      const accuracy = Math.round((correctCount / pool.length) * 100);
+      const seconds = gameStartedAt ? Math.max(1, Math.round((Date.now() - gameStartedAt) / 1000)) : 0;
+      const row = { date: todayString(), mode: currentMode, modeName: modeName(currentMode), score, correct: correctCount, total: pool.length, accuracy, streak: maxStreakThisRound, seconds };
+      const list = loadLeaderboard();
+      list.push(row);
+      list.sort((a,b) => b.score - a.score || b.accuracy - a.accuracy || a.seconds - b.seconds);
+      saveLeaderboardList(list);
+    }
+    function showLeaderboard() {
+      setScreen('leaderboardScreen');
+      const list = loadLeaderboard();
+      if (!list.length) { $('leaderboardBox').innerHTML = '<div class="empty">目前還沒有排行榜紀錄。完成一輪遊戲後會自動加入。</div>'; return; }
+      $('leaderboardBox').innerHTML = list.map((r,i) => `<div class="rank-item"><strong>#${i+1}</strong><div><strong>${escapeHtml(r.modeName || modeName(r.mode))}</strong><br><small>${escapeHtml(r.date || '')}｜答對 ${r.correct}/${r.total}｜正確率 ${r.accuracy}%｜最高連續 ${r.streak || 0}</small></div><strong>${r.score} 分</strong><span>${r.seconds || 0} 秒</span></div>`).join('');
+    }
+    function clearLeaderboard() { if (!confirm('確定要清除本機排行榜嗎？')) return; saveLeaderboardList([]); showLeaderboard(); }
+
+    function checkBackupReminder() {
+      const banner = $('backupBanner');
+      if (!banner) return;
+      const r = loadRecords();
+      const last = Number(localStorage.getItem(STORAGE_BACKUP) || 0);
+      const due = (r.totalAnswered || 0) >= 20 && (!last || Date.now() - last > 7*24*60*60*1000);
+      banner.style.display = due ? 'block' : 'none';
+    }
+    function dismissBackupReminder() { localStorage.setItem(STORAGE_BACKUP, String(Date.now())); checkBackupReminder(); }
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+      });
+    }
+
     initSelects();
+    checkBackupReminder();
   </script>
 </body>
 </html>

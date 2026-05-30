@@ -1,0 +1,9 @@
+{
+  "name": "成語大挑戰",
+  "short_name": "成語大挑戰",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4f7f1",
+  "theme_color": "#5b8c5a",
+  "description": "成語填空八選一學習遊戲，可離線使用。"
+}
